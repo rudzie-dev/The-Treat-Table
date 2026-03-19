@@ -297,13 +297,13 @@ body::before{
 /* ── STICKY NOTE GRID ── */
 .snboard{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:clamp(1rem,2.5vw,1.75rem);
   align-items:stretch;
   perspective:1200px;
   perspective-origin:50% 30%;
 }
-@media(max-width:860px){.snboard{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1100px){.snboard{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.snboard{grid-template-columns:1fr}}
 
 /* Individual sticky note */
@@ -1055,6 +1055,7 @@ const NOTES = [
   { bg:"#FFF3A3", border:"#E8DC6A", pin:"#E8A820", rot:"-1.5deg", delay:"0s"   },
   { bg:"#B8D8F8", border:"#7AAED4", pin:"#4A90C4", rot:"1.2deg",  delay:".07s" },
   { bg:"#FFB8C8", border:"#E8809A", pin:"#C06080", rot:"-0.8deg", delay:".14s" },
+  { bg:"#B8EBC8", border:"#7AC490", pin:"#4A8C50", rot:"0.6deg",  delay:".21s" },
 ];
 
 /* ── MENU DATA ─────────────────────────────────────────────── */
@@ -1098,7 +1099,7 @@ const MENU = [
     ],
   },
   {
-    id:2, emoji:"🌀", img:null,
+    id:2, emoji:"🌀", img:"/images/cinnamon-rolls.jpg",
     name:"Cinnamon Rolls",
     desc:"Soft, pillowy rolls with generous glazes and toppings. Available in duo, sharing tray, and family sizes.",
     priceRange:"R60 – R150",
@@ -1148,6 +1149,39 @@ const MENU = [
         ]
       },
     ],
+  },
+  {
+    id:4, emoji:"🍪", img:"/images/cookies.png",
+    name:"Assorted Cookie Box",
+    desc:"Six bold flavours, baked fresh and boxed. Order a full box or half — mix and match as you like.",
+    priceRange:"R120 – R240",
+    badge:"Eggless",
+    tiers:[
+      {
+        label:"Full box — R240",
+        items:[
+          { id:"box-12", name:"Box of 12 Cookies", price:240, swatch:"#C8841A", note:"All six flavours, two of each — the full experience" },
+        ]
+      },
+      {
+        label:"Half box — R120",
+        items:[
+          { id:"box-6", name:"Half Box (6 Cookies)", price:120, swatch:"#D4A853", note:"Pick any six from the flavour list below" },
+        ]
+      },
+      {
+        label:"Available flavours",
+        items:[
+          { id:"ck-choc-chunk",   name:"Chocolate Chunk",        price:0, swatch:"#5C3317", note:"Pools of melted chocolate in every bite" },
+          { id:"ck-cookies-cream",name:"Cookies & Cream",        price:0, swatch:"#2C2416", note:"Oreo pieces folded into a vanilla base" },
+          { id:"ck-double-choc",  name:"Double Chocolate",       price:0, swatch:"#3D1A0A", note:"Fudgy, intense — for serious chocolate fans" },
+          { id:"ck-coffee-almond",name:"Coffee Almond",          price:0, swatch:"#7B4F2E", note:"Espresso-forward with a satisfying crunch" },
+          { id:"ck-red-velvet",   name:"Red Velvet",             price:0, swatch:"#C0392B", note:"Soft, velvety, with a cream cheese drizzle" },
+          { id:"ck-salted-caramel",name:"Salted Caramel",        price:0, swatch:"#C47A1E", note:"Sweet and salty — the one everyone fights over" },
+        ]
+      },
+    ],
+    comingSoon:"Choose your box size above, then list your preferred flavours in the order notes.",
   },
 ];
 
@@ -1338,14 +1372,16 @@ function CategoryModal({ item, noteColor, onClose, onAdd }) {
                   {it.note && <div className="cat-row-note">{it.note}</div>}
                 </div>
               </div>
-              <div className="cat-row-right">
-                <div className="cat-row-price">R{it.price}</div>
-                <div className="cat-qty">
-                  <button className="cat-qbtn" onClick={() => setQty(it.id, -1)} aria-label={`Remove ${it.name}`}>−</button>
-                  <span className="cat-qnum">{quantities[it.id] || 0}</span>
-                  <button className="cat-qbtn" onClick={() => setQty(it.id,  1)} aria-label={`Add ${it.name}`}>+</button>
+              {it.price > 0 && (
+                <div className="cat-row-right">
+                  <div className="cat-row-price">R{it.price}</div>
+                  <div className="cat-qty">
+                    <button className="cat-qbtn" onClick={() => setQty(it.id, -1)} aria-label={`Remove ${it.name}`}>−</button>
+                    <span className="cat-qnum">{quantities[it.id] || 0}</span>
+                    <button className="cat-qbtn" onClick={() => setQty(it.id,  1)} aria-label={`Add ${it.name}`}>+</button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
@@ -1402,8 +1438,6 @@ function OrderModal({ cart, onClose, onClearCart }) {
 
   const cartLines = Object.entries(cart).map(([key, {name: n, price: p, qty: q}]) => ({key, n, p, q}));
   const total = cartLines.reduce((s, {p, q}) => s + p * q, 0);
-  const totalQty = cartLines.reduce((s, {q}) => s + q, 0);
-
   const isValid = name.trim().length > 1 && phone.trim().length > 6 && date.trim().length > 0;
 
   const buildMessage = () => {
@@ -1596,7 +1630,7 @@ export default function BakeryHomepage() {
 
       {/* NAV */}
       <nav className={`nav${scrolled ? " on" : ""}`}>
-        <a href="#" className="logo">
+        <a href="/" className="logo">
           <div className="logo-mark">TT</div>
           The Treat Table
         </a>
@@ -1850,7 +1884,7 @@ export default function BakeryHomepage() {
                 <div className="j-exc">{p.excerpt}</div>
                 <div className="j-foot">
                   <div className="j-date">{p.date} · {p.read}</div>
-                  <a href="#" className="j-link">Read →</a>
+                  <button className="j-link" onClick={()=>{}}>Read →</button>
                 </div>
               </div>
             ))}
