@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const S = `
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap');
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -16,24 +16,10 @@ const S = `
   --gold-lt: #E8A84A;
   --green:   #4A7C4E;
   --green-lt:#7CBF81;
-  --red:     #C0392B;
 
-  /* sticky note colours */
-  --sn-yellow: #FFF3A3;
-  --sn-yb:     #E8DC6A;
-  --sn-blue:   #B8D8F8;
-  --sn-bb:     #7AAED4;
-  --sn-pink:   #FFB8C8;
-  --sn-pb:     #E8809A;
-  --sn-green:  #B8EBC8;
-  --sn-gb:     #7AC490;
-  --sn-peach:  #FFD4A8;
-  --sn-peb:    #E8A870;
-  --sn-lav:    #D8C8F8;
-  --sn-lb:     #A888D0;
 
-  --serif:  'Lora', Georgia, serif;
-  --hand:   'Caveat', cursive;
+  --serif:  'Cormorant Garamond', Georgia, serif;
+  --hand:   'Cormorant Garamond', Georgia, serif;
   --sans:   'DM Sans', system-ui, sans-serif;
   --r:      14px;
   --rlg:    20px;
@@ -66,9 +52,40 @@ body::before{
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes wiggle{0%,100%{transform:rotate(var(--rot,0deg))}50%{transform:rotate(calc(var(--rot,0deg) + 1.5deg))}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}50%{transform:rotate(calc(var(--rot,0deg) + 1.5deg))}}
 @keyframes pinDrop{from{opacity:0;transform:translateY(-8px) rotate(var(--rot,0deg))}to{opacity:1;transform:translateY(0) rotate(var(--rot,0deg))}}
+
+/* ── SCROLL REVEAL ── */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .65s ease, transform .65s cubic-bezier(.22,1,.36,1);
+}
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+/* Stagger children — each .reveal-child inside a .reveal-stagger staggers */
+.reveal-stagger .reveal-child{
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1);
+}
+.reveal-stagger.visible .reveal-child:nth-child(1){transition-delay:.05s}
+.reveal-stagger.visible .reveal-child:nth-child(2){transition-delay:.14s}
+.reveal-stagger.visible .reveal-child:nth-child(3){transition-delay:.23s}
+.reveal-stagger.visible .reveal-child:nth-child(4){transition-delay:.32s}
+.reveal-stagger.visible .reveal-child:nth-child(5){transition-delay:.41s}
+.reveal-stagger.visible .reveal-child:nth-child(6){transition-delay:.5s}
+.reveal-stagger.visible .reveal-child:nth-child(7){transition-delay:.59s}
+.reveal-stagger.visible .reveal-child:nth-child(8){transition-delay:.68s}
+.reveal-stagger.visible .reveal-child{opacity:1;transform:translateY(0)}
+/* Respect reduced motion */
+@media(prefers-reduced-motion:reduce){
+  .reveal,.reveal-stagger .reveal-child{
+    opacity:1;transform:none;transition:none;
+  }
+}
 
 /* ── NAV ── */
 .nav{
@@ -599,7 +616,7 @@ body::before{
 .j-exc{font-family:var(--serif);font-size:.78rem;color:var(--ink2);line-height:1.8;font-style:italic;margin-bottom:1rem}
 .j-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
 .j-date{font-size:.65rem;color:var(--ink3)}
-.j-link{font-family:var(--hand);font-size:.95rem;font-weight:600;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:gap .2s}
+.j-link{font-family:var(--hand);font-size:.95rem;font-weight:600;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:gap .2s;background:none;border:none;padding:0;cursor:pointer;}
 .j-link:hover{gap:9px}
 
 /* ── NEWSLETTER ── */
@@ -1238,7 +1255,7 @@ function StickyNote({ item, note, onOpen }) {
   return (
     <div
       ref={ref}
-      className="sn"
+      className="sn reveal-child"
       style={{
         "--rot":        note.rot,
         "--delay":      note.delay,
@@ -1597,6 +1614,17 @@ export default function BakeryHomepage() {
     setTimeout(() => setActiveItem(null), 420);
   };
 
+  // Scroll reveal observer
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal, .reveal-stagger');
+    if (!els.length) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   const addToCart = useCallback((quantities, categoryName) => {
     setCart(prev => {
       const next = { ...prev };
@@ -1727,7 +1755,7 @@ export default function BakeryHomepage() {
             </a>
           </div>
 
-          <div className="snboard">
+          <div className="snboard reveal-stagger">
             {MENU.map((item, i) => (
               <StickyNote
                 key={item.id}
@@ -1744,8 +1772,8 @@ export default function BakeryHomepage() {
       <div className="about-wrap">
         <section className="sec" id="about">
           <div className="wrap">
-            <div className="about-grid">
-              <div className="about-visual">
+            <div className="about-grid reveal-stagger">
+              <div className="about-visual reveal-child">
                 <div className="about-img">
                   {null
                     ? <img src="/images/kitchen.jpg" alt="Our kitchen" loading="lazy"/>
@@ -1761,7 +1789,7 @@ export default function BakeryHomepage() {
                 </div>
               </div>
 
-              <div className="about-txt">
+              <div className="about-txt reveal-child">
                 <div className="eyebrow">About us</div>
                 <h2 className="sec-title" style={{marginBottom:"1.5rem"}}>
                   Baking with<br/><em>heart</em>
@@ -1793,15 +1821,15 @@ export default function BakeryHomepage() {
       {/* HOW IT WORKS */}
       <section className="sec" id="how-it-works" style={{paddingTop:0}}>
         <div className="wrap">
-          <div className="eyebrow">How it works</div>
+          <div className="eyebrow reveal">How it works</div>
           <h2 className="sec-title">Simple as <em>that</em></h2>
-          <div className="how-grid">
+          <div className="how-grid reveal-stagger">
             {[
               {n:"01",t:"Browse the menu",  d:"Everything is available all the time — no reset, no cutoff. Pick what you'd like at your own pace."},
               {n:"02",t:"Place your order", d:"Choose your items, pick variants, note any vegan requests, and let us know when you'd like to collect."},
               {n:"03",t:"Pick up fresh",    d:"Give us 24 hours and your order is baked fresh on the morning of pickup. Warm bread in hand."},
             ].map(s=>(
-              <div key={s.n} className="how-card">
+              <div key={s.n} className="how-card reveal-child">
                 <div className="how-num">{s.n}</div>
                 <div className="how-title">{s.t}</div>
                 <div className="how-desc">{s.d}</div>
@@ -1835,28 +1863,28 @@ export default function BakeryHomepage() {
       {/* CONTACT */}
       <section className="sec" id="contact">
         <div className="wrap">
-          <div className="eyebrow">Get in touch</div>
+          <div className="eyebrow reveal">Get in touch</div>
           <h2 className="sec-title">Order, ask, or just <em>say hi</em></h2>
-          <div className="contact-grid">
-            <a className="contact-card" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+          <div className="contact-grid reveal-stagger">
+            <a className="contact-card reveal-child" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
               <span className="contact-card-icon">💬</span>
               <div className="contact-card-label">WhatsApp</div>
               <div className="contact-card-val">Chat with us</div>
               <div className="contact-card-hint">Quickest way to place an order or ask a question</div>
             </a>
-            <a className="contact-card" href={`mailto:${CONTACT_EMAIL}`}>
+            <a className="contact-card reveal-child" href={`mailto:${CONTACT_EMAIL}`}>
               <span className="contact-card-icon">✉️</span>
               <div className="contact-card-label">Email</div>
               <div className="contact-card-val">{CONTACT_EMAIL}</div>
               <div className="contact-card-hint">For detailed orders or special requests</div>
             </a>
-            <a className="contact-card" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+            <a className="contact-card reveal-child" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
               <span className="contact-card-icon">📸</span>
               <div className="contact-card-label">Instagram</div>
               <div className="contact-card-val">@thetreattableza</div>
               <div className="contact-card-hint">See what's fresh, behind the scenes, and new flavours</div>
             </a>
-            <div className="contact-card" style={{cursor:"default"}}>
+            <div className="contact-card reveal-child" style={{cursor:"default"}}>
               <span className="contact-card-icon">📍</span>
               <div className="contact-card-label">Location</div>
               <div className="contact-card-val">Ladysmith, KZN</div>
@@ -1871,14 +1899,14 @@ export default function BakeryHomepage() {
         <div className="wrap">
           <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",flexWrap:"wrap",gap:"1rem"}}>
             <div>
-              <div className="eyebrow">The journal</div>
+              <div className="eyebrow reveal">The journal</div>
               <h2 className="sec-title">Stories from the <em>kitchen</em></h2>
             </div>
             <a href="#all" className="btn-outline" style={{fontSize:".7rem",padding:"10px 20px"}}>All posts</a>
           </div>
-          <div className="j-grid">
+          <div className="j-grid reveal-stagger">
             {POSTS.map((p,i) => (
-              <div key={i} className={`jcard${p.feat?" feat":""}`}>
+              <div key={i} className={`jcard reveal-child${p.feat?" feat":""}`}>
                 <div className="j-cat">{p.cat}</div>
                 <div className="j-title">{p.title}</div>
                 <div className="j-exc">{p.excerpt}</div>
@@ -1894,7 +1922,7 @@ export default function BakeryHomepage() {
 
       {/* NEWSLETTER */}
       <div style={{padding:"clamp(3rem,6vh,5rem) 0 0"}}>
-        <div className="nl-wrap">
+        <div className="nl-wrap reveal">
           <div>
             <div className="eyebrow" style={{marginBottom:".65rem"}}>Stay in touch</div>
             <h2 className="nl-title">New bakes, <em>special runs</em> & updates</h2>
