@@ -1068,7 +1068,7 @@ const NOTES = [
 */
 const MENU = [
   {
-    id:1, emoji:"🍰", img:null,
+    id:1, emoji:"🍰", img:"/images/mini-cakes.webp",
     name:"Mini Loaf Cakes",
     desc:"Individually sized loaf cakes, baked fresh to order. Seven flavours across three tiers.",
     priceRange:"R42 – R48",
@@ -1099,7 +1099,7 @@ const MENU = [
     ],
   },
   {
-    id:2, emoji:"🌀", img:"/images/cinnamon-rolls.jpg",
+    id:2, emoji:"🌀", img:"/images/cinnamon-rolls.webp",
     name:"Cinnamon Rolls",
     desc:"Soft, pillowy rolls with generous glazes and toppings. Available in duo, sharing tray, and family sizes.",
     priceRange:"R60 – R150",
@@ -1128,7 +1128,7 @@ const MENU = [
     comingSoon:"More flavours and fillings coming soon.",
   },
   {
-    id:3, emoji:"🍮", img:null,
+    id:3, emoji:"🍮", img:"/images/milk-cake.webp",
     name:"Milk Cake",
     desc:"A rich, creamy South African classic. Choose your flavour and your serving size.",
     priceRange:"R120 – R150",
@@ -1151,7 +1151,7 @@ const MENU = [
     ],
   },
   {
-    id:4, emoji:"🍪", img:"/images/cookies.png",
+    id:4, emoji:"🍪", img:"/images/cookies.webp",
     name:"Assorted Cookie Box",
     desc:"Six bold flavours, baked fresh and boxed. Order a full box or half — mix and match as you like.",
     priceRange:"R120 – R240",
