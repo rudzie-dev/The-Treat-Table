@@ -1,2014 +1,853 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
+import {
+  ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
+  BookOpen, Home, Plus, Minus, ArrowRight, ShoppingCart,
+  Clock, Flame, Wheat
+} from "lucide-react";
 
-const S = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap');
+const t = {
+  cream: "#F5F0E8", sand: "#E8DCC8", tan: "#C9B99A",
+  brown: "#6B4F35", dark: "#3D2B1A", esp: "#1C1008", warm: "#A07850",
+};
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+const fonts = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');`;
 
-:root{
-  --paper:   #FAF7F2;
-  --paper2:  #F4EFE6;
-  --paper3:  #EDE5D5;
-  --ink:     #2C2416;
-  --ink2:    #5C4A30;
-  --ink3:    #8C7355;
-  --gold:    #C8841A;
-  --gold-lt: #E8A84A;
-  --green:   #4A7C4E;
-  --green-lt:#7CBF81;
+const css = `
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  overflow-y: scroll;
+}
+html::-webkit-scrollbar { width: 0; display: none; }
+body {
+  background: ${t.cream}; font-family: 'DM Sans', sans-serif;
+  color: ${t.esp}; overflow-x: hidden;
+  scrollbar-width: none;
+}
+body::-webkit-scrollbar { width: 0; display: none; }
+.drawer, .po-card, .drawer-body { scrollbar-width: none; }
+.drawer::-webkit-scrollbar, .po-card::-webkit-scrollbar, .drawer-body::-webkit-scrollbar { display: none; }
 
-
-  --serif:  'Cormorant Garamond', Georgia, serif;
-  --hand:   'Cormorant Garamond', Georgia, serif;
-  --sans:   'DM Sans', system-ui, sans-serif;
-  --r:      14px;
-  --rlg:    20px;
-  --rxl:    28px;
-  --shadow: 0 2px 12px rgba(44,36,22,.1), 0 1px 3px rgba(44,36,22,.08);
-  --shadow-lift: 0 8px 32px rgba(44,36,22,.16), 0 2px 8px rgba(44,36,22,.1);
+/* custom overlay scrollbar */
+.scroll-thumb {
+  position: fixed; right: 3px; z-index: 9999;
+  width: 3px; border-radius: 3px;
+  background: ${t.tan};
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+  top: 0;
 }
 
-html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
-body{
-  background:var(--paper);color:var(--ink);
-  font-family:var(--sans);font-size:15px;line-height:1.65;
-  overflow-x:hidden;min-height:100vh
+/* ── NAV GHOST ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.9rem 1.25rem;
+  transition: background 0.45s ease, border-color 0.45s ease, backdrop-filter 0.45s ease;
+  border-bottom: 1px solid transparent;
+  background: linear-gradient(to bottom, ${t.esp}28 0%, transparent 100%);
+}
+.nav.scrolled {
+  background: ${t.cream}f0;
+  backdrop-filter: blur(20px);
+  border-bottom-color: ${t.sand};
+}
+.nav.scrolled .nav-brand-name { color: ${t.dark}; }
+.nav.scrolled .nav-brand-sub { color: ${t.warm}; }
+.nav.scrolled .nav-links a { color: ${t.brown}; }
+.nav.scrolled .nav-cart-btn { color: ${t.dark}; }
+.nav.scrolled .nav-wa { color: ${t.brown}; border-color: ${t.tan}; }
+
+.nav-brand { text-decoration: none; display: flex; flex-direction: column; gap: 0.14rem; }
+.nav-brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-weight: 600; letter-spacing: 0.14em;
+  color: ${t.cream}; text-transform: uppercase;
+  line-height: 1; transition: color 0.4s;
+}
+.nav-brand-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.58rem; font-weight: 300; letter-spacing: 0.24em;
+  color: ${t.tan}; text-transform: uppercase;
+  line-height: 1; font-style: italic; transition: color 0.4s;
+}
+.nav-links { display: none; gap: 2rem; list-style: none; align-items: center; }
+.nav-links a {
+  font-size: 0.68rem; letter-spacing: 0.14em;
+  color: ${t.cream}; text-decoration: none; text-transform: uppercase;
+  transition: opacity 0.2s; font-weight: 400; opacity: 0.85;
+}
+.nav-links a:hover { opacity: 0.5; }
+.nav-right { display: flex; align-items: center; gap: 1.25rem; }
+.nav-wa {
+  display: none; align-items: center; gap: 0.5rem;
+  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: ${t.cream}; text-decoration: none;
+  padding: 0.45rem 1rem; border: 1px solid ${t.cream}44;
+  border-radius: 2px; transition: all 0.2s; opacity: 0.85;
+}
+.nav-wa:hover { background: ${t.cream}18; opacity: 1; }
+.nav-cart-btn { display: flex; align-items: center; color: ${t.cream}; background: none; border: none; cursor: pointer; position: relative; padding: 0.25rem; transition: color 0.4s, opacity 0.2s; opacity: 0.85; }
+.nav-cart-btn:hover { opacity: 0.55; }
+.cart-count { position: absolute; top: -5px; right: -7px; width: 16px; height: 16px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; font-size: 0.55rem; font-weight: 500; display: flex; align-items: center; justify-content: center; opacity: 1; }
+
+/* ── BOTTOM TAB ── */
+.bottom-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; display: flex; background: ${t.cream}f5; backdrop-filter: blur(16px); border-top: 1px solid ${t.sand}; padding-bottom: env(safe-area-inset-bottom); }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem 0.5rem 0.55rem; gap: 0.22rem; text-decoration: none; color: ${t.tan}; transition: color 0.2s; border: none; background: none; cursor: pointer; }
+.tab-item:hover, .tab-item.active { color: ${t.dark}; }
+.tab-item span { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.tab-cart-btn { flex: 1.5; background: ${t.dark}; color: ${t.cream}; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem 0.5rem 0.55rem; gap: 0.22rem; border: none; cursor: pointer; transition: background 0.2s; position: relative; }
+.tab-cart-btn:hover { background: ${t.esp}; }
+.tab-cart-btn span { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; }
+.tab-cart-count { position: absolute; top: 6px; right: calc(50% - 18px); width: 15px; height: 15px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
+.page-end-pad { height: 5rem; }
+
+/* ── CART DRAWER ── */
+.drawer-overlay { position: fixed; inset: 0; z-index: 300; background: ${t.esp}55; backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 400; width: min(420px, 100vw); background: ${t.cream}; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow: -8px 0 40px ${t.esp}22; }
+.drawer.open { transform: translateX(0); }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1.25rem; border-bottom: 1px solid ${t.sand}; flex-shrink: 0; }
+.drawer-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; color: ${t.dark}; }
+.drawer-title em { font-style: italic; }
+.drawer-close { background: none; border: none; cursor: pointer; color: ${t.tan}; padding: 0.25rem; display: flex; align-items: center; transition: color 0.2s; }
+.drawer-close:hover { color: ${t.dark}; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 0 1.5rem; }
+.drawer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 1rem; padding: 3rem 0; }
+.drawer-empty-icon { color: ${t.tan}; }
+.drawer-empty-text { font-size: 0.85rem; color: ${t.warm}; text-align: center; line-height: 1.7; }
+.drawer-empty-cta { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.brown}; background: none; border: 1px solid ${t.tan}; padding: 0.6rem 1.25rem; border-radius: 2px; cursor: pointer; transition: all 0.2s; }
+.drawer-empty-cta:hover { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
+.drawer-line { display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem 0; border-bottom: 1px solid ${t.sand}; }
+.drawer-line-info { flex: 1; }
+.drawer-line-name { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 400; color: ${t.dark}; margin-bottom: 0.15rem; }
+.drawer-line-flavor { font-size: 0.72rem; color: ${t.warm}; }
+.drawer-line-price { font-size: 0.72rem; color: ${t.brown}; margin-top: 0.25rem; }
+.drawer-line-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; padding-top: 0.2rem; }
+.dqty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid ${t.tan}; background: transparent; color: ${t.brown}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.dqty-btn:hover { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
+.dqty-val { font-size: 0.85rem; font-weight: 500; color: ${t.dark}; min-width: 1.2rem; text-align: center; }
+.drawer-form-wrap { padding: 1.5rem 0 1rem; }
+.drawer-form-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: ${t.dark}; margin-bottom: 1.25rem; }
+.drawer-form-title em { font-style: italic; }
+.d-form { display: flex; flex-direction: column; gap: 0.85rem; }
+.d-form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+.d-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: ${t.brown}; }
+.d-input, .d-textarea { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 300; color: ${t.dark}; background: transparent; border: none; border-bottom: 1px solid ${t.tan}; padding: 0.55rem 0; outline: none; transition: border-color 0.2s; width: 100%; }
+.d-input:focus, .d-textarea:focus { border-bottom-color: ${t.brown}; }
+.d-textarea { resize: vertical; min-height: 60px; }
+.drawer-foot { padding: 1.25rem 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.drawer-note { font-size: 0.68rem; color: ${t.warm}; font-style: italic; }
+.drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 2px; width: 100%; transition: background 0.2s; }
+.drawer-wa-btn:hover { background: ${t.esp}; }
+.drawer-wa-alt { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: ${t.brown}; text-decoration: none; padding: 0.5rem; transition: color 0.2s; }
+.drawer-wa-alt:hover { color: ${t.dark}; }
+
+/* ── PRODUCT OVERLAY ── */
+.product-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.25rem;
+  pointer-events: none;
+}
+.product-overlay::before {
+  content: ''; position: absolute; inset: 0;
+  background: ${t.esp}66;
+  backdrop-filter: blur(20px) saturate(0.7);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.product-overlay.open { pointer-events: all; }
+.product-overlay.open::before { opacity: 1; }
+.product-overlay.closing::before { opacity: 0; transition: opacity 0.26s ease; }
+
+.po-card {
+  position: relative; z-index: 1;
+  background: ${t.cream}; width: 100%; max-width: 860px;
+  max-height: 90vh; overflow-y: auto;
+  display: grid; grid-template-columns: 1fr;
+  opacity: 0; transform: scale(0.94) translateY(24px);
+  border-radius: 3px;
+}
+.product-overlay.open .po-card {
+  animation: overlayIn 0.4s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+}
+.product-overlay.closing .po-card {
+  animation: overlayOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes overlayIn {
+  0%   { opacity: 0; transform: scale(0.94) translateY(24px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes overlayOut {
+  0%   { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.97) translateY(10px); }
 }
 
-/* Subtle paper texture */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0
+.po-close {
+  position: absolute; top: 1.25rem; right: 1.25rem; z-index: 2;
+  background: ${t.sand}; border: none; cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: ${t.dark}; transition: background 0.2s;
 }
-*{position:relative;z-index:1}
+.po-close:hover { background: ${t.tan}; }
 
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:var(--paper2)}
-::-webkit-scrollbar-thumb{background:var(--ink3);border-radius:2px}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
-[id]{scroll-margin-top:72px}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}50%{transform:rotate(calc(var(--rot,0deg) + 1.5deg))}}
-@keyframes pinDrop{from{opacity:0;transform:translateY(-8px) rotate(var(--rot,0deg))}to{opacity:1;transform:translateY(0) rotate(var(--rot,0deg))}}
+.po-img {
+  width: 100%; aspect-ratio: 16/7;
+  background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
+  color: ${t.warm}88; letter-spacing: 0.15em; flex-shrink: 0;
+}
+.po-body { padding: 2rem 1.75rem 2.5rem; }
+.po-tag { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.4rem; }
+.po-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; margin-bottom: 1rem; }
+.po-name em { font-style: italic; }
+.po-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warm}; line-height: 1.85; margin-bottom: 1.75rem; }
+.po-flavor-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; }
+.po-flavors { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+.po-flavor-pill { font-size: 0.75rem; color: ${t.warm}; background: ${t.sand}; padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
+.po-flavor-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
+.po-order-row { display: flex; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid ${t.sand}; }
+.po-price { font-size: 0.88rem; font-weight: 500; color: ${t.brown}; flex: 1; }
+.po-qty-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid ${t.tan}; background: transparent; color: ${t.brown}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.po-qty-btn:hover { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
+.po-qty-val { font-size: 0.9rem; font-weight: 500; color: ${t.dark}; min-width: 1.4rem; text-align: center; }
+.po-add-btn { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 0.8rem 1.75rem; border-radius: 2px; transition: background 0.2s, transform 0.15s; display: flex; align-items: center; gap: 0.4rem; }
+.po-add-btn:hover { background: ${t.esp}; transform: translateY(-1px); }
+.po-add-btn.added { background: ${t.brown}; transform: none; }
+.po-eggless { display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+.po-eggless-text { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: ${t.warm}; }
+.po-vegan { font-size: 0.6rem; color: ${t.tan}; margin-left: 0.25rem; }
 
 /* ── SCROLL REVEAL ── */
-.reveal{
-  opacity:0;
-  transform:translateY(28px);
-  transition:opacity .65s ease, transform .65s cubic-bezier(.22,1,.36,1);
-}
-.reveal.visible{
-  opacity:1;
-  transform:translateY(0);
-}
-/* Stagger children — each .reveal-child inside a .reveal-stagger staggers */
-.reveal-stagger .reveal-child{
-  opacity:0;
-  transform:translateY(24px);
-  transition:opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1);
-}
-.reveal-stagger.visible .reveal-child:nth-child(1){transition-delay:.05s}
-.reveal-stagger.visible .reveal-child:nth-child(2){transition-delay:.14s}
-.reveal-stagger.visible .reveal-child:nth-child(3){transition-delay:.23s}
-.reveal-stagger.visible .reveal-child:nth-child(4){transition-delay:.32s}
-.reveal-stagger.visible .reveal-child:nth-child(5){transition-delay:.41s}
-.reveal-stagger.visible .reveal-child:nth-child(6){transition-delay:.5s}
-.reveal-stagger.visible .reveal-child:nth-child(7){transition-delay:.59s}
-.reveal-stagger.visible .reveal-child:nth-child(8){transition-delay:.68s}
-.reveal-stagger.visible .reveal-child{opacity:1;transform:translateY(0)}
-/* Respect reduced motion */
-@media(prefers-reduced-motion:reduce){
-  .reveal,.reveal-stagger .reveal-child{
-    opacity:1;transform:none;transition:none;
-  }
-}
-
-/* ── NAV ── */
-.nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  height:64px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 clamp(1.25rem,4vw,3rem);
-  background:rgba(250,247,242,.92);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--paper3);
-  transition:box-shadow .3s;
-}
-.nav.on{box-shadow:0 2px 20px rgba(44,36,22,.08)}
-.logo{
-  font-family:var(--hand);font-size:1.55rem;font-weight:600;
-  color:var(--ink);letter-spacing:.02em;text-decoration:none;
-  display:flex;align-items:center;gap:10px;white-space:nowrap
-}
-.logo-mark{
-  width:32px;height:32px;border-radius:10px;
-  background:var(--ink);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--hand);font-size:.85rem;color:var(--paper);
-  font-weight:700;flex-shrink:0
-}
-.nav-mid{
-  display:flex;gap:2.25rem;list-style:none;
-  position:absolute;left:50%;transform:translateX(-50%)
-}
-.nav-mid a{
-  font-size:.73rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink3);text-decoration:none;transition:color .2s;white-space:nowrap
-}
-.nav-mid a:hover{color:var(--ink)}
-.nav-r{display:flex;align-items:center;gap:10px}
-.nav-pill{
-  display:flex;align-items:center;gap:7px;
-  font-size:.7rem;font-weight:500;letter-spacing:.06em;
-  color:var(--paper);background:var(--ink);
-  padding:8px 18px;border-radius:40px;text-decoration:none;
-  transition:background .2s,transform .15s;white-space:nowrap
-}
-.nav-pill:hover{background:var(--ink2);transform:translateY(-1px)}
-.ndot{width:6px;height:6px;border-radius:50%;background:var(--green-lt);animation:pulse 2s infinite}
-.burger{
-  display:none;flex-direction:column;gap:4.5px;
-  background:none;border:none;cursor:pointer;padding:6px
-}
-.burger span{display:block;width:20px;height:1.5px;background:var(--ink);border-radius:1px}
-@media(max-width:820px){.nav-mid{display:none}.burger{display:flex}}
-@media(max-width:480px){.nav-pill span{display:none}.nav-pill{padding:8px 14px;border-radius:50%}}
-
-/* ── MOBILE DRAWER ── */
-.ov{position:fixed;inset:0;background:rgba(44,36,22,.45);z-index:190;opacity:0;pointer-events:none;transition:opacity .3s}
-.ov.open{opacity:1;pointer-events:all}
-.mdrawer{
-  position:fixed;top:0;right:0;width:min(280px,80vw);height:100vh;
-  background:var(--paper);border-left:1px solid var(--paper3);
-  z-index:195;transform:translateX(100%);
-  transition:transform .4s cubic-bezier(.32,0,.15,1);
-  display:flex;flex-direction:column;padding:80px 1.75rem 2rem
-}
-.mdrawer.open{transform:translateX(0)}
-.mdrawer a{
-  font-family:var(--hand);font-size:2rem;font-weight:500;
-  color:var(--ink2);text-decoration:none;
-  padding:.55rem 0;border-bottom:1px solid var(--paper3);display:block;transition:color .2s
-}
-.mdrawer a:hover{color:var(--ink)}
-.mdrawer-cta{
-  margin-top:auto;text-align:center;
-  background:var(--ink);color:var(--paper);
-  font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
-  padding:14px;border-radius:var(--rlg);text-decoration:none;display:block
-}
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s cubic-bezier(0.4,0,0.2,1), transform 0.65s cubic-bezier(0.4,0,0.2,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.22s; }
+.reveal-d3 { transition-delay: 0.34s; }
 
 /* ── HERO ── */
-.hero{
-  min-height:100vh;
-  min-height:100svh;
-  min-height:100dvh;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;
-  padding:
-    clamp(88px,12vh,120px)
-    clamp(1.25rem,5vw,4rem)
-    clamp(4rem,8vh,5.5rem);
-  overflow:hidden;background:var(--paper);
+.hero { min-height: 100svh; padding: 0; display: flex; flex-direction: column; border-bottom: 1px solid ${t.sand}; position: relative; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; background: url('/images/cinnamon-rolls.webp') center / cover; display: flex; align-items: center; justify-content: center; }
+.hero-circle { width: 200px; height: 200px; border-radius: 50%; background: ${t.tan}44; display: none; align-items: center; justify-content: center; position: relative; opacity: 0.6; }
+.hero-circle::before { content: ''; position: absolute; width: 155px; height: 155px; border-radius: 50%; background: ${t.tan}66; border: 1px solid ${t.tan}99; }
+.hero-circle-text { font-family: 'Cormorant Garamond', serif; font-size: 0.72rem; font-style: italic; color: ${t.brown}; z-index: 1; letter-spacing: 0.1em; }
+.hero-badge { display: none; }
+.hero-content {
+  position: relative; z-index: 1;
+  margin-top: auto;
+  padding: 2rem 1.5rem calc(5.5rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, ${t.cream} 70%, transparent 100%);
 }
-
-/* Decorative circles — clamp size so they don't dominate on mobile */
-.hero-deco{position:absolute;border-radius:50%;pointer-events:none}
-.hero-deco-1{
-  width:clamp(200px,50vw,500px);height:clamp(200px,50vw,500px);
-  background:radial-gradient(circle,rgba(200,132,26,.06) 0%,transparent 65%);
-  top:-60px;right:-60px
-}
-.hero-deco-2{
-  width:clamp(150px,35vw,350px);height:clamp(150px,35vw,350px);
-  background:radial-gradient(circle,rgba(74,124,78,.05) 0%,transparent 65%);
-  bottom:-40px;left:-40px
-}
-
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--paper2);border:1px solid var(--paper3);border-radius:40px;
-  padding:7px 18px 7px 12px;
-  font-size:.67rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink3);margin-bottom:1.5rem;animation:fadeIn .6s ease both;
-  max-width:calc(100vw - 3rem);white-space:nowrap;overflow:hidden;
-}
-.live{display:flex;align-items:center;gap:5px;color:var(--green);font-weight:500;flex-shrink:0}
-.ldot{width:6px;height:6px;border-radius:50%;background:var(--green-lt);animation:pulse 2s infinite;flex-shrink:0}
-
-.hero-h1{
-  font-family:var(--hand);font-size:clamp(2.8rem,9vw,7rem);
-  font-weight:700;line-height:1.05;color:var(--ink);
-  margin-bottom:1rem;letter-spacing:-.01em;
-  animation:fadeUp .9s ease both;animation-delay:.15s;
-  max-width:min(860px,90vw);
-}
-.hero-h1 em{font-style:normal;color:var(--gold)}
-
-.hero-sub{
-  font-family:var(--serif);font-size:clamp(.85rem,2.5vw,1.05rem);
-  color:var(--ink2);line-height:1.85;
-  width:min(440px,88vw);
-  font-weight:400;font-style:italic;margin-bottom:2rem;
-  animation:fadeUp .9s ease both;animation-delay:.28s
-}
-
-.hero-btns{
-  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
-  animation:fadeUp .9s ease both;animation-delay:.4s;margin-bottom:2rem;
-  width:min(400px,88vw);
-}
-@media(max-width:400px){
-  .hero-btns{flex-direction:column}
-  .hero-btns a,.hero-btns button{width:100%;text-align:center}
-}
-.btn-ink{
-  background:var(--ink);color:var(--paper);font-family:var(--sans);
-  font-size:.74rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
-  padding:14px 30px;border-radius:40px;border:none;cursor:pointer;
-  text-decoration:none;white-space:nowrap;
-  transition:background .2s,transform .15s,box-shadow .2s;
-}
-.btn-ink:hover,.btn-ink:focus-visible{
-  background-color:var(--ink2);
-  transform:translateY(-2px);
-  box-shadow:0 6px 24px rgba(44,36,22,.18);
-}
-.btn-outline{
-  background:transparent;color:var(--ink);font-family:var(--sans);
-  font-size:.74rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
-  padding:14px 26px;border-radius:40px;cursor:pointer;text-decoration:none;
-  border:1.5px solid var(--paper3);
-  transition:border-color .2s,background .2s,transform .15s;white-space:nowrap
-}
-.btn-outline:hover{border-color:var(--ink3);background:var(--paper2);transform:translateY(-2px)}
-
-/* Stat pills — 2x2 grid on mobile, single row above 560px */
-.hero-stats{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;
-  width:min(400px,88vw);
-  animation:fadeUp .9s ease both;animation-delay:.54s
-}
-@media(min-width:560px){
-  .hero-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:auto}
-}
-.hero-stat{
-  display:flex;align-items:center;justify-content:center;gap:7px;
-  background:var(--paper2);border:1px solid var(--paper3);
-  border-radius:40px;padding:7px 14px;
-  font-size:.68rem;font-weight:400;color:var(--ink2);white-space:nowrap;
-}
-.hero-stat-icon{font-size:.85rem;flex-shrink:0}
-
-/* Scroll cue — hide on short viewports to prevent overlap */
-.scroll-cue{
-  position:absolute;bottom:1.25rem;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  animation:fadeIn 1s ease both 1.1s
-}
-@media(max-height:680px){.scroll-cue{display:none}}
-.scroll-line{width:1px;height:28px;background:linear-gradient(to bottom,var(--ink3),transparent)}
-.scroll-lbl{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)}
+.hero-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+.hero-eyebrow::before { content: ''; display: block; width: 1.5rem; height: 1px; background: ${t.tan}; flex-shrink: 0; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem, 9vw, 3.5rem); font-weight: 300; line-height: 1.05; color: ${t.dark}; margin-bottom: 0.75rem; opacity: 0; animation: fadeUp 0.9s 0.35s forwards; }
+.hero-title em { font-style: italic; color: ${t.brown}; }
+.hero-sub { font-size: 0.85rem; font-weight: 300; line-height: 1.7; color: ${t.warm}; margin-bottom: 1.75rem; opacity: 0; animation: fadeUp 0.9s 0.5s forwards; max-width: 340px; }
+.hero-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s 0.65s forwards; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.btn-primary { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; color: ${t.cream}; background: ${t.dark}; padding: 0.85rem 1.75rem; border-radius: 2px; text-decoration: none; text-transform: uppercase; transition: background 0.2s, transform 0.2s; border: none; cursor: pointer; display: inline-block; }
+.btn-primary:hover { background: ${t.esp}; transform: translateY(-1px); }
+.btn-ghost { font-size: 0.75rem; letter-spacing: 0.08em; color: ${t.brown}; text-decoration: none; text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s, gap 0.2s; }
+.btn-ghost:hover { color: ${t.dark}; gap: 0.65rem; }
 
 /* ── TICKER ── */
-.ticker{
-  overflow:hidden;padding:10px 0;
-  border-top:1px solid var(--paper3);border-bottom:1px solid var(--paper3);
-  background:var(--paper2)
-}
-.ticker-t{display:flex;width:max-content;animation:marquee 30s linear infinite}
-.tick{
-  display:flex;align-items:center;gap:1.75rem;padding:0 1.75rem;
-  font-family:var(--hand);font-size:.95rem;font-weight:500;
-  color:var(--ink2);white-space:nowrap
-}
-.tsep{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--gold);flex-shrink:0
-}
+.ticker { background: ${t.dark}; padding: 0.75rem 0; overflow: hidden; white-space: nowrap; }
+.ticker-inner { display: flex; gap: 2.5rem; animation: ticker 22s linear infinite; }
+.ticker-item { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: ${t.tan}; flex-shrink: 0; display: flex; align-items: center; gap: 1.25rem; }
+.ticker-dot { width: 3px; height: 3px; border-radius: 50%; background: ${t.warm}; }
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* ── SECTION ── */
-.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.75rem)}
-.sec{padding:clamp(3.5rem,7vh,6rem) 0}
-.eyebrow{
-  display:inline-flex;align-items:center;gap:10px;
-  font-family:var(--hand);font-size:1rem;font-weight:500;color:var(--gold);
-  margin-bottom:.65rem
-}
-.eyebrow::before{content:'✦';font-size:.7rem}
-.sec-title{
-  font-family:var(--hand);font-size:clamp(2rem,5vw,3.2rem);
-  font-weight:700;line-height:1.1;color:var(--ink)
-}
-.sec-title em{font-style:normal;color:var(--gold)}
+/* ── SECTION COMMONS ── */
+.section { padding: 3.5rem 1.25rem; }
+.section-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.5rem; }
+.section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; }
+.section-title em { font-style: italic; }
 
-/* ── MENU ── */
-.menu-header{
-  display:flex;align-items:flex-end;justify-content:space-between;
-  flex-wrap:wrap;gap:1rem;margin-bottom:2rem
+/* ── MENU — mobile stacked ── */
+.menu-section { padding: 3.5rem 0 3.5rem; }
+.menu-header { padding: 0 1.25rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: flex-end; }
+.menu-scroll-track {
+  display: flex; gap: 12px; background: transparent;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
+  scrollbar-width: none; padding: 0 1.25rem 0.25rem;
 }
-
-/* ── STICKY NOTE GRID ── */
-.snboard{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:clamp(1rem,2.5vw,1.75rem);
-  align-items:stretch;
-  perspective:1200px;
-  perspective-origin:50% 30%;
+.menu-scroll-track::-webkit-scrollbar { display: none; }
+.menu-card {
+  flex: 0 0 68vw; scroll-snap-align: start;
+  background: ${t.cream}; padding: 0;
+  display: flex; flex-direction: column; cursor: pointer;
+  border: 1px solid ${t.sand}; border-radius: 3px; overflow: hidden;
 }
-@media(max-width:1100px){.snboard{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.snboard{grid-template-columns:1fr}}
-
-/* Individual sticky note */
-/* ── STICKY NOTE PAPER PHYSICS ── */
-.sn{
-  border-radius:4px;
-  padding:1.6rem 1.5rem 1.2rem;
-  cursor:pointer;
-  display:flex;
-  flex-direction:column;
-
-  /* Resting shadow: ambient depth + subtle contact shadow on the "desk" */
-  box-shadow:
-    0 1px 1px rgba(44,36,22,.12),
-    0 3px 8px rgba(44,36,22,.10),
-    0 8px 20px rgba(44,36,22,.07);
-
-  transform:rotate(var(--rot,0deg));
-  transition:
-    box-shadow .3s ease,
-    transform .08s ease;
-  will-change:transform;
-  animation:pinDrop .5s ease both;
-  animation-delay:var(--delay,0s);
-  border-top:3px solid var(--border-col,rgba(0,0,0,.12));
-  transform-style:preserve-3d;
-  overflow:hidden;
+.menu-card-img-wrap {
+  position: relative; width: 100%; aspect-ratio: 3/4;
+  overflow: hidden; cursor: pointer;
 }
-
-@media(hover:hover){
-  .sn:hover{
-    box-shadow:
-      0 2px 2px rgba(44,36,22,.08),
-      0 8px 24px rgba(44,36,22,.16),
-      0 24px 48px rgba(44,36,22,.10);
-    z-index:20;
-  }
+.menu-card-img-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 0.8rem;
+  color: ${t.warm}88; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
 }
-
-/* Active: pressed flat */
-.sn:active{
-  box-shadow:
-    0 1px 1px rgba(44,36,22,.14),
-    0 2px 6px rgba(44,36,22,.10);
-  transition:transform .05s ease, box-shadow .05s ease;
+.menu-card-img-wrap:hover .menu-card-img-bg { transform: scale(1.04); }
+.menu-card-plus {
+  position: absolute; bottom: 0.85rem; right: 0.85rem;
+  opacity: 0; pointer-events: none;
+  transform: scale(0.5);
 }
-
-/* Warm colour wash on hover — note "warms up" as you approach it */
-.sn-glow{
-  position:absolute;inset:0;
-  border-radius:inherit;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,
-    rgba(255,255,255,.55) 0%,
-    transparent 70%
-  );
-  opacity:0;
-  transition:opacity .35s ease;
-  pointer-events:none;
-  z-index:1;
+.menu-card-img-wrap:hover .menu-card-plus,
+.menu-card-img-wrap:active .menu-card-plus {
+  opacity: 1; pointer-events: all;
+  animation: plusPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
-@media(hover:hover){
-  .sn:hover .sn-glow{ opacity:1; }
+@keyframes plusPop {
+  0%   { transform: scale(0.5); }
+  70%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
 }
-
-/* Tape strip at top */
-.sn-tape{
-  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
-  width:44px;height:20px;border-radius:3px;
-  background:rgba(255,255,255,.55);
-  border:1px solid rgba(255,255,255,.8);
-  backdrop-filter:blur(2px);
-  transition:transform .3s ease,box-shadow .3s ease;
+@media (hover: none) {
+  .menu-card-plus { opacity: 1; pointer-events: all; transform: scale(1); animation: none; }
 }
-@media(hover:hover){
-  .sn:hover .sn-tape{
-    transform:translateX(-50%) scaleY(1.06);
-    box-shadow:0 3px 10px rgba(44,36,22,.12);
-  }
+.menu-card-plus-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: ${t.cream}; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px ${t.esp}44;
+  transition: background 0.2s, transform 0.15s;
+  color: ${t.dark};
 }
-
-/* Pin dot */
-.sn-pin{
-  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
-  width:10px;height:10px;border-radius:50%;
-  background:var(--pin-col,#c0392b);
-  box-shadow:0 2px 4px rgba(0,0,0,.25),0 0 0 2px rgba(255,255,255,.5);
-  z-index:4;
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
-}
-@media(hover:hover){
-  .sn:hover .sn-pin{
-    transform:translateX(-50%) scale(1.3) translateY(-3px);
-    box-shadow:0 5px 10px rgba(0,0,0,.28),0 0 0 2px rgba(255,255,255,.65);
-  }
-}
-
-.sn-img{
-  width:calc(100% + 3rem);
-  margin-left:-1.5rem;
-  margin-right:-1.5rem;
-  margin-top:-1.6rem;
-  aspect-ratio:4/3;
-  overflow:hidden;
-  border-bottom:1px solid rgba(44,36,22,.08);
-  margin-bottom:1.1rem;
-  flex-shrink:0;
-}
-.sn-img img{width:100%;height:100%;object-fit:cover;display:block}
-.sn-img-ph{
-  width:100%;height:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:.35rem;background:rgba(44,36,22,.05)
-}
-.sn-emoji{font-size:2.6rem;line-height:1}
-.sn-img-hint{
-  font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;
-  color:rgba(44,36,22,.28);font-family:var(--sans)
-}
-
-/* Tag + name always paired — tag sits left, small, above name */
-.sn-header{
-  margin-bottom:.65rem;
-  flex-shrink:0;
-}
-.sn-tag{
-  display:inline-flex;align-items:center;gap:4px;
-  font-family:var(--hand);font-size:.78rem;font-weight:600;
-  color:var(--green);
-  margin-bottom:.2rem;
-  line-height:1;
-}
-.sn-name{
-  font-family:var(--hand);font-size:1.45rem;font-weight:700;
-  color:var(--ink);line-height:1.18;
-  /* No margin-bottom here — parent .sn-header owns spacing */
-}
-
-/* Description — flex:1 so it pushes variants+footer to the bottom */
-.sn-desc{
-  font-family:var(--serif);font-size:.76rem;font-style:italic;
-  color:var(--ink2);line-height:1.72;
-  flex:1;
-  /* Clamp at 3 lines so long descs don't blow out card height */
-  display:-webkit-box;
-  -webkit-line-clamp:3;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-/* Variants — fixed min-height so cards with fewer pills don't collapse */
-.sn-variants{
-  display:flex;flex-wrap:wrap;gap:5px;
-  min-height:2rem; /* always reserves space even if 0 variants */
-  align-content:flex-start;
-  margin-top:.7rem;
-  margin-bottom:.7rem;
-  flex-shrink:0;
-}
-.sv{
-  font-family:var(--hand);font-size:.82rem;font-weight:500;
-  padding:3px 11px;border-radius:20px;
-  background:rgba(44,36,22,.06);border:1px solid rgba(44,36,22,.1);color:var(--ink2);
-  cursor:pointer;transition:background .15s,border-color .15s,color .15s;
-  line-height:1.5;
-}
-.sv:hover{background:rgba(44,36,22,.12);color:var(--ink)}
-.sv.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-
-/* Footer pinned: price left-aligned on baseline, button right */
-.sn-foot{
-  display:flex;align-items:center;justify-content:space-between;
-  padding-top:.7rem;border-top:1px dashed rgba(44,36,22,.18);
-  flex-shrink:0;
-  gap:.5rem;
-}
-.sn-price{
-  font-family:var(--hand);font-size:1.55rem;font-weight:700;
-  color:var(--ink);line-height:1;
-  /* Consistent baseline regardless of price string length */
-  min-width:3.5rem;
-}
-.sn-add{
-  display:flex;align-items:center;gap:6px;
-  background:var(--ink);border:none;border-radius:40px;
-  padding:7px 14px 7px 10px;
-  font-family:var(--hand);font-size:.92rem;font-weight:600;
-  color:var(--paper);cursor:pointer;
-  transition:background .2s,transform .15s;
-  white-space:nowrap;flex-shrink:0;
-}
-.sn-add:hover{background:var(--gold);transform:scale(1.04)}
-.sn-add svg{width:13px;height:13px;flex-shrink:0}
-@media(max-width:768px){.sn-add{min-height:44px}}
-
-/* ── ABOUT ── */
-.about-wrap{
-  background:var(--paper2);
-  border-top:1px solid var(--paper3);border-bottom:1px solid var(--paper3)
-}
-.about-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:clamp(2.5rem,5vw,5rem);align-items:center
-}
-@media(max-width:720px){.about-grid{grid-template-columns:1fr}}
-
-.about-visual{
-  border-radius:var(--rlg);overflow:hidden;
-  box-shadow:var(--shadow-lift);
-  background:var(--paper3)
-}
-.about-img{
-  width:100%;aspect-ratio:3/4;max-height:480px;
-  background:var(--paper3);display:flex;align-items:center;justify-content:center
-}
-.about-img img{width:100%;height:100%;object-fit:cover;display:block}
-.about-img-ph{display:flex;flex-direction:column;align-items:center;gap:.75rem}
-.about-img-emoji{font-size:5rem;opacity:.5}
-.about-img-hint{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-family:var(--sans)}
-.about-cap{
-  padding:1.1rem 1.35rem;border-top:1px solid var(--paper3)
-}
-.about-cap-title{font-family:var(--hand);font-size:1.05rem;font-weight:600;color:var(--ink);margin-bottom:2px}
-.about-cap-sub{font-size:.7rem;color:var(--ink3);font-weight:300}
-
-.about-txt p{
-  font-family:var(--serif);font-size:.9rem;color:var(--ink2);
-  line-height:1.9;font-weight:400;margin-bottom:1.25rem
-}
-.about-pills{display:flex;flex-wrap:wrap;gap:7px;margin:1.5rem 0 2rem}
-.about-pill{
-  font-family:var(--hand);font-size:.9rem;font-weight:500;
-  padding:5px 15px;border-radius:20px;
-  background:var(--paper);border:1px solid var(--paper3);color:var(--ink2)
-}
+.menu-card-plus-btn:hover { background: ${t.dark}; color: ${t.cream}; transform: scale(1.08); }
+.menu-card-info { padding: 0.9rem 1rem 1.1rem; }
+.menu-card-tag { font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.3rem; }
+.menu-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 400; color: ${t.dark}; margin-bottom: 0.2rem; line-height: 1.15; }
+.menu-card-price { font-size: 0.72rem; color: ${t.brown}; font-weight: 500; }
+.menu-eggless { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.55rem; }
+.eggless-text { font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: ${t.warm}; }
+.vegan-note { font-size: 0.52rem; color: ${t.tan}; }
 
 /* ── HOW IT WORKS ── */
-.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
-@media(max-width:620px){.how-grid{grid-template-columns:1fr}}
-.how-card{
-  background:var(--paper);border:1px solid var(--paper3);
-  border-radius:var(--rlg);padding:1.65rem 1.5rem;
-  box-shadow:var(--shadow);
-  transition:transform .25s,box-shadow .25s
-}
-.how-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
-.how-num{
-  font-family:var(--hand);font-size:3.5rem;font-weight:700;
-  color:var(--paper3);line-height:1;margin-bottom:.5rem
-}
-.how-title{font-family:var(--hand);font-size:1.25rem;font-weight:600;color:var(--ink);margin-bottom:.35rem}
-.how-desc{font-family:var(--serif);font-size:.8rem;color:var(--ink2);line-height:1.8;font-style:italic}
+.how-section { padding: 3.5rem 1.25rem; background: ${t.dark}; }
+.how-section .section-label { color: ${t.tan}; }
+.how-section .section-title { color: ${t.cream}; margin-bottom: 3rem; }
+.how-steps { display: flex; flex-direction: column; gap: 0; }
+.how-step { padding: 2rem 0; border-bottom: 1px solid ${t.brown}33; display: flex; gap: 1.5rem; align-items: flex-start; }
+.how-step:last-child { border-bottom: none; }
+.how-step-num { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; color: ${t.brown}44; line-height: 1; flex-shrink: 0; width: 3rem; }
+.how-step-body {}
+.how-step-icon { margin-bottom: 0.75rem; color: ${t.tan}; }
+.how-step-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: ${t.cream}; margin-bottom: 0.4rem; }
+.how-step-desc { font-size: 0.8rem; font-weight: 300; color: ${t.tan}; line-height: 1.8; }
 
-.pickup-strip{
-  margin-top:1rem;border-radius:var(--rlg);
-  background:var(--ink);color:var(--paper);
-  padding:1.75rem 2rem;
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem;
-  box-shadow:var(--shadow-lift)
-}
-.pickup-info{}
-.pickup-lbl{font-family:var(--hand);font-size:.8rem;font-weight:500;color:var(--gold);margin-bottom:.25rem}
-.pickup-val{font-family:var(--hand);font-size:1.3rem;font-weight:600;color:var(--paper);line-height:1.2}
-.pickup-sub{font-size:.72rem;color:rgba(250,247,242,.55);font-weight:300;margin-top:2px}
-.pickup-div{width:1px;height:44px;background:rgba(250,247,242,.15)}
-@media(max-width:560px){.pickup-div{display:none}}
-.btn-paper{
-  background:var(--paper);color:var(--ink);font-family:var(--sans);
-  font-size:.72rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
-  padding:12px 24px;border-radius:40px;border:none;cursor:pointer;
-  text-decoration:none;transition:background .2s,transform .15s;white-space:nowrap;flex-shrink:0
-}
-.btn-paper:hover{background:var(--paper2);transform:translateY(-1px)}
+/* ── THIS WEEK'S BAKE ── */
+.weekly-section { padding: 3.5rem 1.25rem; border-top: 1px solid ${t.sand}; }
+.weekly-inner { background: ${t.sand}; position: relative; overflow: hidden; border-radius: 2px; }
+.weekly-inner::after { content: ''; position: absolute; bottom: -50px; right: -50px; width: 180px; height: 180px; border-radius: 50%; background: ${t.tan}55; pointer-events: none; }
+.weekly-img { width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, ${t.tan} 0%, ${t.brown}44 100%); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: ${t.cream}88; letter-spacing: 0.15em; flex-shrink: 0; }
+.weekly-body { padding: 1.75rem 1.5rem 2rem; position: relative; z-index: 1; }
+.weekly-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+.weekly-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.15; margin-bottom: 0.75rem; }
+.weekly-name em { font-style: italic; }
+.weekly-desc { font-size: 0.84rem; font-weight: 300; color: ${t.warm}; line-height: 1.8; margin-bottom: 1.25rem; }
+.weekly-meta { display: flex; gap: 1.25rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+.weekly-meta-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: ${t.brown}; }
 
 /* ── JOURNAL ── */
-.j-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
-@media(max-width:820px){.j-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:500px){.j-grid{grid-template-columns:1fr}}
-.jcard{
-  background:var(--paper);border:1px solid var(--paper3);
-  border-radius:var(--rlg);padding:1.5rem;
-  box-shadow:var(--shadow);cursor:pointer;
-  transition:transform .25s,box-shadow .25s
-}
-.jcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
-.jcard.feat{grid-column:span 2}
-@media(max-width:820px){.jcard.feat{grid-column:span 1}}
-.j-cat{
-  font-family:var(--hand);font-size:.88rem;font-weight:500;
-  color:var(--gold);margin-bottom:.55rem
-}
-.j-title{font-family:var(--hand);font-size:1.3rem;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:.45rem}
-.jcard.feat .j-title{font-size:1.55rem}
-.j-exc{font-family:var(--serif);font-size:.78rem;color:var(--ink2);line-height:1.8;font-style:italic;margin-bottom:1rem}
-.j-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
-.j-date{font-size:.65rem;color:var(--ink3)}
-.j-link{font-family:var(--hand);font-size:.95rem;font-weight:600;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:gap .2s;background:none;border:none;padding:0;cursor:pointer;}
-.j-link:hover{gap:9px}
-
-/* ── NEWSLETTER ── */
-.nl-wrap{
-  margin:0 clamp(1.25rem,4vw,2.75rem) clamp(3rem,5vh,5rem);
-  border-radius:var(--rxl);
-  background:var(--paper2);border:1px solid var(--paper3);
-  box-shadow:var(--shadow);
-  padding:clamp(2rem,5vw,3.25rem);
-  display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center
-}
-@media(max-width:600px){.nl-wrap{grid-template-columns:1fr;gap:1.75rem}}
-.nl-title{font-family:var(--hand);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.65rem}
-.nl-title em{font-style:normal;color:var(--gold)}
-.nl-sub{font-family:var(--serif);font-size:.85rem;color:var(--ink2);font-style:italic;line-height:1.8}
-.nl-form{display:flex;flex-direction:column;gap:9px}
-.nl-row{display:flex;border-radius:var(--rlg);overflow:hidden;border:1.5px solid var(--paper3);background:var(--paper)}
-.nl-in{flex:1;background:transparent;border:none;outline:none;padding:12px 16px;font-family:var(--sans);font-size:.85rem;font-weight:300;color:var(--ink)}
-.nl-in::placeholder{color:var(--ink3)}
-.nl-btn{background:var(--ink);border:none;padding:12px 20px;font-family:var(--sans);font-size:.68rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--paper);cursor:pointer;transition:background .2s;white-space:nowrap}
-.nl-btn:hover{background:var(--gold)}
-.nl-note{font-size:.63rem;color:var(--ink3)}
-.nl-ok{font-family:var(--hand);font-size:1.4rem;font-weight:600;color:var(--green);animation:fadeIn .5s ease}
+.blog-section { padding: 3.5rem 1.25rem; background: ${t.sand}55; }
+.blog-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid ${t.sand}; }
+.blog-grid { display: flex; flex-direction: column; gap: 1rem; }
+.blog-card { background: ${t.cream}; border: 1px solid ${t.sand}; border-radius: 2px; overflow: hidden; position: relative; }
+.blog-skeleton-img { width: 100%; height: 160px; background: linear-gradient(90deg, ${t.sand} 25%, ${t.cream} 50%, ${t.sand} 75%); background-size: 200% 100%; animation: shimmer 1.8s infinite; }
+.blog-skeleton-body { padding: 1.25rem; }
+.blog-skel { border-radius: 2px; margin-bottom: 0.5rem; background: linear-gradient(90deg, ${t.sand} 25%, ${t.cream} 50%, ${t.sand} 75%); background-size: 200% 100%; animation: shimmer 1.8s infinite; }
+.coming-soon-badge { position: absolute; top: 0.75rem; right: 0.75rem; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: ${t.brown}; background: ${t.cream}; border: 1px solid ${t.tan}; padding: 0.25rem 0.6rem; border-radius: 20px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 /* ── FOOTER ── */
-.footer{
-  padding:2rem clamp(1.25rem,4vw,2.75rem);
-  border-top:1px solid var(--paper3);
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem;
-  background:var(--paper2)
-}
-.f-logo{font-family:var(--hand);font-size:1.1rem;font-weight:600;color:var(--ink2)}
-.f-copy{font-size:.63rem;color:var(--ink3);margin-top:3px}
-.f-nav{display:flex;gap:1.75rem;list-style:none;flex-wrap:wrap}
-.f-nav a{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);text-decoration:none;transition:color .2s}
-.f-nav a:hover{color:var(--ink)}
+.footer { background: ${t.esp}; padding: 2.5rem 1.25rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; border-top: 1px solid ${t.dark}; }
+.footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.cream}; text-transform: uppercase; }
+.footer-tagline { font-size: 0.73rem; font-weight: 300; color: ${t.brown}; line-height: 1.6; margin-top: 0.3rem; }
+.footer-links { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+.footer-links a { font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.brown}; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: ${t.cream}; }
+.footer-bottom { font-size: 0.62rem; color: ${t.brown}44; padding-top: 0.75rem; border-top: 1px solid ${t.dark}88; }
 
-/* ── MOBILE STICKY BAR ── */
-.sbar{
-  display:none;position:fixed;bottom:0;left:0;right:0;
-  padding:.75rem clamp(1rem,3vw,1.5rem);
-  background:rgba(250,247,242,.94);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-top:1px solid var(--paper3);z-index:180;gap:9px
-}
-@media(max-width:768px){.sbar{display:flex};body{padding-bottom:70px}}
-.sb-main{
-  flex:1;text-align:center;
-  background:var(--ink);color:var(--paper);
-  font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
-  padding:13px;border-radius:var(--rlg);text-decoration:none;
-}
+/* ── DESKTOP 768+ ── */
+@media (min-width: 768px) {
+  .nav { padding: 1rem 3rem; }
+  .nav-brand-name { font-size: 1.2rem; }
+  .nav-brand-sub { font-size: 0.62rem; }
+  .nav-links { display: flex; }
+  .nav-wa { display: flex; }
+  .nav-right { gap: 1.5rem; }
+  .bottom-tab-bar { display: none; }
+  .page-end-pad { display: none; }
 
-.sb-ghost{flex:1;text-align:center;border:1.5px solid var(--paper3);color:var(--ink);font-size:.76rem;font-weight:400;letter-spacing:.07em;text-transform:uppercase;padding:12px;border-radius:var(--rlg);text-decoration:none}
+  /* HERO */
+  .hero { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; padding: 0; flex-direction: unset; align-items: stretch; }
+  .hero-bg { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .hero-circle { width: 420px; height: 420px; }
+  .hero-circle::before { width: 330px; height: 330px; }
+  .hero-circle-text { font-size: 1rem; }
+  .hero-content { position: static; background: transparent; padding: 0 5rem 0 3.5rem; margin: 0; display: flex; flex-direction: column; justify-content: center; }
+  .hero-title { font-size: clamp(3.5rem, 4.5vw, 5.5rem); margin-bottom: 1.25rem; }
+  .hero-sub { font-size: 0.92rem; max-width: 400px; margin-bottom: 2.5rem; }
+  .hero-badge { display: block; position: absolute; bottom: 3rem; left: -1.5rem; background: ${t.cream}; border: 1px solid ${t.sand}; padding: 1.2rem 1.75rem; min-width: 195px; box-shadow: 0 8px 32px ${t.esp}18; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .hero-badge:hover { transform: translateY(-3px); box-shadow: 0 16px 40px ${t.esp}28; }
+  .hero-badge-label { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .hero-badge-value { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: ${t.dark}; }
 
-/* ── PRODUCT DRAWER ── */
-.pd-ov{
-  position:fixed;inset:0;
-  background:rgba(44,36,22,.55);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-  z-index:300;opacity:0;pointer-events:none;
-  transition:opacity .35s ease;
-  display:flex;align-items:center;justify-content:center;
-  padding:clamp(1rem,4vw,2rem);
-}
-.pd-ov.open{opacity:1;pointer-events:all}
+  /* MENU — horizontal scroll desktop */
+  .menu-section { padding: 6rem 0; }
+  .menu-header { padding: 0 3rem; margin-bottom: 2.5rem; }
+  .menu-scroll-track { padding: 0 3rem 0.5rem; gap: 1.25rem; }
+  .menu-card { flex: 0 0 280px; border-radius: 3px; }
+  .menu-card-img-wrap { aspect-ratio: 3/4; }
 
-.pd-panel{
-  width:min(560px,94vw);
-  max-height:88svh;
-  overflow-y:auto;
-  background:var(--paper);
-  border-radius:8px;
-  box-shadow:
-    0 2px 0 rgba(255,255,255,.8) inset,
-    0 -1px 0 rgba(44,36,22,.08) inset,
-    0 32px 80px rgba(44,36,22,.35),
-    0 8px 24px rgba(44,36,22,.2);
-  /* Paper border feel */
-  border:1px solid rgba(44,36,22,.1);
-  border-bottom:2px solid rgba(44,36,22,.12);
+  /* PRODUCT OVERLAY — side-by-side on desktop */
+  .po-card { grid-template-columns: 1fr 1fr; max-height: 80vh; }
+  .po-img { aspect-ratio: unset; height: 100%; min-height: 400px; }
+  .po-body { overflow-y: auto; }
 
-  /* Start tiny+rotated, expand into place */
-  transform:scale(.88) rotate(-1.5deg);
-  opacity:0;
-  transition:
-    transform .42s cubic-bezier(.34,1.28,.64,1),
-    opacity .3s ease;
-  transform-origin:center center;
+  /* HOW */
+  .how-section { padding: 6rem 3rem; }
+  .how-section .section-title { margin-bottom: 0; }
+  .how-steps { flex-direction: row; gap: 0; margin-top: 4rem; border-top: 1px solid ${t.brown}33; }
+  .how-step { flex: 1; flex-direction: column; padding: 2.5rem 2rem; border-bottom: none; border-right: 1px solid ${t.brown}33; gap: 0; }
+  .how-step:last-child { border-right: none; }
+  .how-step:nth-child(2) { padding-top: 4rem; }
+  .how-step:nth-child(3) { padding-top: 1.5rem; padding-bottom: 4rem; }
+  .how-step-num { font-size: 3.5rem; width: auto; margin-bottom: 1.5rem; }
+  .how-step-icon { margin-bottom: 1rem; }
+  .how-step-title { font-size: 1.35rem; }
 
-  /* Subtle paper gradient */
-  background-image:
-    linear-gradient(180deg,rgba(255,255,255,.6) 0%,transparent 60%),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 27px,
-      rgba(44,36,22,.03) 27px,
-      rgba(44,36,22,.03) 28px
-    );
-}
-.pd-panel.open{
-  transform:scale(1) rotate(0deg);
-  opacity:1;
-}
+  /* WEEKLY */
+  .weekly-section { padding: 6rem 3rem; }
+  .weekly-inner { display: grid; grid-template-columns: 1fr 1fr; }
+  .weekly-inner::after { width: 280px; height: 280px; bottom: -80px; right: -80px; }
+  .weekly-img { aspect-ratio: unset; min-height: 420px; order: 2; overflow: hidden; display: flex; }
+  .weekly-body { padding: 3rem 3rem; display: flex; flex-direction: column; justify-content: center; order: 1; }
 
-/* Fold crease at top — like the note was folded open */
-.pd-panel::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:3px;
-  background:linear-gradient(90deg,
-    rgba(44,36,22,.06) 0%,
-    rgba(44,36,22,.12) 30%,
-    rgba(44,36,22,.06) 60%,
-    rgba(44,36,22,.1) 100%
-  );
-  border-radius:8px 8px 0 0;
-  z-index:1;
-}
+  /* JOURNAL */
+  .blog-section { padding: 6rem 3rem; }
+  .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; flex-direction: unset; }
 
-.pd-in{padding:clamp(1.5rem,4vw,2.25rem)}
-
-/* Pull handle — hide in modal */
-.pd-handle{display:none}
-
-.pd-close{
-  position:absolute;top:1rem;right:1rem;
-  width:34px;height:34px;border-radius:50%;
-  background:var(--paper2);border:1px solid var(--paper3);
-  color:var(--ink);font-size:.9rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .2s,transform .15s;
-  z-index:10;
+  /* FOOTER */
+  .footer { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2.5rem; flex-direction: unset; align-items: end; padding: 3rem; }
+  .footer-bottom { grid-column: 1 / -1; text-align: right; }
 }
-.pd-close:hover{background:var(--paper3);transform:scale(1.08)}
-
-.pd-img{
-  width:100%;aspect-ratio:4/3;border-radius:var(--rlg);
-  background:var(--paper2);overflow:hidden;margin-bottom:1.4rem;
-  border:1px solid var(--paper3)
-}
-.pd-img img{width:100%;height:100%;object-fit:cover;display:block}
-.pd-img-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem}
-.pd-emoji{font-size:4rem}
-.pd-img-note{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-family:var(--sans)}
-
-.pd-tag-row{display:flex;gap:7px;margin-bottom:.85rem}
-.pd-tag{
-  font-family:var(--hand);font-size:.85rem;font-weight:500;
-  padding:3px 12px;border-radius:20px;background:rgba(74,124,78,.1);
-  color:var(--green);border:1px solid rgba(74,124,78,.2)
-}
-.pd-name{font-family:var(--hand);font-size:1.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;line-height:1.15}
-.pd-desc{font-family:var(--serif);font-size:.83rem;color:var(--ink2);font-style:italic;line-height:1.8;margin-bottom:1.3rem}
-
-.pd-lbl{font-family:var(--hand);font-size:.85rem;font-weight:600;color:var(--ink3);margin-bottom:.55rem;display:block}
-.pd-variants{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1.25rem}
-.pv{
-  font-family:var(--hand);font-size:.95rem;font-weight:500;
-  padding:6px 16px;border-radius:20px;
-  background:transparent;border:1.5px solid var(--paper3);color:var(--ink2);
-  cursor:pointer;transition:all .15s;min-height:40px
-}
-.pv:hover{border-color:var(--ink3);color:var(--ink)}
-.pv.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-
-.pd-vegan-row{
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  background:rgba(74,124,78,.07);border:1px solid rgba(74,124,78,.18);
-  border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:1.25rem
-}
-.pd-vegan-l{}
-.pd-vegan-title{font-family:var(--hand);font-size:1rem;font-weight:600;color:var(--green);margin-bottom:2px}
-.pd-vegan-note{font-family:var(--serif);font-size:.72rem;color:rgba(74,124,78,.7);font-style:italic;line-height:1.5}
-.toggle{
-  width:42px;height:24px;border-radius:12px;
-  background:var(--paper3);border:1.5px solid var(--paper3);
-  cursor:pointer;flex-shrink:0;transition:background .2s;
-}
-.toggle.on{background:var(--green-lt)}
-.toggle-k{
-  position:absolute;top:2px;left:2px;
-  width:18px;height:18px;border-radius:50%;
-  background:var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.2);
-  transition:transform .2s
-}
-.toggle.on .toggle-k{transform:translateX(18px)}
-
-.pd-qty{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
-.qty-l{font-family:var(--hand);font-size:.9rem;font-weight:600;color:var(--ink3);flex:1}
-.qty-row{display:flex;align-items:center;gap:0;border:1.5px solid var(--paper3);border-radius:var(--r);overflow:hidden}
-.qb{
-  width:38px;height:38px;background:var(--paper2);border:none;
-  color:var(--ink);font-size:1.1rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .15s
-}
-.qb:hover{background:var(--paper3)}
-.qty-n{min-width:38px;text-align:center;font-family:var(--hand);font-size:1.1rem;font-weight:700;color:var(--ink)}
-
-.pd-foot{
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:.75rem;padding-top:1.1rem;border-top:1px dashed var(--paper3)
-}
-.pd-price{font-family:var(--hand);font-size:2.1rem;font-weight:700;color:var(--ink)}
-.pd-add{
-  flex:1;background:var(--ink);border:none;border-radius:40px;
-  font-family:var(--hand);font-size:1.05rem;font-weight:700;
-  color:var(--paper);cursor:pointer;padding:13px 20px;
-  transition:background .2s,transform .15s;min-height:48px
-}
-.pd-add:hover{background:var(--gold);transform:translateY(-1px)}
-.pd-add.done{background:var(--green)}
-.pd-add.disabled{opacity:.4;cursor:default}
-
-/* ── CATEGORY TIER ROWS ── */
-.cat-tier{margin-bottom:1.25rem}
-.cat-tier-label{
-  font-family:var(--hand);font-size:.82rem;font-weight:600;
-  color:var(--ink3);letter-spacing:.04em;
-  padding-bottom:.4rem;margin-bottom:.5rem;
-  border-bottom:1px dashed var(--paper3);
-}
-.cat-row{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:1rem;padding:.7rem 0;
-  border-bottom:1px solid rgba(44,36,22,.05);
-}
-.cat-row:last-child{border-bottom:none}
-.cat-row-left{display:flex;align-items:flex-start;gap:.75rem;flex:1;min-width:0}
-.cat-swatch{
-  width:28px;height:28px;border-radius:6px;
-  flex-shrink:0;margin-top:2px;
-  border:1px solid rgba(44,36,22,.12);
-  box-shadow:0 1px 3px rgba(44,36,22,.1);
-}
-.cat-row-info{flex:1;min-width:0}
-.cat-row-name{
-  font-family:var(--hand);font-size:1rem;font-weight:500;
-  color:var(--ink);line-height:1.3;
-}
-.cat-row-note{
-  font-family:var(--serif);font-size:.75rem;font-style:italic;
-  color:var(--ink3);line-height:1.5;margin-top:2px;
-}
-.cat-row-right{display:flex;align-items:center;gap:.75rem;flex-shrink:0;padding-top:2px}
-.cat-row-price{
-  font-family:var(--hand);font-size:1rem;font-weight:600;
-  color:var(--gold);min-width:2.5rem;text-align:right;
-}
-.cat-qty{
-  display:flex;align-items:center;gap:0;
-  border:1.5px solid var(--paper3);border-radius:var(--r);overflow:hidden;
-}
-.cat-qbtn{
-  width:32px;height:32px;background:var(--paper2);border:none;
-  color:var(--ink);font-size:1rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .15s;
-}
-.cat-qbtn:hover{background:var(--paper3)}
-.cat-qnum{
-  min-width:28px;text-align:center;
-  font-family:var(--hand);font-size:1rem;font-weight:700;color:var(--ink);
-}
-.cat-coming{
-  font-family:var(--serif);font-size:.78rem;font-style:italic;
-  color:var(--ink3);text-align:center;
-  padding:.75rem 1rem;
-  background:var(--paper2);border-radius:var(--r);
-  margin-bottom:.5rem;
-}
-/* ── CART PILL ── */
-.cart-pill{
-  position:fixed;bottom:1.5rem;right:1.5rem;z-index:250;
-  display:flex;align-items:center;gap:10px;
-  background:var(--ink);color:var(--paper);
-  font-family:var(--hand);font-size:1.05rem;font-weight:600;
-  padding:12px 20px 12px 16px;border-radius:40px;
-  box-shadow:0 4px 20px rgba(44,36,22,.25),0 1px 4px rgba(44,36,22,.15);
-  cursor:pointer;border:none;
-  transform:translateY(80px);opacity:0;pointer-events:none;
-  transition:transform .35s cubic-bezier(.34,1.28,.64,1),opacity .3s ease;
-}
-.cart-pill.visible{transform:translateY(0);opacity:1;pointer-events:all}
-.cart-pill:hover{background:var(--ink2);transform:translateY(-2px)}
-.cart-pill.visible:hover{transform:translateY(-2px)}
-.cart-badge{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--gold);color:var(--ink);
-  font-size:.72rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-@media(max-width:768px){
-  .cart-pill{bottom:5.5rem;right:1rem}
-}
-
-/* ── ORDER FORM MODAL ── */
-.order-ov{
-  position:fixed;inset:0;
-  background:rgba(44,36,22,.6);
-  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
-  z-index:400;opacity:0;pointer-events:none;
-  display:flex;align-items:center;justify-content:center;
-  padding:clamp(1rem,4vw,2rem);
-  transition:opacity .35s ease;
-}
-.order-ov.open{opacity:1;pointer-events:all}
-.order-modal{
-  width:min(600px,96vw);
-  max-height:90svh;overflow-y:auto;
-  background:var(--paper);
-  border-radius:12px;
-  box-shadow:0 24px 80px rgba(44,36,22,.3),0 4px 16px rgba(44,36,22,.15);
-  border:1px solid var(--paper3);
-  transform:scale(.92) translateY(16px);opacity:0;
-  transition:transform .4s cubic-bezier(.34,1.2,.64,1),opacity .3s ease;
-}
-.order-ov.open .order-modal{transform:scale(1) translateY(0);opacity:1}
-.order-inner{padding:clamp(1.5rem,4vw,2.25rem)}
-.order-close{
-  position:absolute;top:1rem;right:1rem;
-  width:34px;height:34px;border-radius:50%;
-  background:var(--paper2);border:1px solid var(--paper3);
-  color:var(--ink);font-size:.9rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .2s;z-index:2;
-}
-.order-close:hover{background:var(--paper3)}
-.order-title{
-  font-family:var(--hand);font-size:1.8rem;font-weight:700;
-  color:var(--ink);margin-bottom:.3rem;
-}
-.order-sub{
-  font-family:var(--serif);font-size:.83rem;font-style:italic;
-  color:var(--ink3);margin-bottom:1.5rem;line-height:1.6;
-}
-
-/* Cart summary inside order modal */
-.order-cart{
-  background:var(--paper2);border:1px solid var(--paper3);
-  border-radius:var(--r);padding:1rem 1.15rem;
-  margin-bottom:1.5rem;
-}
-.order-cart-title{
-  font-family:var(--hand);font-size:.8rem;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);
-  margin-bottom:.65rem;
-}
-.order-cart-row{
-  display:flex;justify-content:space-between;align-items:baseline;
-  gap:.5rem;padding:.3rem 0;font-size:.83rem;
-  border-bottom:1px solid rgba(44,36,22,.05);
-}
-.order-cart-row:last-child{border-bottom:none}
-.order-cart-name{font-family:var(--hand);font-size:.95rem;color:var(--ink);flex:1}
-.order-cart-qty{font-size:.75rem;color:var(--ink3);flex-shrink:0}
-.order-cart-price{font-family:var(--hand);font-size:.95rem;color:var(--gold);flex-shrink:0}
-.order-cart-total{
-  display:flex;justify-content:space-between;align-items:baseline;
-  padding-top:.65rem;margin-top:.5rem;border-top:1px dashed var(--paper3);
-}
-.order-cart-total-label{font-family:var(--hand);font-size:.85rem;font-weight:600;color:var(--ink3)}
-.order-cart-total-amt{font-family:var(--hand);font-size:1.4rem;font-weight:700;color:var(--ink)}
-
-/* Form fields */
-.form-row{margin-bottom:1rem}
-.form-label{
-  display:block;font-family:var(--hand);font-size:.85rem;font-weight:600;
-  color:var(--ink3);margin-bottom:.35rem;
-}
-.form-input,.form-textarea{
-  width:100%;font-family:var(--sans);font-size:.88rem;font-weight:300;
-  color:var(--ink);background:var(--paper);
-  border:1.5px solid var(--paper3);border-radius:var(--r);
-  padding:10px 14px;outline:none;
-  transition:border-color .2s;
-}
-.form-input:focus,.form-textarea:focus{border-color:var(--ink3)}
-.form-textarea{min-height:80px;resize:vertical;line-height:1.6}
-.form-hint{font-size:.68rem;color:var(--ink3);margin-top:.3rem;font-style:italic}
-.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-@media(max-width:460px){.form-2col{grid-template-columns:1fr}}
-
-/* Submit buttons */
-.order-submit-wa{
-  width:100%;background:#25D366;color:#fff;
-  font-family:var(--hand);font-size:1.05rem;font-weight:700;
-  border:none;border-radius:40px;padding:15px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:background .2s,transform .15s;margin-bottom:.65rem;
-}
-.order-submit-wa:hover{background:#1fb959;transform:translateY(-1px)}
-.order-submit-wa:disabled{opacity:.4;cursor:default;transform:none}
-.wa-icon{width:20px;height:20px;flex-shrink:0}
-.order-submit-email{
-  width:100%;background:transparent;color:var(--ink);
-  font-family:var(--sans);font-size:.75rem;font-weight:500;letter-spacing:.08em;
-  text-transform:uppercase;border:1.5px solid var(--paper3);
-  border-radius:40px;padding:12px;cursor:pointer;
-  transition:border-color .2s,background .2s;
-}
-.order-submit-email:hover{border-color:var(--ink3);background:var(--paper2)}
-.order-submit-email:disabled{opacity:.4;cursor:default}
-.order-note{
-  font-size:.68rem;color:var(--ink3);text-align:center;
-  margin-top:.75rem;line-height:1.6;font-style:italic;
-}
-.order-success{
-  text-align:center;padding:2rem 1rem;
-}
-.order-success-icon{font-size:3rem;margin-bottom:1rem;display:block}
-.order-success-title{font-family:var(--hand);font-size:1.6rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
-.order-success-msg{font-family:var(--serif);font-size:.88rem;font-style:italic;color:var(--ink2);line-height:1.8}
-
-/* ── CONTACT SECTION ── */
-.contact-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:2rem;
-}
-@media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
-.contact-card{
-  background:var(--paper);border:1px solid var(--paper3);
-  border-radius:var(--rxl);padding:1.5rem 1.5rem;
-  box-shadow:0 2px 12px rgba(44,36,22,.07);
-  display:flex;flex-direction:column;gap:.4rem;
-  text-decoration:none;color:inherit;
-  transition:transform .25s,box-shadow .25s,border-color .25s;
-}
-.contact-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(44,36,22,.12);border-color:var(--ink3)}
-.contact-card-icon{font-size:1.6rem;margin-bottom:.25rem;display:block}
-.contact-card-label{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)}
-.contact-card-val{font-family:var(--hand);font-size:1.15rem;font-weight:600;color:var(--ink)}
-.contact-card-hint{font-size:.72rem;color:var(--ink3);font-style:italic}
-
-/* ── SOCIAL LINKS ── */
-.social-links{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.social-link{
-  display:flex;align-items:center;gap:6px;
-  font-size:.65rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink3);text-decoration:none;
-  padding:6px 14px;border:1px solid var(--paper3);border-radius:20px;
-  transition:color .2s,border-color .2s;
-}
-.social-link:hover{color:var(--ink);border-color:var(--ink3)}
-
 `;
 
-/* ── STICKY NOTE CONFIG ──────────────────────────────────────── */
-const NOTES = [
-  { bg:"#FFF3A3", border:"#E8DC6A", pin:"#E8A820", rot:"-1.5deg", delay:"0s"   },
-  { bg:"#B8D8F8", border:"#7AAED4", pin:"#4A90C4", rot:"1.2deg",  delay:".07s" },
-  { bg:"#FFB8C8", border:"#E8809A", pin:"#C06080", rot:"-0.8deg", delay:".14s" },
-  { bg:"#B8EBC8", border:"#7AC490", pin:"#4A8C50", rot:"0.6deg",  delay:".21s" },
+const products = [
+  { tag: "Signature", name: "Brown Butter Tart", image: "mini-cakes.webp", flavors: ["Classic Vanilla Custard", "Spiced Chai", "Dark Chocolate", "Salted Caramel", "Lemon Curd"], desc: "Short-crust shell, brown butter custard, finished with flaked salt. A refined take on a classic — five rotating flavours, all baked to order the morning of collection.", price: "From R85" },
+  { tag: "Baked Weekly", name: "Olive Oil Cake", image: "cinnamon-rolls.webp", flavors: ["Blood Orange", "Lemon & Rosemary", "Almond & Cardamom"], desc: "Pressed olive oil keeps the crumb tender over several days. Citrus-forward, light in texture, available whole or by the slice. A reliable weekly staple.", price: "From R220" },
+  { tag: "On the Menu", name: "Sourdough Loaf", image: "milk-cake.webp", flavors: ["Plain", "Seeded", "Rosemary & Sea Salt", "Jalapeño & Cheddar"], desc: "Long-fermented over 24 hours for an open, airy crumb and a crust that actually has character. Four variations — each baked to order.", price: "From R95" },
+  { tag: "Sweet", name: "Celebration Cake", image: "cookies.webp", flavors: ["Red Velvet", "Vanilla Bean", "Chocolate Fudge", "Carrot & Walnut"], desc: "A curated selection of layer cakes built for occasions. Clean finish, no excess decoration unless requested. Sized to your event.", price: "From R380" },
 ];
 
-/* ── MENU DATA ─────────────────────────────────────────────── */
-/*
-  Structure: each entry is a CATEGORY (one sticky note).
-  items[]  — all orderable options inside the category
-    tier   — optional grouping label shown inside the modal
-    name   — item name
-    price  — exact price in Rands
-*/
-const MENU = [
-  {
-    id:1, emoji:"🍰", img:"/images/mini-cakes.webp",
-    name:"Mini Loaf Cakes",
-    desc:"Individually sized loaf cakes, baked fresh to order. Seven flavours across three tiers.",
-    priceRange:"R42 – R48",
-    badge:"Eggless",
-    tiers:[
-      {
-        label:"Classic — R42 each",
-        items:[
-          { id:"vanilla",   name:"Vanilla",   price:42, swatch:"#F5E6C8", note:"Soft, buttery, pure — the one that never disappoints" },
-          { id:"burfi",     name:"Burfi",      price:42, swatch:"#E8D4A0", note:"Cardamom and rose, inspired by the classic Indian sweet" },
-        ]
-      },
-      {
-        label:"Premium — R45 each",
-        items:[
-          { id:"chocolate", name:"Chocolate",  price:45, swatch:"#5C3317", note:"Deep, fudgy, rich — proper chocolate, not cocoa powder" },
-          { id:"mocha",     name:"Mocha",       price:45, swatch:"#7B4F2E", note:"Espresso and dark chocolate, for coffee lovers" },
-          { id:"carrot",    name:"Carrot",      price:45, swatch:"#D4701A", note:"Warmly spiced, moist, topped with cream cheese glaze" },
-        ]
-      },
-      {
-        label:"Specialty — R48 each",
-        items:[
-          { id:"redvelvet", name:"Red Velvet",  price:48, swatch:"#C0392B", note:"Velvety crumb, subtle cocoa, cream cheese finish" },
-          { id:"hotchoc",   name:"Hot Chocolate",price:48, swatch:"#3D1A0A", note:"Intense dark chocolate with a warming spiced finish" },
-        ]
-      },
-    ],
-  },
-  {
-    id:2, emoji:"🌀", img:"/images/cinnamon-rolls.webp",
-    name:"Cinnamon Rolls",
-    desc:"Soft, pillowy rolls with generous glazes and toppings. Available in duo, sharing tray, and family sizes.",
-    priceRange:"R60 – R150",
-    badge:"Eggless",
-    tiers:[
-      {
-        label:"Duo",
-        items:[
-          { id:"duo-choc-caramel", name:"2 Large Rolls", price:60, swatch:"#C47A1E", note:"Chocolate & caramel drizzle — sticky, indulgent, generous" },
-        ]
-      },
-      {
-        label:"Sharing tray",
-        items:[
-          { id:"tray-8-cream", name:"8 Small Rolls", price:105, swatch:"#F0E6D0", note:"Cream cheese frosting & pecans — tangy, nutty, perfect with tea" },
-        ]
-      },
-      {
-        label:"Family tray",
-        items:[
-          { id:"tray-12-glaze",  name:"12 Medium Rolls — Classic Glaze",           price:140, swatch:"#EDD9A3", note:"Simple, sweet glaze — the crowd-pleaser for any table" },
-          { id:"tray-12-almond", name:"12 Medium Rolls — Classic Glaze & Almonds", price:150, swatch:"#D4B483", note:"Toasted sliced almonds add crunch to the classic" },
-        ]
-      },
-    ],
-    comingSoon:"More flavours and fillings coming soon.",
-  },
-  {
-    id:3, emoji:"🍮", img:"/images/milk-cake.webp",
-    name:"Milk Cake",
-    desc:"A rich, creamy South African classic. Choose your flavour and your serving size.",
-    priceRange:"R120 – R150",
-    badge:"Eggless",
-    tiers:[
-      {
-        label:"Pistachio & Cream",
-        items:[
-          { id:"pist-sm", name:"Serves 4–6", price:120, swatch:"#A8C878", note:"Delicate, nutty, beautiful pale green — elegant and light" },
-          { id:"pist-lg", name:"Serves 8",   price:140, swatch:"#A8C878", note:"Same gorgeous flavour, bigger celebration" },
-        ]
-      },
-      {
-        label:"Strawberries & Cream",
-        items:[
-          { id:"straw-sm", name:"Serves 4–6", price:130, swatch:"#E8748A", note:"Fresh strawberries, lush cream — bright and summery" },
-          { id:"straw-lg", name:"Serves 8",   price:150, swatch:"#E8748A", note:"The showstopper version — perfect for a birthday" },
-        ]
-      },
-    ],
-  },
-  {
-    id:4, emoji:"🍪", img:"/images/cookies.webp",
-    name:"Assorted Cookie Box",
-    desc:"Six bold flavours, baked fresh and boxed. Order a full box or half — mix and match as you like.",
-    priceRange:"R120 – R240",
-    badge:"Eggless",
-    tiers:[
-      {
-        label:"Full box — R240",
-        items:[
-          { id:"box-12", name:"Box of 12 Cookies", price:240, swatch:"#C8841A", note:"All six flavours, two of each — the full experience" },
-        ]
-      },
-      {
-        label:"Half box — R120",
-        items:[
-          { id:"box-6", name:"Half Box (6 Cookies)", price:120, swatch:"#D4A853", note:"Pick any six from the flavour list below" },
-        ]
-      },
-      {
-        label:"Available flavours",
-        items:[
-          { id:"ck-choc-chunk",   name:"Chocolate Chunk",        price:0, swatch:"#5C3317", note:"Pools of melted chocolate in every bite" },
-          { id:"ck-cookies-cream",name:"Cookies & Cream",        price:0, swatch:"#2C2416", note:"Oreo pieces folded into a vanilla base" },
-          { id:"ck-double-choc",  name:"Double Chocolate",       price:0, swatch:"#3D1A0A", note:"Fudgy, intense — for serious chocolate fans" },
-          { id:"ck-coffee-almond",name:"Coffee Almond",          price:0, swatch:"#7B4F2E", note:"Espresso-forward with a satisfying crunch" },
-          { id:"ck-red-velvet",   name:"Red Velvet",             price:0, swatch:"#C0392B", note:"Soft, velvety, with a cream cheese drizzle" },
-          { id:"ck-salted-caramel",name:"Salted Caramel",        price:0, swatch:"#C47A1E", note:"Sweet and salty — the one everyone fights over" },
-        ]
-      },
-    ],
-    comingSoon:"Choose your box size above, then list your preferred flavours in the order notes.",
-  },
-];
+const weeklyBake = {
+  name: "Brown Butter\nSalted Caramel Tart",
+  desc: "This week's featured bake — our signature short-crust shell filled with salted caramel brown butter custard. A limited run, available until Sunday.",
+  meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Baked Thursday" }, { icon: Wheat, label: "Eggless" }],
+  productIdx: 0,
+};
 
-const POSTS = [
-  {cat:"Behind the bake",title:"Why we cold-proof our croissant dough for 72 hours",  excerpt:"The science of slow fermentation — why patience makes better layers.",date:"12 Mar 2026",read:"8 min",feat:true},
-  {cat:"Recipe",          title:"Making our focaccia vegan without compromise",          excerpt:"How one swap changes nothing about flavour or texture.",            date:"5 Mar 2026", read:"5 min",feat:false},
-  {cat:"Ingredients",     title:"On flour: why stone-ground matters",                   excerpt:"Texture, flavour, and the miller we source from.",                  date:"28 Feb 2026",read:"4 min",feat:false},
-];
-
-/* ── CATEGORY STICKY NOTE ─────────────────────────────────── */
-function StickyNote({ item, note, onOpen }) {
-  const ref    = useRef(null);
-  const rafRef = useRef(null);
-
+function useReveal() {
+  const ref = useRef(null);
   useEffect(() => {
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    const el = ref.current; if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { el.classList.add("visible"); obs.unobserve(el); } }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
+  return ref;
+}
 
-  const handleMouseMove = (e) => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      const el = ref.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const dx = (e.clientX - (rect.left + rect.width  / 2)) / (rect.width  / 2);
-      const dy = (e.clientY - (rect.top  + rect.height / 2)) / (rect.height / 2);
-      el.style.transform = `rotate(0deg) translate(${dx*4}px,${-8 + dy*1.5}px) rotateX(${-dy*8}deg) rotateY(${dx*8}deg) scale(1.02)`;
-      el.style.transition = 'box-shadow .35s ease';
-    });
-  };
-  const handleMouseLeave = () => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    const el = ref.current;
-    if (!el) return;
-    el.style.transform = `rotate(var(--rot,0deg))`;
-    el.style.transition = 'transform .5s cubic-bezier(.34,1.2,.64,1), box-shadow .35s ease';
-  };
-  const handleMouseDown = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.transform = `rotate(0deg) translateY(-3px) scale(0.99)`;
-    el.style.transition = 'transform .08s ease, box-shadow .08s ease';
-  };
-  const handleMouseUp = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.transform = `rotate(0deg) translateY(-8px) scale(1.02)`;
-    el.style.transition = 'transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s ease';
-  };
+function R({ children, d = 0, className = "", style = {} }) {
+  const ref = useReveal();
+  return <div ref={ref} className={`reveal${d ? ` reveal-d${d}` : ""} ${className}`} style={style}>{children}</div>;
+}
 
-  // Count total items across all tiers
-  const totalItems = item.tiers.reduce((sum, t) => sum + t.items.length, 0);
-
+function SkeletonCard() {
   return (
-    <div
-      ref={ref}
-      className="sn reveal-child"
-      style={{
-        "--rot":        note.rot,
-        "--delay":      note.delay,
-        "--border-col": note.border,
-        "--pin-col":    note.pin,
-        background:     note.bg,
-        transformStyle: "preserve-3d",
-        perspective:    "800px",
-      }}
-      onClick={() => onOpen(item, note.bg)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-    >
-      <div className="sn-glow"/>
-      <div className="sn-tape"/>
-      <div className="sn-pin"/>
-
-      <div className="sn-img">
-        {item.img
-          ? <img src={item.img} alt={item.name} loading="lazy"/>
-          : <div className="sn-img-ph">
-              <span className="sn-emoji">{item.emoji}</span>
-              <span className="sn-img-hint">Add photo</span>
-            </div>
-        }
-      </div>
-
-      <div className="sn-header">
-        <div className="sn-tag">🌱 {item.badge}</div>
-        <div className="sn-name">{item.name}</div>
-      </div>
-
-      <div className="sn-desc">{item.desc}</div>
-
-      {/* Tier count teaser */}
-      <div className="sn-variants">
-        <span className="sv on" style={{pointerEvents:"none"}}>
-          {totalItems} options
-        </span>
-        <span className="sv" style={{pointerEvents:"none"}}>
-          {item.priceRange}
-        </span>
-      </div>
-
-      <div className="sn-foot">
-        <div className="sn-price">from {item.priceRange.split(' ')[0]}</div>
-        <button
-          className="sn-add"
-          onClick={e => { e.stopPropagation(); onOpen(item, note.bg); }}
-          aria-label={`View ${item.name}`}
-        >
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1 7h12M8 2l5 5-5 5"/>
-          </svg>
-          View & order
-        </button>
+    <div className="blog-card">
+      <div className="coming-soon-badge">Coming Soon</div>
+      <div className="blog-skeleton-img" />
+      <div className="blog-skeleton-body">
+        <div className="blog-skel" style={{ height: 9, width: "38%", marginBottom: "0.75rem" }} />
+        <div className="blog-skel" style={{ height: 14, width: "82%" }} />
+        <div className="blog-skel" style={{ height: 14, width: "58%", marginBottom: "0.75rem" }} />
+        <div className="blog-skel" style={{ height: 9, width: "100%" }} />
+        <div className="blog-skel" style={{ height: 9, width: "80%" }} />
       </div>
     </div>
   );
 }
 
-/* ── CATEGORY MODAL ─────────────────────────────────────────── */
-function CategoryModal({ item, noteColor, onClose, onAdd }) {
-  const [quantities, setQuantities] = useState({});
-  const [done, setDone] = useState(false);
+export default function KindCrumb() {
+  const [cart, setCart] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [overlay, setOverlay] = useState(null);
+  const [overlayClosing, setOverlayClosing] = useState(false); // { product, flavor, qty, added }
+  const [selections, setSelections] = useState(Object.fromEntries(products.map((_, i) => [i, { qty: 1, added: false }])));
+  const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
+  const [activeTab, setActiveTab] = useState("home");
+  const [navCls, setNavCls] = useState("on-dark");
+  const [navScrolled, setNavScrolled] = useState(false);
 
   useEffect(() => {
-    if (item) { setQuantities({}); setDone(false); }
-  }, [item]);
-
-  if (!item) return null;
-
-  const setQty = (id, delta) => {
-    setQuantities(prev => {
-      const next = Math.max(0, (prev[id] || 0) + delta);
-      return { ...prev, [id]: next };
-    });
-  };
-
-  const allItems = item.tiers.flatMap(t => t.items);
-  const total = allItems.reduce((sum, it) => sum + (quantities[it.id] || 0) * it.price, 0);
-  const totalQty = allItems.reduce((sum, it) => sum + (quantities[it.id] || 0), 0);
-
-  const handleOrder = () => {
-    if (totalQty === 0) return;
-    onAdd(quantities, item.name);
-    setDone(true);
-    setTimeout(() => { onClose(); setDone(false); }, 900);
-  };
-
-  return (
-    <div className="pd-in">
-      {noteColor && (
-        <div style={{
-          position:"absolute",top:0,left:0,right:0,height:"6px",
-          background:noteColor,borderRadius:"8px 8px 0 0",opacity:.7,
-        }}/>
-      )}
-      <button className="pd-close" onClick={onClose} aria-label="Close">✕</button>
-
-      <div className="pd-img" style={{marginTop:"1rem"}}>
-        {item.img
-          ? <img src={item.img} alt={item.name} loading="lazy"/>
-          : <div className="pd-img-ph">
-              <span className="pd-emoji">{item.emoji}</span>
-              <span className="pd-img-note">Add your photo to /public/images/</span>
-            </div>
-        }
-      </div>
-
-      <div className="pd-tag-row">
-        <span className="pd-tag">🌱 {item.badge}</span>
-      </div>
-      <div className="pd-name">{item.name}</div>
-      <div className="pd-desc">{item.desc}</div>
-
-      {/* Tier groups */}
-      {item.tiers.map(tier => (
-        <div key={tier.label} className="cat-tier">
-          <div className="cat-tier-label">{tier.label}</div>
-          {tier.items.map(it => (
-            <div key={it.id} className="cat-row">
-              <div className="cat-row-left">
-                {it.swatch && (
-                  <div className="cat-swatch" style={{background:it.swatch}} aria-hidden="true"/>
-                )}
-                <div className="cat-row-info">
-                  <div className="cat-row-name">{it.name}</div>
-                  {it.note && <div className="cat-row-note">{it.note}</div>}
-                </div>
-              </div>
-              {it.price > 0 && (
-                <div className="cat-row-right">
-                  <div className="cat-row-price">R{it.price}</div>
-                  <div className="cat-qty">
-                    <button className="cat-qbtn" onClick={() => setQty(it.id, -1)} aria-label={`Remove ${it.name}`}>−</button>
-                    <span className="cat-qnum">{quantities[it.id] || 0}</span>
-                    <button className="cat-qbtn" onClick={() => setQty(it.id,  1)} aria-label={`Add ${it.name}`}>+</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ))}
-
-      {/* Coming soon note */}
-      {item.comingSoon && (
-        <div className="cat-coming">{item.comingSoon}</div>
-      )}
-
-      {/* Order footer */}
-      <div className="pd-foot" style={{marginTop:"1.25rem"}}>
-        <div>
-          <div style={{fontSize:".65rem",fontWeight:500,letterSpacing:".1em",textTransform:"uppercase",color:"var(--ink3)",marginBottom:"2px"}}>
-            {totalQty > 0 ? `${totalQty} item${totalQty > 1 ? "s" : ""}` : "Nothing selected yet"}
-          </div>
-          <div className="pd-price">{total > 0 ? `R${total}` : "—"}</div>
-        </div>
-        <button
-          className={`pd-add${done ? " done" : ""}${totalQty === 0 ? " disabled" : ""}`}
-          onClick={handleOrder}
-          disabled={totalQty === 0}
-        >
-          {done ? "✓ Added!" : "Add to order"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ── ORDER FORM MODAL ───────────────────────────────────────── */
-/*
-  CONFIGURATION — update these before going live:
-  WHATSAPP_NUMBER: client's WhatsApp number in international format, no + or spaces
-  CONTACT_EMAIL:   client's email for the mailto fallback
-*/
-const WHATSAPP_NUMBER = "27600000000"; // ← replace with real number
-const CONTACT_EMAIL   = "orders@thetreattable.co.za"; // ← replace with real email
-
-function OrderModal({ cart, onClose, onClearCart }) {
-  const [name,    setName]    = useState("");
-  const [phone,   setPhone]   = useState("");
-  const [date,    setDate]    = useState("");
-  const [notes,   setNotes]   = useState("");
-  const [sent,    setSent]    = useState(false);
-  const firstRef = useRef(null);
-
-  // Focus trap
-  useEffect(() => {
-    if (firstRef.current) firstRef.current.focus();
-    const prev = document.activeElement;
-    return () => { if (prev?.focus) prev.focus(); };
-  }, []);
-
-  const cartLines = Object.entries(cart).map(([key, {name: n, price: p, qty: q}]) => ({key, n, p, q}));
-  const total = cartLines.reduce((s, {p, q}) => s + p * q, 0);
-  const isValid = name.trim().length > 1 && phone.trim().length > 6 && date.trim().length > 0;
-
-  const buildMessage = () => {
-    const lines = cartLines.map(({n, p, q}) => `  • ${q}x ${n} — R${p * q}`).join("\n");
-    return `Hi! I'd like to place an order from The Treat Table 🎂\n\n*Order:*\n${lines}\n\n*Total: R${total}*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Pickup date:* ${date}${notes ? `\n*Notes:* ${notes}` : ""}`;
-  };
-
-  const handleWhatsApp = () => {
-    if (!isValid) return;
-    const msg = encodeURIComponent(buildMessage());
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
-    setSent(true);
-    setTimeout(() => { onClearCart(); onClose(); setSent(false); }, 3000);
-  };
-
-  const handleEmail = () => {
-    if (!isValid) return;
-    const subject = encodeURIComponent("Order from The Treat Table");
-    const body = encodeURIComponent(buildMessage().replace(/\*/g, ""));
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-    setSent(true);
-    setTimeout(() => { onClearCart(); onClose(); setSent(false); }, 3000);
-  };
-
-  // Minimum pickup date = tomorrow
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split("T")[0];
-
-  return (
-    <div className="order-inner">
-      <button className="order-close" onClick={onClose} aria-label="Close">✕</button>
-
-      {sent ? (
-        <div className="order-success">
-          <span className="order-success-icon">🎉</span>
-          <div className="order-success-title">Order sent!</div>
-          <div className="order-success-msg">
-            We'll be in touch to confirm your order and pickup time. Thank you!
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="order-title">Place your order</div>
-          <div className="order-sub">Give us 24 hours and we'll bake it fresh for you.</div>
-
-          {/* Cart summary */}
-          <div className="order-cart">
-            <div className="order-cart-title">Your order</div>
-            {cartLines.map(({key, n, p, q}) => (
-              <div key={key} className="order-cart-row">
-                <div className="order-cart-name">{n}</div>
-                <div className="order-cart-qty">×{q}</div>
-                <div className="order-cart-price">R{p * q}</div>
-              </div>
-            ))}
-            <div className="order-cart-total">
-              <div className="order-cart-total-label">Total</div>
-              <div className="order-cart-total-amt">R{total}</div>
-            </div>
-          </div>
-
-          {/* Contact details */}
-          <div className="form-2col">
-            <div className="form-row">
-              <label className="form-label" htmlFor="ord-name">Your name</label>
-              <input
-                ref={firstRef}
-                id="ord-name" className="form-input" type="text"
-                placeholder="e.g. Fatima" value={name}
-                onChange={e => setName(e.target.value)} required
-              />
-            </div>
-            <div className="form-row">
-              <label className="form-label" htmlFor="ord-phone">WhatsApp number</label>
-              <input
-                id="ord-phone" className="form-input" type="tel"
-                placeholder="e.g. 083 123 4567" value={phone}
-                onChange={e => setPhone(e.target.value)} required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <label className="form-label" htmlFor="ord-date">Pickup date</label>
-            <input
-              id="ord-date" className="form-input" type="date"
-              min={minDate} value={date}
-              onChange={e => setDate(e.target.value)} required
-            />
-            <div className="form-hint">Minimum 24 hours from today</div>
-          </div>
-
-          <div className="form-row">
-            <label className="form-label" htmlFor="ord-notes">Special requests <span style={{fontWeight:300}}>(optional)</span></label>
-            <textarea
-              id="ord-notes" className="form-textarea"
-              placeholder="e.g. no nuts, extra cream cheese, allergies..."
-              value={notes} onChange={e => setNotes(e.target.value)}
-            />
-          </div>
-
-          {/* Submit */}
-          <button className="order-submit-wa" onClick={handleWhatsApp} disabled={!isValid}>
-            <svg className="wa-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            Send order via WhatsApp
-          </button>
-          <button className="order-submit-email" onClick={handleEmail} disabled={!isValid}>
-            Or send via email
-          </button>
-          <div className="order-note">
-            We'll confirm your order and give you a pickup time via WhatsApp within a few hours.
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-/* ── PAGE ───────────────────────────────────────────────────── */
-export default function BakeryHomepage() {
-  const [scrolled,   setScrolled]   = useState(false);
-  const [drawer,     setDrawer]     = useState(false);
-  const [email,      setEmail]      = useState("");
-  const [subbed,     setSubbed]     = useState(false);
-  const [activeItem, setActiveItem] = useState(null);
-  const [activeNote, setActiveNote] = useState(null);
-  const [pdOpen,     setPdOpen]     = useState(false);
-  // cart: { [uniqueKey]: { name, price, qty, category } }
-  const [cart,       setCart]       = useState({});
-  const [orderOpen,  setOrderOpen]  = useState(false);
-
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setNavScrolled(y > 60);
+      const mid = y + 80;
+      const how = document.querySelector(".how-section");
+      const isDark = (mid < 200) || (how && mid >= how.offsetTop && mid < how.offsetTop + how.offsetHeight);
+      setNavCls(isDark ? "on-dark" : "on-light");
+      const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }, { id: "blog", el: document.getElementById("blog") }];
+      let cur = "home";
+      secs.forEach(({ id, el }) => { if (el && el.offsetTop <= y + window.innerHeight / 2) cur = id; });
+      setActiveTab(cur);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = (drawer || pdOpen || orderOpen) ? "hidden" : "";
+    document.body.style.overflow = (drawerOpen || overlay) ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [drawer, pdOpen, orderOpen]);
+  }, [drawerOpen, overlay]);
+
+  const thumbRef = useRef(null);
+  const scrollTimer = useRef(null);
 
   useEffect(() => {
-    const fn = e => { if (e.key === "Escape") { setPdOpen(false); setDrawer(false); setOrderOpen(false); } };
-    window.addEventListener("keydown", fn);
-    return () => window.removeEventListener("keydown", fn);
+    const thumb = thumbRef.current;
+    if (!thumb) return;
+    const update = () => {
+      const doc = document.documentElement;
+      const scrollRatio = window.scrollY / (doc.scrollHeight - doc.clientHeight);
+      const thumbHeight = Math.max(40, (doc.clientHeight / doc.scrollHeight) * doc.clientHeight);
+      const maxTop = doc.clientHeight - thumbHeight;
+      thumb.style.height = `${thumbHeight}px`;
+      thumb.style.top = `${scrollRatio * maxTop}px`;
+      thumb.style.opacity = "0.7";
+      clearTimeout(scrollTimer.current);
+      scrollTimer.current = setTimeout(() => { thumb.style.opacity = "0"; }, 1200);
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    return () => { window.removeEventListener("scroll", update); clearTimeout(scrollTimer.current); };
   }, []);
 
-  const openProduct = (item, noteBg) => {
-    setActiveItem(item); setActiveNote(noteBg ?? null); setPdOpen(true);
-  };
-  const closeProduct = () => {
-    setPdOpen(false);
-    setTimeout(() => setActiveItem(null), 420);
-  };
+  const openOverlay = (product) => { setOverlayClosing(false); setOverlay({ product, flavor: product.flavors[0], qty: 1, added: false }); };
+  const closeOverlay = () => { setOverlayClosing(true); setTimeout(() => { setOverlay(null); setOverlayClosing(false); }, 260); };
 
-  // Scroll reveal observer
-  useEffect(() => {
-    const els = document.querySelectorAll('.reveal, .reveal-stagger');
-    if (!els.length) return;
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-    }, { threshold: 0.12 });
-    els.forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-
-  const addToCart = useCallback((quantities, categoryName) => {
+  const addToCart = (name, flavor, qty, price) => {
     setCart(prev => {
-      const next = { ...prev };
-      Object.entries(quantities).forEach(([id, qty]) => {
-        if (qty <= 0) return;
-        // find item details from MENU
-        let itemName = id, itemPrice = 0;
-        MENU.forEach(cat => cat.tiers.forEach(tier => {
-          const found = tier.items.find(it => it.id === id);
-          if (found) { itemName = found.name; itemPrice = found.price; }
-        }));
-        const key = id;
-        if (next[key]) {
-          next[key] = { ...next[key], qty: next[key].qty + qty };
-        } else {
-          next[key] = { name: itemName, price: itemPrice, qty, category: categoryName };
-        }
-      });
-      return next;
+      const idx = prev.findIndex(c => c.name === name && c.flavor === flavor);
+      if (idx >= 0) { const u = [...prev]; u[idx].qty += qty; return u; }
+      return [...prev, { name, flavor, qty, price }];
     });
-  }, []);
+    setDrawerOpen(true);
+  };
 
-  const clearCart = useCallback(() => setCart({}), []);
+  const addFromCard = (p, i) => {
+    addToCart(p.name, p.flavors[0], selections[i].qty, p.price);
+    setSelections(s => ({ ...s, [i]: { ...s[i], added: true } }));
+    setTimeout(() => setSelections(s => ({ ...s, [i]: { ...s[i], added: false } })), 1500);
+  };
 
-  const cartTotal = Object.values(cart).reduce((s, {price, qty}) => s + price * qty, 0);
-  const cartQty   = Object.values(cart).reduce((s, {qty}) => s + qty, 0);
+  const addFromOverlay = () => {
+    if (!overlay) return;
+    addToCart(overlay.product.name, overlay.flavor, overlay.qty, overlay.product.price);
+    setOverlay(o => ({ ...o, added: true }));
+    setTimeout(() => closeOverlay(), 1100);
+  };
+
+  const updateCartQty = (i, d) => {
+    const u = [...cart]; u[i].qty = Math.max(0, u[i].qty + d);
+    setCart(u.filter(c => c.qty > 0));
+  };
+
+  const totalItems = cart.reduce((s, c) => s + c.qty, 0);
+
+  const handleSubmit = () => {
+    const items = cart.length ? cart.map(c => `- ${c.name} (${c.flavor}) x${c.qty}`).join("%0A") : "No items";
+    const msg = `Hello Kind Crumb!%0A%0AOrder:%0A${items}%0A%0AName: ${formData.name}%0APhone: ${formData.phone}%0ADate needed: ${formData.date}%0ANotes: ${formData.notes}`;
+    window.open(`https://wa.me/27000000000?text=${msg}`, "_blank");
+  };
+
+  const tickerItems = ["Baked to order", "Pickup available", "Ladysmith", "Always eggless", "Small batch", "No artificial additives"];
 
   return (
     <>
-      <style>{S}</style>
+      <style>{fonts}{css}</style>
+
+      <div ref={thumbRef} className="scroll-thumb" />
+      {/* CART DRAWER OVERLAY */}
+      <div className={`drawer-overlay${drawerOpen ? " open" : ""}`} onClick={() => setDrawerOpen(false)} />
+
+      {/* PRODUCT OVERLAY */}
+      <div className={`product-overlay${overlay ? " open" : ""}${overlayClosing ? " closing" : ""}`} onClick={e => { if (e.target === e.currentTarget) closeOverlay(); }}>
+        {overlay && (
+          <div className="po-card">
+            <div className="po-img"><img src={`/images/${overlay.product.image}`} alt={overlay.product.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="po-body">
+              <button className="po-close" onClick={closeOverlay}><X size={16} strokeWidth={1.5} /></button>
+              <p className="po-tag">{overlay.product.tag}</p>
+              <h2 className="po-name">{overlay.product.name}</h2>
+              <p className="po-desc">{overlay.product.desc}</p>
+              <p className="po-flavor-label">Choose your flavour</p>
+              <div className="po-flavors">
+                {overlay.product.flavors.map((f, i) => (
+                  <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
+                ))}
+              </div>
+              <div className="po-order-row">
+                <span className="po-price">{overlay.product.price}</span>
+                <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: Math.max(1, o.qty - 1) }))}><Minus size={12} strokeWidth={2} /></button>
+                <span className="po-qty-val">{overlay.qty}</span>
+                <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: o.qty + 1 }))}><Plus size={12} strokeWidth={2} /></button>
+                <button className={`po-add-btn${overlay.added ? " added" : ""}`} onClick={addFromOverlay}>
+                  {overlay.added ? "Added" : <><Plus size={12} strokeWidth={2} />Add to order</>}
+                </button>
+              </div>
+              <div className="po-eggless">
+                <Leaf size={11} color={t.warm} strokeWidth={1.5} />
+                <span className="po-eggless-text">Always eggless</span>
+                <span className="po-vegan">· Vegan on request</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* CART DRAWER */}
+      <div className={`drawer${drawerOpen ? " open" : ""}`}>
+        <div className="drawer-head">
+          <h2 className="drawer-title">Your <em>order</em></h2>
+          <button className="drawer-close" onClick={() => setDrawerOpen(false)}><X size={20} strokeWidth={1.5} /></button>
+        </div>
+        <div className="drawer-body">
+          {cart.length === 0 ? (
+            <div className="drawer-empty">
+              <ShoppingCart size={36} strokeWidth={1} className="drawer-empty-icon" />
+              <p className="drawer-empty-text">Nothing here yet.<br />Pick something from the menu.</p>
+              <button className="drawer-empty-cta" onClick={() => { setDrawerOpen(false); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}>View Menu</button>
+            </div>
+          ) : (
+            <>
+              {cart.map((c, i) => (
+                <div key={i} className="drawer-line">
+                  <div className="drawer-line-info">
+                    <p className="drawer-line-name">{c.name}</p>
+                    <p className="drawer-line-flavor">{c.flavor}</p>
+                    <p className="drawer-line-price">{c.price}</p>
+                  </div>
+                  <div className="drawer-line-actions">
+                    <button className="dqty-btn" onClick={() => updateCartQty(i, -1)}><Minus size={11} strokeWidth={2} /></button>
+                    <span className="dqty-val">{c.qty}</span>
+                    <button className="dqty-btn" onClick={() => updateCartQty(i, 1)}><Plus size={11} strokeWidth={2} /></button>
+                  </div>
+                </div>
+              ))}
+              <div className="drawer-form-wrap">
+                <h3 className="drawer-form-title">Your <em>details</em></h3>
+                <div className="d-form">
+                  <div className="d-form-group"><label className="d-label">Name</label><input className="d-input" type="text" placeholder="Full name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} /></div>
+                  <div className="d-form-group"><label className="d-label">Phone / WhatsApp</label><input className="d-input" type="tel" placeholder="+27 000 000 0000" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
+                  <div className="d-form-group"><label className="d-label">Date needed</label><input className="d-input" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} /></div>
+                  <div className="d-form-group"><label className="d-label">Notes</label><textarea className="d-textarea" placeholder="Vegan requirements, allergies, quantities…" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        {cart.length > 0 && (
+          <div className="drawer-foot">
+            <p className="drawer-note">Pricing confirmed on collection. We'll reach out within 24 hours.</p>
+            <button className="drawer-wa-btn" onClick={handleSubmit}><MessageCircle size={15} strokeWidth={1.5} />Send Order via WhatsApp</button>
+            <a href="https://wa.me/27000000000" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
+          </div>
+        )}
+      </div>
 
       {/* NAV */}
-      <nav className={`nav${scrolled ? " on" : ""}`}>
-        <a href="/" className="logo">
-          <div className="logo-mark">TT</div>
-          The Treat Table
+      <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
+        <a href="#" className="nav-brand">
+          <span className="nav-brand-name">Kind Crumb</span>
+          <span className="nav-brand-sub">The Treat Table</span>
         </a>
-        <ul className="nav-mid">
-          <li><a href="#menu">Menu</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#journal">Journal</a></li>
-          <li><a href="#contact">Contact</a></li>
+        <ul className="nav-links">
+          <li><a href="#products">Menu</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#blog">Journal</a></li>
         </ul>
-        <div className="nav-r">
-          <button className="nav-pill" onClick={() => cartQty > 0 ? setOrderOpen(true) : document.querySelector('#menu').scrollIntoView({behavior:'smooth'})}><div className="ndot"/><span>{cartQty > 0 ? `Order (${cartQty})` : "Order now"}</span></button>
-          <button className="burger" aria-label="Open menu" onClick={() => setDrawer(true)}>
-            <span/><span/><span/>
+        <div className="nav-right">
+          <a href="https://wa.me/27000000000" className="nav-wa" target="_blank" rel="noreferrer">
+            <MessageCircle size={13} strokeWidth={1.5} /> Order via WhatsApp
+          </a>
+          <button className="nav-cart-btn" onClick={() => setDrawerOpen(true)}>
+            <ShoppingCart size={19} strokeWidth={1.5} />
+            {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
           </button>
         </div>
       </nav>
 
-      {/* MOBILE DRAWER */}
-      <div className={`ov${drawer ? " open" : ""}`} onClick={() => setDrawer(false)}/>
-      <div className={`mdrawer${drawer ? " open" : ""}`}>
-        {["Menu","About","Journal"].map(l => (
-          <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setDrawer(false)}>{l}</a>
-        ))}
-        <a href="#menu" className="mdrawer-cta" onClick={() => setDrawer(false)}>Place a pre-order →</a>
-      </div>
-
       {/* HERO */}
       <section className="hero">
-        <div className="hero-deco hero-deco-1"/>
-        <div className="hero-deco hero-deco-2"/>
-
-        <div className="hero-badge">
-          <div className="live"><div className="ldot"/>Taking orders</div>
-          <span style={{color:"var(--paper3)"}}>·</span>
-          24hr notice · Ladysmith pickup
+        <div className="hero-bg">
+          <div className="hero-circle"><span className="hero-circle-text">The Treat Table</span></div>
+          <div className="hero-badge">
+            <p className="hero-badge-label">This week</p>
+            <p className="hero-badge-value">Brown Butter Tart</p>
+          </div>
         </div>
-
-        <h1 className="hero-h1">Made fresh.<br/>Made for <em>you.</em></h1>
-
-        <p className="hero-sub">
-          Every loaf, tart and pastry baked to your order.
-          Always eggless — vegan on request.
-          Pick up from our kitchen. 24 hours notice.
-        </p>
-
-        <div className="hero-btns">
-          <a href="#menu" className="btn-ink">See the full menu</a>
-          <a href="#about" className="btn-outline">Our story</a>
-        </div>
-
-        <div className="hero-stats">
-          {[
-            {icon:"⏱",label:"24h pre-order"},
-            {icon:"🌱",label:"Always eggless"},
-            {icon:"🌿",label:"Vegan on request"},
-            {icon:"🏠",label:"Home kitchen"},
-          ].map(s => (
-            <div key={s.label} className="hero-stat">
-              <span className="hero-stat-icon">{s.icon}</span>
-              {s.label}
-            </div>
-          ))}
-        </div>
-
-        <div className="scroll-cue">
-          <div className="scroll-line"/>
-          <div className="scroll-lbl">Scroll</div>
+        <div className="hero-content">
+          <p className="hero-eyebrow"><MapPin size={11} strokeWidth={1.5} style={{ flexShrink: 0 }} />Ladysmith, KZN</p>
+          <h1 className="hero-title">Good things,<br /><em>baked right.</em></h1>
+          <p className="hero-sub">Small-batch baking made to order. No excess, no shortcuts — just carefully sourced ingredients and process that shows in every bite.</p>
+          <div className="hero-actions">
+            <a href="#products" className="btn-primary">View the Menu</a>
+            <a href="#how" className="btn-ghost">How it works <ArrowDown size={13} strokeWidth={1.5} /></a>
+          </div>
         </div>
       </section>
 
       {/* TICKER */}
       <div className="ticker">
-        <div className="ticker-t">
-          {[0,1].map(i=>(
-            <div key={i} style={{display:"flex",alignItems:"center"}}>
-              {["Baked to order","Always eggless","Vegan on request","24hr notice","Pickup from Ladysmith","Home kitchen","No preservatives · No shortcuts"].map((t,j)=>(
-                <div key={j} className="tick">{t}<div className="tsep"/></div>
-              ))}
-            </div>
+        <div className="ticker-inner">
+          {[...tickerItems, ...tickerItems].map((item, i) => (
+            <span key={i} className="ticker-item">{item}<span className="ticker-dot" /></span>
           ))}
         </div>
       </div>
 
       {/* MENU */}
-      <section className="sec" id="menu">
-        <div className="wrap">
-          <div className="menu-header">
-            <div>
-              <div className="eyebrow">Our menu</div>
-              <h2 className="sec-title">Always available,<br/><em>made to order</em></h2>
+      <section id="products" className="menu-section">
+        <R className="menu-header">
+          <div>
+            <p className="section-label">What we make</p>
+            <h2 className="section-title">The <em>menu</em></h2>
+          </div>
+        </R>
+        <div className="menu-scroll-track">
+          {products.map((p, i) => (
+            <div key={i} className="menu-card">
+              <div className="menu-card-img-wrap" onClick={() => openOverlay(p)}>
+                <img src={`/images/${p.image}`} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+                <div className="menu-card-plus">
+                  <button className="menu-card-plus-btn" onClick={e => { e.stopPropagation(); openOverlay(p); }}>
+                    <Plus size={20} strokeWidth={1.5} />
+                  </button>
+                </div>
+              </div>
+              <div className="menu-card-info">
+                <p className="menu-card-tag">{p.tag}</p>
+                <h3 className="menu-card-name">{p.name}</h3>
+                <p className="menu-card-price">{p.price}</p>
+                <div className="menu-eggless">
+                  <Leaf size={10} color={t.warm} strokeWidth={1.5} />
+                  <span className="eggless-text">Always eggless</span>
+                  <span className="vegan-note">· Vegan on request</span>
+                </div>
+              </div>
             </div>
-            <a href="#order" className="btn-ink" style={{fontSize:".72rem",padding:"11px 24px"}}>
-              Place an order
-            </a>
-          </div>
-
-          <div className="snboard reveal-stagger">
-            {MENU.map((item, i) => (
-              <StickyNote
-                key={item.id}
-                item={item}
-                note={NOTES[i % NOTES.length]}
-                onOpen={(it, noteBg) => openProduct(it, noteBg)}
-              />
-            ))}
-          </div>
+          ))}
         </div>
       </section>
-
-      {/* ABOUT */}
-      <div className="about-wrap">
-        <section className="sec" id="about">
-          <div className="wrap">
-            <div className="about-grid reveal-stagger">
-              <div className="about-visual reveal-child">
-                <div className="about-img">
-                  {null
-                    ? <img src="/images/kitchen.jpg" alt="Our kitchen" loading="lazy"/>
-                    : <div className="about-img-ph">
-                        <span className="about-img-emoji">🫙</span>
-                        <span className="about-img-hint">Your kitchen photo here</span>
-                      </div>
-                  }
-                </div>
-                <div className="about-cap">
-                  <div className="about-cap-title">The kitchen</div>
-                  <div className="about-cap-sub">Ladysmith, KwaZulu-Natal · Est. 2024</div>
-                </div>
-              </div>
-
-              <div className="about-txt reveal-child">
-                <div className="eyebrow">About us</div>
-                <h2 className="sec-title" style={{marginBottom:"1.5rem"}}>
-                  Baking with<br/><em>heart</em>
-                </h2>
-                <p>
-                  The Treat Table is a home bakery based in Ladysmith, KwaZulu-Natal.
-                  Every item on the menu is baked fresh to your order — mini loaf cakes in
-                  seven flavours, pillowy cinnamon rolls, and rich milk cakes for the whole family.
-                  Nothing sits on a shelf. Nothing is made in advance.
-                </p>
-                <p>
-                  Every bake is fully eggless. Just place your order at least 24 hours ahead
-                  and collect from our kitchen at a time that suits you.
-                </p>
-                <div className="about-pills">
-                  {["Always eggless","Vegan on request","No delivery","Made to order","Home kitchen","No preservatives"].map(p=>(
-                    <span key={p} className="about-pill">{p}</span>
-                  ))}
-                </div>
-                <a href="#story" className="btn-outline" style={{width:"fit-content",fontSize:".72rem",padding:"11px 22px"}}>
-                  Read the full story
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
 
       {/* HOW IT WORKS */}
-      <section className="sec" id="how-it-works" style={{paddingTop:0}}>
-        <div className="wrap">
-          <div className="eyebrow reveal">How it works</div>
-          <h2 className="sec-title">Simple as <em>that</em></h2>
-          <div className="how-grid reveal-stagger">
-            {[
-              {n:"01",t:"Browse the menu",  d:"Everything is available all the time — no reset, no cutoff. Pick what you'd like at your own pace."},
-              {n:"02",t:"Place your order", d:"Choose your items, pick variants, note any vegan requests, and let us know when you'd like to collect."},
-              {n:"03",t:"Pick up fresh",    d:"Give us 24 hours and your order is baked fresh on the morning of pickup. Warm bread in hand."},
-            ].map(s=>(
-              <div key={s.n} className="how-card reveal-child">
-                <div className="how-num">{s.n}</div>
-                <div className="how-title">{s.t}</div>
-                <div className="how-desc">{s.d}</div>
+      <section id="how" className="how-section">
+        <R>
+          <p className="section-label">How it works</p>
+          <h2 className="section-title">Three steps.<br /><em>That's it.</em></h2>
+        </R>
+        <div className="how-steps">
+          {[
+            { n: "01", icon: ShoppingBag, title: "Choose & add", desc: "Browse the menu, tap a flavour, set your quantity. Add directly from the card — no extra pages." },
+            { n: "02", icon: MessageCircle, title: "Send your order", desc: "Your cart holds everything. Fill in your details and send directly to us on WhatsApp." },
+            { n: "03", icon: MapPin, title: "Collect in Ladysmith", desc: "Everything baked fresh to your order on collection day. No pre-made stock, ever." },
+          ].map((s, i) => (
+            <R key={i} d={i + 1} className="how-step">
+              <div className="how-step-num">{s.n}</div>
+              <div className="how-step-body">
+                <div className="how-step-icon"><s.icon size={20} strokeWidth={1.5} /></div>
+                <h3 className="how-step-title">{s.title}</h3>
+                <p className="how-step-desc">{s.desc}</p>
               </div>
-            ))}
-          </div>
-
-          <div className="pickup-strip">
-            <div className="pickup-info">
-              <div className="pickup-lbl">Location</div>
-              <div className="pickup-val">Ladysmith, KZN</div>
-              <div className="pickup-sub">Address in your confirmation</div>
-            </div>
-            <div className="pickup-div"/>
-            <div className="pickup-info">
-              <div className="pickup-lbl">Pickup</div>
-              <div className="pickup-val">Your schedule</div>
-              <div className="pickup-sub">Collect whenever suits you — just give us a day's notice</div>
-            </div>
-            <div className="pickup-div"/>
-            <div className="pickup-info">
-              <div className="pickup-lbl">Notice required</div>
-              <div className="pickup-val">24 hours</div>
-              <div className="pickup-sub">Order any day — we just need time to bake</div>
-            </div>
-            <a href="#menu" className="btn-paper">Order now</a>
-          </div>
+            </R>
+          ))}
         </div>
       </section>
 
-      {/* CONTACT */}
-      <section className="sec" id="contact">
-        <div className="wrap">
-          <div className="eyebrow reveal">Get in touch</div>
-          <h2 className="sec-title">Order, ask, or just <em>say hi</em></h2>
-          <div className="contact-grid reveal-stagger">
-            <a className="contact-card reveal-child" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
-              <span className="contact-card-icon">💬</span>
-              <div className="contact-card-label">WhatsApp</div>
-              <div className="contact-card-val">Chat with us</div>
-              <div className="contact-card-hint">Quickest way to place an order or ask a question</div>
-            </a>
-            <a className="contact-card reveal-child" href={`mailto:${CONTACT_EMAIL}`}>
-              <span className="contact-card-icon">✉️</span>
-              <div className="contact-card-label">Email</div>
-              <div className="contact-card-val">{CONTACT_EMAIL}</div>
-              <div className="contact-card-hint">For detailed orders or special requests</div>
-            </a>
-            <a className="contact-card reveal-child" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-              <span className="contact-card-icon">📸</span>
-              <div className="contact-card-label">Instagram</div>
-              <div className="contact-card-val">@thetreattableza</div>
-              <div className="contact-card-hint">See what's fresh, behind the scenes, and new flavours</div>
-            </a>
-            <div className="contact-card reveal-child" style={{cursor:"default"}}>
-              <span className="contact-card-icon">📍</span>
-              <div className="contact-card-label">Location</div>
-              <div className="contact-card-val">Ladysmith, KZN</div>
-              <div className="contact-card-hint">Pickup from our home kitchen — address in your order confirmation</div>
+      {/* THIS WEEK'S BAKE */}
+      <section className="weekly-section">
+        <R style={{ marginBottom: "1.75rem" }}>
+          <p className="section-label">From the oven</p>
+          <h2 className="section-title">This week's <em>bake</em></h2>
+        </R>
+        <R d={1}>
+          <div className="weekly-inner">
+            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="weekly-body">
+              <div className="weekly-eyebrow"><Flame size={12} color={t.warm} strokeWidth={1.5} />Limited this week</div>
+              <h3 className="weekly-name">
+                {weeklyBake.name.split("\n").map((l, i) => i === 0 ? <span key={i}>{l}<br /></span> : <em key={i}>{l}</em>)}
+              </h3>
+              <p className="weekly-desc">{weeklyBake.desc}</p>
+              <div className="weekly-meta">
+                {weeklyBake.meta.map((m, i) => <span key={i} className="weekly-meta-item"><m.icon size={13} strokeWidth={1.5} />{m.label}</span>)}
+              </div>
+              <button className="btn-primary" onClick={() => openOverlay(products[weeklyBake.productIdx])}>Order This Bake</button>
             </div>
           </div>
-        </div>
+        </R>
       </section>
 
       {/* JOURNAL */}
-      <section className="sec" id="journal" style={{background:"var(--paper2)",borderTop:"1px solid var(--paper3)",borderBottom:"1px solid var(--paper3)"}}>
-        <div className="wrap">
-          <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",flexWrap:"wrap",gap:"1rem"}}>
-            <div>
-              <div className="eyebrow reveal">The journal</div>
-              <h2 className="sec-title">Stories from the <em>kitchen</em></h2>
-            </div>
-            <a href="#all" className="btn-outline" style={{fontSize:".7rem",padding:"10px 20px"}}>All posts</a>
-          </div>
-          <div className="j-grid reveal-stagger">
-            {POSTS.map((p,i) => (
-              <div key={i} className={`jcard reveal-child${p.feat?" feat":""}`}>
-                <div className="j-cat">{p.cat}</div>
-                <div className="j-title">{p.title}</div>
-                <div className="j-exc">{p.excerpt}</div>
-                <div className="j-foot">
-                  <div className="j-date">{p.date} · {p.read}</div>
-                  <button className="j-link" onClick={()=>{}}>Read →</button>
-                </div>
-              </div>
-            ))}
-          </div>
+      <section id="blog" className="blog-section">
+        <div className="blog-header">
+          <R>
+            <p className="section-label">From the kitchen</p>
+            <h2 className="section-title">Our <em>Journal</em></h2>
+          </R>
+          <span style={{ fontSize: "0.7rem", color: t.warm, letterSpacing: "0.1em", textTransform: "uppercase" }}>Launching soon</span>
+        </div>
+        <div className="blog-grid">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard />
         </div>
       </section>
-
-      {/* NEWSLETTER */}
-      <div style={{padding:"clamp(3rem,6vh,5rem) 0 0"}}>
-        <div className="nl-wrap reveal">
-          <div>
-            <div className="eyebrow" style={{marginBottom:".65rem"}}>Stay in touch</div>
-            <h2 className="nl-title">New bakes, <em>special runs</em> & updates</h2>
-            <p className="nl-sub">
-              Occasional emails when we add something new to the menu, run a special batch, or have something worth sharing. No spam, ever.
-            </p>
-          </div>
-          <div>
-            {subbed ? (
-              <div className="nl-ok">✦ You're on the list. We'll be in touch.</div>
-            ) : (
-              <form className="nl-form" onSubmit={e=>{e.preventDefault();if(email)setSubbed(true)}}>
-                <div className="nl-row">
-                  <input className="nl-in" type="email" placeholder="your@email.com" value={email} onChange={e=>setEmail(e.target.value)} required/>
-                  <button type="submit" className="nl-btn">Sign up</button>
-                </div>
-                <div className="nl-note">Infrequent. Unsubscribe any time.</div>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* FOOTER */}
       <footer className="footer">
         <div>
-          <div className="f-logo">The Treat Table</div>
-          <div className="f-copy">© 2026 · Ladysmith, KwaZulu-Natal · Always eggless</div>
+          <p className="footer-brand">Kind Crumb · The Treat Table</p>
+          <p className="footer-tagline">Small-batch baking, made to order.<br />Ladysmith, KZN.</p>
         </div>
-        <div style={{display:"flex",flexDirection:"column",gap:"10px",alignItems:"flex-end"}}>
-          <ul className="f-nav">
-            <li><a href="#menu">Menu</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-            <li><a href="#journal">Journal</a></li>
-          </ul>
-          <div className="social-links">
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="social-link">💬 WhatsApp</a>
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" className="social-link">📸 Instagram</a>
-          </div>
-        </div>
+        <ul className="footer-links">
+          <li><a href="#products">Menu</a></li>
+          <li><a href="#blog">Journal</a></li>
+          <li><a href="https://wa.me/27000000000">WhatsApp</a></li>
+        </ul>
+        <div />
+        <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
       </footer>
 
-      {/* MOBILE STICKY BAR */}
-      <div className="sbar">
-        <button className="sb-main" style={{border:"none",cursor:"pointer"}}
-          onClick={() => cartQty > 0 ? setOrderOpen(true) : document.querySelector('#menu').scrollIntoView({behavior:'smooth'})}>
-          {cartQty > 0 ? `Review order · R${cartTotal}` : "Order now"}
+      <div className="page-end-pad" />
+
+      {/* BOTTOM TAB BAR */}
+      <nav className="bottom-tab-bar">
+        <a href="#" className={`tab-item${activeTab === "home" ? " active" : ""}`}><Home size={18} strokeWidth={1.5} /><span>Home</span></a>
+        <a href="#products" className={`tab-item${activeTab === "products" ? " active" : ""}`}><ShoppingBag size={18} strokeWidth={1.5} /><span>Menu</span></a>
+        <button className="tab-cart-btn" onClick={() => setDrawerOpen(true)}>
+          {totalItems > 0 && <span className="tab-cart-count">{totalItems}</span>}
+          <ShoppingCart size={18} strokeWidth={1.5} /><span>Order</span>
         </button>
-        <a href="#how-it-works" className="sb-ghost">How it works</a>
-      </div>
-
-      {/* PRODUCT DETAIL DRAWER */}
-      <div
-        className={`pd-ov${pdOpen?" open":""}`}
-        onClick={e => { if(e.target === e.currentTarget) closeProduct(); }}
-      >
-        <div className={`pd-panel${pdOpen?" open":""}`} role="dialog" aria-modal="true" aria-label={activeItem?.name}>
-          {activeItem && (
-            <CategoryModal item={activeItem} noteColor={activeNote} onClose={closeProduct} onAdd={addToCart}/>
-          )}
-        </div>
-      </div>
-
-      {/* FLOATING CART PILL */}
-      <button
-        className={`cart-pill${cartQty > 0 ? " visible" : ""}`}
-        onClick={() => setOrderOpen(true)}
-        aria-label={`View order — ${cartQty} items`}
-      >
-        <div className="cart-badge">{cartQty}</div>
-        <span>R{cartTotal} · Review order</span>
-      </button>
-
-      {/* ORDER FORM MODAL */}
-      <div className={`order-ov${orderOpen ? " open" : ""}`} onClick={e => { if (e.target === e.currentTarget) setOrderOpen(false); }}>
-        <div className="order-modal" role="dialog" aria-modal="true" aria-label="Place your order">
-          {orderOpen && (
-            <OrderModal
-              cart={cart}
-              onClose={() => setOrderOpen(false)}
-              onClearCart={clearCart}
-            />
-          )}
-        </div>
-      </div>
+        <a href="#blog" className={`tab-item${activeTab === "blog" ? " active" : ""}`}><BookOpen size={18} strokeWidth={1.5} /><span>Journal</span></a>
+      </nav>
     </>
   );
 }
