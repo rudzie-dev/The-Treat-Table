@@ -1,15 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#FAF7F2" />
-    <meta name="description" content="The Treat Table — handcrafted bakes, made to order. Always vegetarian, vegan on request. Pickup from our Ladysmith kitchen." />
-    <title>The Treat Table</title>
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ─── PRIMARY SEO ─────────────────────────────────────── -->
+    <title>Kind Crumb: The Treat Table — Home Baker, Ladysmith KZN</title>
+    <meta name="description" content="Kind Crumb is a home bakery based in Ladysmith, KZN. Freshly baked cinnamon rolls, mini cakes, cookies and Tres Leches — always eggless, always made to order." />
+    <meta name="keywords" content="home bakery Ladysmith, eggless baking KZN, cinnamon rolls Ladysmith, mini cakes, cookies, Tres Leches cake, baked to order KZN" />
+    <meta name="author" content="Kind Crumb: The Treat Table" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://kindcrumbtreats.co.za/" />
+    <meta name="theme-color" content="#1C1008" />
+
+    <!-- ─── OPEN GRAPH ────────────────────────────────────────── -->
+    <meta property="og:type"         content="website" />
+    <meta property="og:url"          content="https://kindcrumbtreats.co.za/" />
+    <meta property="og:title"        content="Kind Crumb: The Treat Table — Home Baker, Ladysmith" />
+    <meta property="og:description"  content="Small-batch home baking in Ladysmith KZN. Cinnamon rolls, mini cakes, cookies and more — always eggless, always made to order." />
+    <meta property="og:image"        content="https://kindcrumbtreats.co.za/og.png" />
+    <meta property="og:image:width"  content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name"    content="Kind Crumb: The Treat Table" />
+    <meta property="og:locale"       content="en_ZA" />
+
+    <!-- ─── TWITTER CARD ─────────────────────────────────────── -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="Kind Crumb: The Treat Table — Home Baker, Ladysmith" />
+    <meta name="twitter:description" content="Small-batch home baking in Ladysmith KZN. Always eggless, always made to order." />
+    <meta name="twitter:image"       content="https://kindcrumbtreats.co.za/og.png" />
+
+    <!-- ─── SCHEMA MARKUP (AEO) ──────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://kindcrumbtreats.co.za/#website",
+          "url": "https://kindcrumbtreats.co.za/",
+          "name": "Kind Crumb: The Treat Table",
+          "publisher": { "@id": "https://kindcrumbtreats.co.za/#organization" }
+        },
+        {
+          "@type": ["Organization", "Bakery", "LocalBusiness"],
+          "@id": "https://kindcrumbtreats.co.za/#organization",
+          "name": "Kind Crumb: The Treat Table",
+          "url": "https://kindcrumbtreats.co.za/",
+          "logo": "https://kindcrumbtreats.co.za/favicon.svg",
+          "foundingDate": "2025",
+          "description": "Kind Crumb is a small-batch home bakery in Ladysmith, KZN. Specialising in eggless cinnamon rolls, mini cakes, Tres Leches and cookies — all baked fresh to order.",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Ladysmith",
+            "addressRegion": "KwaZulu-Natal",
+            "addressCountry": "ZA"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+27689536500",
+            "contactType": "customer service",
+            "availableLanguage": "English"
+          },
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Kind Crumb Menu",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Cinnamon Rolls",
+                  "description": "Soft and fluffy cinnamon rolls available in classic and speciality flavours. Always eggless. From R25.",
+                  "offers": { "@type": "Offer", "priceCurrency": "ZAR", "price": "25" }
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Mini Cakes",
+                  "description": "Perfectly portioned mini cakes in Vanilla Bean, Chocolate Fudge, Red Velvet, Lemon Raspberry and Carrot Cake. From R65.",
+                  "offers": { "@type": "Offer", "priceCurrency": "ZAR", "price": "65" }
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Tres Leches Milk Cake",
+                  "description": "Rich moist sponge soaked in three milks, topped with whipped cream. Available in Classic Vanilla, Pistachio, Rose and Saffron. From R350.",
+                  "offers": { "@type": "Offer", "priceCurrency": "ZAR", "price": "350" }
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Chunky Cookies",
+                  "description": "Thick chewy cookies with crispy edges and gooey centres. Brown Butter Choc Chip, Double Chocolate, Macadamia Nut and Oatmeal Raisin. From R35.",
+                  "offers": { "@type": "Offer", "priceCurrency": "ZAR", "price": "35" }
+                }
+              }
+            ]
+          },
+          "knowsAbout": [
+            "Eggless Baking",
+            "Home Baking",
+            "Cinnamon Rolls",
+            "Mini Cakes",
+            "Tres Leches",
+            "Custom Orders",
+            "Small Batch Baking",
+            "KZN Bakery"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is Kind Crumb eggless?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes — all Kind Crumb products are always eggless. Vegan options are available on request."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I order from Kind Crumb?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Browse the menu on kindcrumbtreats.co.za, add items to your order, fill in your details and send directly via WhatsApp. Everything is baked fresh to your order."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Where is Kind Crumb based?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Kind Crumb is based in Ladysmith, KwaZulu-Natal. Orders are collected in Ladysmith."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What does Kind Crumb sell?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Kind Crumb sells cinnamon rolls, mini cakes, Tres Leches milk cake, and chunky cookies — all baked fresh to order in small batches."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- ─── FONTS (non-blocking) ──────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    </noscript>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
