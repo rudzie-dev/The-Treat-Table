@@ -10,7 +10,7 @@ const t = {
   brown: "#6B4F35", dark: "#3D2B1A", esp: "#1C1008", warm: "#A07850",
 };
 
-const fonts = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');`;
+const fonts = ``; // Fonts loaded via <link> in index.html
 
 const css = `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -242,11 +242,11 @@ body::-webkit-scrollbar { width: 0; display: none; }
   padding: 2rem 1.5rem calc(5.5rem + env(safe-area-inset-bottom));
   background: linear-gradient(to top, ${t.cream} 70%, transparent 100%);
 }
-.hero-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+.hero-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem; opacity: 1; animation: fadeUp 0.8s 0.2s forwards; }
 .hero-eyebrow::before { content: ''; display: block; width: 1.5rem; height: 1px; background: ${t.tan}; flex-shrink: 0; }
-.hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem, 9vw, 3.5rem); font-weight: 300; line-height: 1.05; color: ${t.dark}; margin-bottom: 0.75rem; opacity: 0; animation: fadeUp 0.9s 0.35s forwards; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem, 9vw, 3.5rem); font-weight: 300; line-height: 1.05; color: ${t.dark}; margin-bottom: 0.75rem; opacity: 1; animation: fadeUp 0.9s 0.35s forwards; }
 .hero-title em { font-style: italic; color: ${t.brown}; }
-.hero-sub { font-size: 0.85rem; font-weight: 300; line-height: 1.7; color: ${t.warm}; margin-bottom: 1.75rem; opacity: 0; animation: fadeUp 0.9s 0.5s forwards; max-width: 340px; }
+.hero-sub { font-size: 0.85rem; font-weight: 300; line-height: 1.7; color: ${t.warm}; margin-bottom: 1.75rem; opacity: 1; animation: fadeUp 0.9s 0.5s forwards; max-width: 340px; }
 .hero-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s 0.65s forwards; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .btn-primary { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; color: ${t.cream}; background: ${t.dark}; padding: 0.85rem 1.75rem; border-radius: 2px; text-decoration: none; text-transform: uppercase; transition: background 0.2s, transform 0.2s; border: none; cursor: pointer; display: inline-block; }
@@ -346,7 +346,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .weekly-section { padding: 3.5rem 1.25rem; border-top: 1px solid ${t.sand}; }
 .weekly-inner { background: ${t.sand}; position: relative; overflow: hidden; border-radius: 2px; }
 .weekly-inner::after { content: ''; position: absolute; bottom: -50px; right: -50px; width: 180px; height: 180px; border-radius: 50%; background: ${t.tan}55; pointer-events: none; }
-.weekly-img { width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, ${t.tan} 0%, ${t.brown}44 100%); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: ${t.cream}88; letter-spacing: 0.15em; flex-shrink: 0; }
+.weekly-img { width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, ${t.tan} 0%, ${t.brown}44 100%); display: flex; align-items: center; justify-content: center; position: relative; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: ${t.cream}88; letter-spacing: 0.15em; flex-shrink: 0; }
 .weekly-body { padding: 1.75rem 1.5rem 2rem; position: relative; z-index: 1; }
 .weekly-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
 .weekly-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.15; margin-bottom: 0.75rem; }
@@ -428,7 +428,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
   .weekly-section { padding: 6rem 3rem; }
   .weekly-inner { display: grid; grid-template-columns: 1fr 1fr; }
   .weekly-inner::after { width: 280px; height: 280px; bottom: -80px; right: -80px; }
-  .weekly-img { aspect-ratio: unset; min-height: 420px; order: 2; overflow: hidden; display: flex; }
+  .weekly-img { aspect-ratio: unset; order: 2; overflow: hidden; display: flex; min-height: 500px; position: relative; }
   .weekly-body { padding: 3rem 3rem; display: flex; flex-direction: column; justify-content: center; order: 1; }
 
   /* JOURNAL */
@@ -442,17 +442,21 @@ body::-webkit-scrollbar { width: 0; display: none; }
 `;
 
 const products = [
-  { tag: "Signature", name: "Brown Butter Tart", image: "mini-cakes.webp", flavors: ["Classic Vanilla Custard", "Spiced Chai", "Dark Chocolate", "Salted Caramel", "Lemon Curd"], desc: "Short-crust shell, brown butter custard, finished with flaked salt. A refined take on a classic — five rotating flavours, all baked to order the morning of collection.", price: "From R85" },
-  { tag: "Baked Weekly", name: "Olive Oil Cake", image: "cinnamon-rolls.webp", flavors: ["Blood Orange", "Lemon & Rosemary", "Almond & Cardamom"], desc: "Pressed olive oil keeps the crumb tender over several days. Citrus-forward, light in texture, available whole or by the slice. A reliable weekly staple.", price: "From R220" },
-  { tag: "On the Menu", name: "Sourdough Loaf", image: "milk-cake.webp", flavors: ["Plain", "Seeded", "Rosemary & Sea Salt", "Jalapeño & Cheddar"], desc: "Long-fermented over 24 hours for an open, airy crumb and a crust that actually has character. Four variations — each baked to order.", price: "From R95" },
-  { tag: "Sweet", name: "Celebration Cake", image: "cookies.webp", flavors: ["Red Velvet", "Vanilla Bean", "Chocolate Fudge", "Carrot & Walnut"], desc: "A curated selection of layer cakes built for occasions. Clean finish, no excess decoration unless requested. Sized to your event.", price: "From R380" },
+  { tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", flavors: ["Vanilla Bean", "Chocolate Fudge", "Red Velvet", "Lemon Raspberry", "Carrot Cake"], desc: "Perfectly portioned mini cakes for any occasion. Available in a variety of classic flavors, baked fresh.", price: "From R65" },
+  { tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", flavors: ["Classic (R25)"], categories: [
+    { name: "Classic Rolls", options: ["Classic (R25)", "Classic + Nuts/Coconut (R35)", "Iced (R30)", "CinnaCream (R45)"] },
+    { name: "Speciality Rolls", options: ["Almond Delight (R55)", "Chocolate Dream (R55)", "Royal Oreo (R55)", "Caramel Swirl (R55)"] },
+    { name: "Available as Packs", options: ["Classic 4-Pack (R90)", "Classic 6-Pack (R130)", "Classic 12-Pack (R250)", "Speciality 4-Pack (R200)", "Speciality 6-Pack (R290)", "Speciality 12-Pack (R580)"] }
+  ], desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25" },
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Classic Vanilla", "Pistachio", "Rose", "Saffron"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: ["Brown Butter Choc Chip", "Double Chocolate", "Macadamia Nut", "Oatmeal Raisin"], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
 ];
 
 const weeklyBake = {
-  name: "Brown Butter\nSalted Caramel Tart",
-  desc: "This week's featured bake — our signature short-crust shell filled with salted caramel brown butter custard. A limited run, available until Sunday.",
+  name: "Signature\nCinnamon Rolls",
+  desc: "This week's featured bake — our highly requested signature soft and fluffy cinnamon rolls. A limited run, available until Sunday.",
   meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Baked Thursday" }, { icon: Wheat, label: "Eggless" }],
-  productIdx: 0,
+  productIdx: 1,
 };
 
 function useReveal() {
@@ -487,6 +491,12 @@ function SkeletonCard() {
   );
 }
 
+function imageNameToTitle(image) {
+  if (!image) return "";
+  const base = image.replace(/\.[^/.]+$/, "");
+  return base.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export default function KindCrumb() {
   const [cart, setCart] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -516,8 +526,17 @@ export default function KindCrumb() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = (drawerOpen || overlay) ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (drawerOpen || overlay) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => { 
+      document.body.style.overflow = ""; 
+      document.documentElement.style.overflow = ""; 
+    };
   }, [drawerOpen, overlay]);
 
   const thumbRef = useRef(null);
@@ -541,7 +560,7 @@ export default function KindCrumb() {
     return () => { window.removeEventListener("scroll", update); clearTimeout(scrollTimer.current); };
   }, []);
 
-  const openOverlay = (product) => { setOverlayClosing(false); setOverlay({ product, flavor: product.flavors[0], qty: 1, added: false }); };
+  const openOverlay = (product) => { setOverlayClosing(false); setOverlay({ product, flavor: product.categories ? product.categories[0].options[0] : product.flavors[0], qty: 1, added: false }); };
   const closeOverlay = () => { setOverlayClosing(true); setTimeout(() => { setOverlay(null); setOverlayClosing(false); }, 260); };
 
   const addToCart = (name, flavor, qty, price) => {
@@ -576,7 +595,7 @@ export default function KindCrumb() {
   const handleSubmit = () => {
     const items = cart.length ? cart.map(c => `- ${c.name} (${c.flavor}) x${c.qty}`).join("%0A") : "No items";
     const msg = `Hello Kind Crumb!%0A%0AOrder:%0A${items}%0A%0AName: ${formData.name}%0APhone: ${formData.phone}%0ADate needed: ${formData.date}%0ANotes: ${formData.notes}`;
-    window.open(`https://wa.me/27000000000?text=${msg}`, "_blank");
+    window.open(`https://wa.me/27689536500?text=${msg}`, "_blank");
   };
 
   const tickerItems = ["Baked to order", "Pickup available", "Ladysmith", "Always eggless", "Small batch", "No artificial additives"];
@@ -599,12 +618,29 @@ export default function KindCrumb() {
               <p className="po-tag">{overlay.product.tag}</p>
               <h2 className="po-name">{overlay.product.name}</h2>
               <p className="po-desc">{overlay.product.desc}</p>
-              <p className="po-flavor-label">Choose your flavour</p>
-              <div className="po-flavors">
-                {overlay.product.flavors.map((f, i) => (
-                  <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
-                ))}
-              </div>
+              {overlay.product.categories ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "2rem" }}>
+                  {overlay.product.categories.map((cat, ci) => (
+                    <div key={ci}>
+                      <p className="po-flavor-label" style={{ marginBottom: "0.6rem" }}>{cat.name}</p>
+                      <div className="po-flavors" style={{ marginBottom: 0 }}>
+                        {cat.options.map((f, i) => (
+                          <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <p className="po-flavor-label">Choose your flavour</p>
+                  <div className="po-flavors">
+                    {overlay.product.flavors.map((f, i) => (
+                      <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
+                    ))}
+                  </div>
+                </>
+              )}
               <div className="po-order-row">
                 <span className="po-price">{overlay.product.price}</span>
                 <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: Math.max(1, o.qty - 1) }))}><Minus size={12} strokeWidth={2} /></button>
@@ -669,7 +705,7 @@ export default function KindCrumb() {
           <div className="drawer-foot">
             <p className="drawer-note">Pricing confirmed on collection. We'll reach out within 24 hours.</p>
             <button className="drawer-wa-btn" onClick={handleSubmit}><MessageCircle size={15} strokeWidth={1.5} />Send Order via WhatsApp</button>
-            <a href="https://wa.me/27000000000" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
+            <a href="https://wa.me/27689536500" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
           </div>
         )}
       </div>
@@ -686,7 +722,7 @@ export default function KindCrumb() {
           <li><a href="#blog">Journal</a></li>
         </ul>
         <div className="nav-right">
-          <a href="https://wa.me/27000000000" className="nav-wa" target="_blank" rel="noreferrer">
+          <a href="https://wa.me/27689536500" className="nav-wa" target="_blank" rel="noreferrer">
             <MessageCircle size={13} strokeWidth={1.5} /> Order via WhatsApp
           </a>
           <button className="nav-cart-btn" onClick={() => setDrawerOpen(true)}>
@@ -701,14 +737,14 @@ export default function KindCrumb() {
         <div className="hero-bg">
           <div className="hero-circle"><span className="hero-circle-text">The Treat Table</span></div>
           <div className="hero-badge">
-            <p className="hero-badge-label">This week</p>
-            <p className="hero-badge-value">Brown Butter Tart</p>
+            <p className="hero-badge-label">Signature</p>
+            <p className="hero-badge-value">Cinnamon Rolls</p>
           </div>
         </div>
         <div className="hero-content">
           <p className="hero-eyebrow"><MapPin size={11} strokeWidth={1.5} style={{ flexShrink: 0 }} />Ladysmith, KZN</p>
-          <h1 className="hero-title">Good things,<br /><em>baked right.</em></h1>
-          <p className="hero-sub">Small-batch baking made to order. No excess, no shortcuts — just carefully sourced ingredients and process that shows in every bite.</p>
+          <h1 className="hero-title">Signature<br /><em>Cinnamon Rolls.</em></h1>
+          <p className="hero-sub">Small-batch baking made to order. Experience our soft, fluffy dough swirled with rich cinnamon sugar and topped with cream cheese frosting.</p>
           <div className="hero-actions">
             <a href="#products" className="btn-primary">View the Menu</a>
             <a href="#how" className="btn-ghost">How it works <ArrowDown size={13} strokeWidth={1.5} /></a>
@@ -746,12 +782,14 @@ export default function KindCrumb() {
               </div>
               <div className="menu-card-info">
                 <p className="menu-card-tag">{p.tag}</p>
-                <h3 className="menu-card-name">{p.name}</h3>
-                <p className="menu-card-price">{p.price}</p>
-                <div className="menu-eggless">
-                  <Leaf size={10} color={t.warm} strokeWidth={1.5} />
-                  <span className="eggless-text">Always eggless</span>
-                  <span className="vegan-note">· Vegan on request</span>
+                <p className="menu-card-name">{p.name}</p>
+                <p style={{ fontSize: "0.78rem", color: t.warm, marginTop: "0.4rem", marginBottom: "0.85rem", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: "2", WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.desc}</p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <p className="menu-card-price">{p.price}</p>
+                  <div className="menu-eggless" style={{ marginTop: 0 }}>
+                    <Leaf size={10} color={t.warm} strokeWidth={1.5} />
+                    <span className="eggless-text">Eggless</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -791,7 +829,7 @@ export default function KindCrumb() {
         </R>
         <R d={1}>
           <div className="weekly-inner">
-            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
             <div className="weekly-body">
               <div className="weekly-eyebrow"><Flame size={12} color={t.warm} strokeWidth={1.5} />Limited this week</div>
               <h3 className="weekly-name">
@@ -830,7 +868,7 @@ export default function KindCrumb() {
         <ul className="footer-links">
           <li><a href="#products">Menu</a></li>
           <li><a href="#blog">Journal</a></li>
-          <li><a href="https://wa.me/27000000000">WhatsApp</a></li>
+          <li><a href="https://wa.me/27689536500">WhatsApp</a></li>
         </ul>
         <div />
         <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
