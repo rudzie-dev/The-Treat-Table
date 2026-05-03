@@ -498,7 +498,7 @@ export default function KindCrumb() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [overlay, setOverlay] = useState(null);
   const [overlayClosing, setOverlayClosing] = useState(false); // { product, flavor, qty, added }
-  const [selections, setSelections] = useState(Object.fromEntries(products.map((_, i) => [i, { qty: 1, added: false }])));
+
   const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
   const [activeTab, setActiveTab] = useState("home");
 
@@ -510,7 +510,7 @@ export default function KindCrumb() {
       setNavScrolled(y > 60);
       const mid = y + 80;
       const how = document.querySelector(".how-section");
-      const isDark = (mid < 200) || (how && mid >= how.offsetTop && mid < how.offsetTop + how.offsetHeight);
+
 
       const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }, { id: "blog", el: document.getElementById("blog") }];
       let cur = "home";
@@ -704,7 +704,7 @@ export default function KindCrumb() {
 
       {/* NAV */}
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
-        <a href="#" className="nav-brand">
+        <a href="#home" className="nav-brand">
           <span className="nav-brand-name">Kind Crumb</span>
           <span className="nav-brand-sub">The Treat Table</span>
         </a>
