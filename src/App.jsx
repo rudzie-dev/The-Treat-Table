@@ -491,11 +491,7 @@ function SkeletonCard() {
   );
 }
 
-function imageNameToTitle(image) {
-  if (!image) return "";
-  const base = image.replace(/\.[^/.]+$/, "");
-  return base.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, c => c.toUpperCase());
-}
+
 
 export default function KindCrumb() {
   const [cart, setCart] = useState([]);
@@ -505,7 +501,7 @@ export default function KindCrumb() {
   const [selections, setSelections] = useState(Object.fromEntries(products.map((_, i) => [i, { qty: 1, added: false }])));
   const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
   const [activeTab, setActiveTab] = useState("home");
-  const [navCls, setNavCls] = useState("on-dark");
+
   const [navScrolled, setNavScrolled] = useState(false);
 
   useEffect(() => {
@@ -515,7 +511,7 @@ export default function KindCrumb() {
       const mid = y + 80;
       const how = document.querySelector(".how-section");
       const isDark = (mid < 200) || (how && mid >= how.offsetTop && mid < how.offsetTop + how.offsetHeight);
-      setNavCls(isDark ? "on-dark" : "on-light");
+
       const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }, { id: "blog", el: document.getElementById("blog") }];
       let cur = "home";
       secs.forEach(({ id, el }) => { if (el && el.offsetTop <= y + window.innerHeight / 2) cur = id; });
@@ -572,11 +568,7 @@ export default function KindCrumb() {
     setDrawerOpen(true);
   };
 
-  const addFromCard = (p, i) => {
-    addToCart(p.name, p.flavors[0], selections[i].qty, p.price);
-    setSelections(s => ({ ...s, [i]: { ...s[i], added: true } }));
-    setTimeout(() => setSelections(s => ({ ...s, [i]: { ...s[i], added: false } })), 1500);
-  };
+
 
   const addFromOverlay = () => {
     if (!overlay) return;
@@ -878,7 +870,7 @@ export default function KindCrumb() {
 
       {/* BOTTOM TAB BAR */}
       <nav className="bottom-tab-bar">
-        <a href="#" className={`tab-item${activeTab === "home" ? " active" : ""}`}><Home size={18} strokeWidth={1.5} /><span>Home</span></a>
+        <button className={`tab-item${activeTab === "home" ? " active" : ""}`} onClick={() => window.scrollTo({top:0,behavior:"smooth"})}><Home size={18} strokeWidth={1.5} /><span>Home</span></button>
         <a href="#products" className={`tab-item${activeTab === "products" ? " active" : ""}`}><ShoppingBag size={18} strokeWidth={1.5} /><span>Menu</span></a>
         <button className="tab-cart-btn" onClick={() => setDrawerOpen(true)}>
           {totalItems > 0 && <span className="tab-cart-count">{totalItems}</span>}
