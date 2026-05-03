@@ -509,9 +509,6 @@ export default function KindCrumb() {
       const y = window.scrollY;
       setNavScrolled(y > 60);
       const mid = y + 80;
-      const how = document.querySelector(".how-section");
-
-
       const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }, { id: "blog", el: document.getElementById("blog") }];
       let cur = "home";
       secs.forEach(({ id, el }) => { if (el && el.offsetTop <= y + window.innerHeight / 2) cur = id; });
