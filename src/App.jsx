@@ -442,22 +442,22 @@ body::-webkit-scrollbar { width: 0; display: none; }
 `;
 
 const products = [
-  { tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", flavors: ["Vanilla Bean", "Chocolate Fudge", "Red Velvet", "Lemon Raspberry", "Carrot Cake"], desc: "Perfectly portioned mini cakes for any occasion. Available in a variety of classic flavors, baked fresh.", price: "From R65" },
+  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", flavors: ["Cinnamon Sugar", "Vanilla Glaze", "Lemon Glaze", "Chocolate Dip"], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
+  { tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", categories: [{ name: "Flavours & Pricing", options: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"] }], flavors: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"], desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42" },
   { tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", flavors: ["Classic (R25)"], categories: [
     { name: "Classic Rolls", options: ["Classic (R25)", "Classic + Nuts/Coconut (R35)", "Iced (R30)", "CinnaCream (R45)"] },
     { name: "Speciality Rolls", options: ["Almond Delight (R55)", "Chocolate Dream (R55)", "Royal Oreo (R55)", "Caramel Swirl (R55)"] },
     { name: "Available as Packs", options: ["Classic 4-Pack (R90)", "Classic 6-Pack (R130)", "Classic 12-Pack (R250)", "Speciality 4-Pack (R200)", "Speciality 6-Pack (R290)", "Speciality 12-Pack (R580)"] }
   ], desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25" },
-  { tag: "Fresh Fried", name: "Cinnamon Sugar Donuts", image: "donuts.webp", flavors: ["Classic Cinnamon Sugar", "Glazed", "Chocolate Dipped"], desc: "Golden fried donuts rolled in warm cinnamon sugar. Crispy outside, pillowy inside — best enjoyed fresh.", price: "From R25" },
   { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: ["Brown Butter Choc Chip", "Double Chocolate", "Macadamia Nut", "Oatmeal Raisin"], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
-  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Classic Vanilla", "Pistachio", "Rose", "Saffron"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
-];
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Pistachio", "Almond", "Coconut", "Strawberry", "Blueberry (coming soon)", "Chocolate (coming soon)"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+]
 
 const weeklyBake = {
-  name: "Cinnamon\nSugar Donuts",
-  desc: "This week's featured bake — golden fried donuts rolled in warm cinnamon sugar. Crispy outside, pillowy inside. Limited run, available until Sunday.",
-  meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Fried Fresh" }, { icon: Wheat, label: "Eggless" }],
-  productIdx: 2,
+  name: "Fresh\nDonut Bites",
+  desc: "This week's featured bake — golden fried donut bites rolled in cinnamon sugar. A limited batch, available until Sunday.",
+  meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Fried fresh" }, { icon: Wheat, label: "Eggless" }],
+  productIdx: 0,
 };
 
 function useReveal() {
