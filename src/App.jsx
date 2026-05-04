@@ -448,15 +448,16 @@ const products = [
     { name: "Speciality Rolls", options: ["Almond Delight (R55)", "Chocolate Dream (R55)", "Royal Oreo (R55)", "Caramel Swirl (R55)"] },
     { name: "Available as Packs", options: ["Classic 4-Pack (R90)", "Classic 6-Pack (R130)", "Classic 12-Pack (R250)", "Speciality 4-Pack (R200)", "Speciality 6-Pack (R290)", "Speciality 12-Pack (R580)"] }
   ], desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25" },
-  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Classic Vanilla", "Pistachio", "Rose", "Saffron"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+  { tag: "Fresh Fried", name: "Cinnamon Sugar Donuts", image: "donuts.webp", flavors: ["Classic Cinnamon Sugar", "Glazed", "Chocolate Dipped"], desc: "Golden fried donuts rolled in warm cinnamon sugar. Crispy outside, pillowy inside — best enjoyed fresh.", price: "From R25" },
   { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: ["Brown Butter Choc Chip", "Double Chocolate", "Macadamia Nut", "Oatmeal Raisin"], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Classic Vanilla", "Pistachio", "Rose", "Saffron"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ];
 
 const weeklyBake = {
-  name: "Signature\nCinnamon Rolls",
-  desc: "This week's featured bake — our highly requested signature soft and fluffy cinnamon rolls. A limited run, available until Sunday.",
-  meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Baked Thursday" }, { icon: Wheat, label: "Eggless" }],
-  productIdx: 1,
+  name: "Cinnamon\nSugar Donuts",
+  desc: "This week's featured bake — golden fried donuts rolled in warm cinnamon sugar. Crispy outside, pillowy inside. Limited run, available until Sunday.",
+  meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Fried Fresh" }, { icon: Wheat, label: "Eggless" }],
+  productIdx: 2,
 };
 
 function useReveal() {
