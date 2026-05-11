@@ -210,6 +210,10 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .po-flavors { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
 .po-flavor-pill { font-size: 0.75rem; color: ${t.warm}; background: ${t.sand}; padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
 .po-flavor-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
+.po-flavor-img-pill { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: ${t.warm}; background: ${t.sand}; padding: 0.3rem 0.75rem 0.3rem 0.3rem; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
+.po-flavor-img-pill img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.po-flavor-img-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
+.po-flavor-img-pill.selected img { outline: 2px solid ${t.cream}44; }
 .po-order-row { display: flex; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid ${t.sand}; }
 .po-price { font-size: 0.88rem; font-weight: 500; color: ${t.brown}; flex: 1; }
 .po-qty-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid ${t.tan}; background: transparent; color: ${t.brown}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
@@ -443,7 +447,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 
 const products = [
   { tag: "This Week", name: "Donut Bites", image: "donuts.webp", flavors: ["Cinnamon Sugar", "Vanilla Glaze", "Lemon Glaze", "Chocolate Dip"], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
-  { tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", categories: [{ name: "Flavours & Pricing", options: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"] }], flavors: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"], desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42" },
+  { tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", categories: [{ name: "Flavours & Pricing", options: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"] }], flavors: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"], flavorImages: { "Chocolate – R45ea": "choc.webp", "Red Velvet – R48ea": "redvelvet.webp", "Hot Chocolate – R48ea": "hotchocholate.webp", "Burfi – R42ea": "burfee.webp", "Carrot Cake – R45ea": "carrotclosup.webp" }, desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42" },
   { tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", flavors: ["Classic (R25)"], categories: [
     { name: "Classic Rolls", options: ["Classic (R25)", "Classic + Nuts/Coconut (R35)", "Iced (R30)", "CinnaCream (R45)"] },
     { name: "Speciality Rolls", options: ["Almond Delight (R55)", "Chocolate Dream (R55)", "Royal Oreo (R55)", "Caramel Swirl (R55)"] },
@@ -613,9 +617,17 @@ export default function KindCrumb() {
                     <div key={ci}>
                       <p className="po-flavor-label" style={{ marginBottom: "0.6rem" }}>{cat.name}</p>
                       <div className="po-flavors" style={{ marginBottom: 0 }}>
-                        {cat.options.map((f, i) => (
-                          <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
-                        ))}
+                        {cat.options.map((f, i) => {
+                          const imgSrc = overlay.product.flavorImages?.[f];
+                          return imgSrc ? (
+                            <span key={i} className={`po-flavor-img-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>
+                              <img src={`/images/${imgSrc}`} alt={f} />
+                              {f}
+                            </span>
+                          ) : (
+                            <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
