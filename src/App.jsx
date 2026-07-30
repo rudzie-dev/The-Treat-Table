@@ -2,12 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
   BookOpen, Home, Plus, Minus, ArrowRight, ShoppingCart,
-  Clock, Flame, Wheat
+  Clock, Flame, Wheat, Star, Quote
 } from "lucide-react";
 
 const t = {
   cream: "#F5F0E8", sand: "#E8DCC8", tan: "#C9B99A",
   brown: "#6B4F35", dark: "#3D2B1A", esp: "#1C1008", warm: "#A07850",
+  // Darker than `warm`, used for body copy on cream/sand backgrounds so
+  // paragraph text clears the WCAG AA 4.5:1 contrast ratio (warm itself
+  // only reaches ~3.5:1, fine for icons/labels but not for reading text).
+  warmText: "#7A5A3D",
 };
 
 const fonts = ``; // Fonts loaded via <link> in index.html
@@ -116,13 +120,13 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .drawer-body { flex: 1; overflow-y: auto; padding: 0 1.5rem; }
 .drawer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 1rem; padding: 3rem 0; }
 .drawer-empty-icon { color: ${t.tan}; }
-.drawer-empty-text { font-size: 0.85rem; color: ${t.warm}; text-align: center; line-height: 1.7; }
+.drawer-empty-text { font-size: 0.85rem; color: ${t.warmText}; text-align: center; line-height: 1.7; }
 .drawer-empty-cta { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.brown}; background: none; border: 1px solid ${t.tan}; padding: 0.6rem 1.25rem; border-radius: 2px; cursor: pointer; transition: all 0.2s; }
 .drawer-empty-cta:hover { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
 .drawer-line { display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem 0; border-bottom: 1px solid ${t.sand}; }
 .drawer-line-info { flex: 1; }
 .drawer-line-name { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 400; color: ${t.dark}; margin-bottom: 0.15rem; }
-.drawer-line-flavor { font-size: 0.72rem; color: ${t.warm}; }
+.drawer-line-flavor { font-size: 0.72rem; color: ${t.warmText}; }
 .drawer-line-price { font-size: 0.72rem; color: ${t.brown}; margin-top: 0.25rem; }
 .drawer-line-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; padding-top: 0.2rem; }
 .dqty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid ${t.tan}; background: transparent; color: ${t.brown}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
@@ -138,7 +142,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .d-input:focus, .d-textarea:focus { border-bottom-color: ${t.brown}; }
 .d-textarea { resize: vertical; min-height: 60px; }
 .drawer-foot { padding: 1.25rem 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.75rem; }
-.drawer-note { font-size: 0.68rem; color: ${t.warm}; font-style: italic; }
+.drawer-note { font-size: 0.68rem; color: ${t.warmText}; font-style: italic; }
 .drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 2px; width: 100%; transition: background 0.2s; }
 .drawer-wa-btn:hover { background: ${t.esp}; }
 .drawer-wa-alt { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: ${t.brown}; text-decoration: none; padding: 0.5rem; transition: color 0.2s; }
@@ -205,12 +209,13 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .po-tag { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.4rem; }
 .po-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; margin-bottom: 1rem; }
 .po-name em { font-style: italic; }
-.po-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warm}; line-height: 1.85; margin-bottom: 1.75rem; }
+.po-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.85; margin-bottom: 1.75rem; }
 .po-flavor-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; }
 .po-flavors { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
-.po-flavor-pill { font-size: 0.75rem; color: ${t.warm}; background: ${t.sand}; padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
+.po-flavor-pill { font: inherit; font-size: 0.75rem; color: ${t.warmText}; background: ${t.sand}; padding: 0.5rem 0.9rem; min-height: 44px; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
+.po-flavor-pill:focus-visible, .po-flavor-img-pill:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
 .po-flavor-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
-.po-flavor-img-pill { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: ${t.warm}; background: ${t.sand}; padding: 0.3rem 0.75rem 0.3rem 0.3rem; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
+.po-flavor-img-pill { font: inherit; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: ${t.warmText}; background: ${t.sand}; padding: 0.3rem 0.75rem 0.3rem 0.3rem; min-height: 44px; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
 .po-flavor-img-pill img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .po-flavor-img-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
 .po-flavor-img-pill.selected img { outline: 2px solid ${t.cream}44; }
@@ -250,7 +255,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .hero-eyebrow::before { content: ''; display: block; width: 1.5rem; height: 1px; background: ${t.tan}; flex-shrink: 0; }
 .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem, 9vw, 3.5rem); font-weight: 300; line-height: 1.05; color: ${t.dark}; margin-bottom: 0.75rem; opacity: 1; animation: fadeUp 0.9s 0.35s forwards; }
 .hero-title em { font-style: italic; color: ${t.brown}; }
-.hero-sub { font-size: 0.85rem; font-weight: 300; line-height: 1.7; color: ${t.warm}; margin-bottom: 1.75rem; opacity: 1; animation: fadeUp 0.9s 0.5s forwards; max-width: 340px; }
+.hero-sub { font-size: 0.85rem; font-weight: 300; line-height: 1.7; color: ${t.warmText}; margin-bottom: 1.75rem; opacity: 1; animation: fadeUp 0.9s 0.5s forwards; max-width: 340px; }
 .hero-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s 0.65s forwards; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .btn-primary { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; color: ${t.cream}; background: ${t.dark}; padding: 0.85rem 1.75rem; border-radius: 2px; text-decoration: none; text-transform: uppercase; transition: background 0.2s, transform 0.2s; border: none; cursor: pointer; display: inline-block; }
@@ -290,6 +295,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
   position: relative; width: 100%; aspect-ratio: 3/4;
   overflow: hidden; cursor: pointer;
 }
+.menu-card-img-wrap:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
 .menu-card-img-bg {
   position: absolute; inset: 0;
   background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%);
@@ -355,9 +361,40 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .weekly-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
 .weekly-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.15; margin-bottom: 0.75rem; }
 .weekly-name em { font-style: italic; }
-.weekly-desc { font-size: 0.84rem; font-weight: 300; color: ${t.warm}; line-height: 1.8; margin-bottom: 1.25rem; }
+.weekly-desc { font-size: 0.84rem; font-weight: 300; color: ${t.warmText}; line-height: 1.8; margin-bottom: 1.25rem; }
 .weekly-meta { display: flex; gap: 1.25rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
 .weekly-meta-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: ${t.brown}; }
+
+/* ── ABOUT ── */
+.about-section { padding: 3.5rem 1.25rem; border-top: 1px solid ${t.sand}; }
+.about-grid { display: flex; flex-direction: column; gap: 1.75rem; }
+.about-img { width: 100%; aspect-ratio: 4/3; border-radius: 2px; overflow: hidden; background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%); }
+.about-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.about-body { display: flex; flex-direction: column; }
+.about-text { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.85; margin-bottom: 1rem; }
+.about-text:last-child { margin-bottom: 0; }
+.about-signoff { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: ${t.dark}; margin-top: 0.75rem; }
+
+/* ── TESTIMONIALS ── */
+.testi-section { padding: 3.5rem 1.25rem; background: ${t.sand}55; }
+.testi-grid { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+.testi-card { background: ${t.cream}; border: 1px solid ${t.sand}; border-radius: 3px; padding: 1.5rem 1.5rem 1.35rem; position: relative; }
+.testi-quote-icon { color: ${t.tan}; margin-bottom: 0.75rem; }
+.testi-stars { display: flex; gap: 0.15rem; margin-bottom: 0.85rem; color: ${t.warm}; }
+.testi-text { font-size: 0.85rem; font-weight: 300; color: ${t.dark}; line-height: 1.75; margin-bottom: 1.1rem; }
+.testi-meta { display: flex; align-items: center; justify-content: space-between; }
+.testi-name { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 500; color: ${t.dark}; }
+.testi-source { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.warm}; }
+
+/* ── GALLERY ── */
+.gallery-section { padding: 3.5rem 1.25rem; border-top: 1px solid ${t.sand}; }
+.gallery-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.75rem; }
+.gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+.gallery-item { position: relative; aspect-ratio: 1/1; overflow: hidden; border-radius: 2px; background: ${t.sand}; }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.gallery-item:hover img { transform: scale(1.06); }
+.gallery-ig-link { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: ${t.brown}; text-decoration: none; transition: color 0.2s; }
+.gallery-ig-link:hover { color: ${t.dark}; }
 
 /* ── JOURNAL ── */
 .blog-section { padding: 3.5rem 1.25rem; background: ${t.sand}55; }
@@ -373,11 +410,17 @@ body::-webkit-scrollbar { width: 0; display: none; }
 /* ── FOOTER ── */
 .footer { background: ${t.esp}; padding: 2.5rem 1.25rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; border-top: 1px solid ${t.dark}; }
 .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.cream}; text-transform: uppercase; }
-.footer-tagline { font-size: 0.73rem; font-weight: 300; color: ${t.brown}; line-height: 1.6; margin-top: 0.3rem; }
+.footer-tagline { font-size: 0.73rem; font-weight: 300; color: ${t.tan}; line-height: 1.6; margin-top: 0.3rem; }
 .footer-links { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
-.footer-links a { font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.brown}; text-decoration: none; transition: color 0.2s; }
-.footer-links a:hover { color: ${t.cream}; }
-.footer-bottom { font-size: 0.62rem; color: ${t.brown}44; padding-top: 0.75rem; border-top: 1px solid ${t.dark}88; }
+.footer-links a { font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.tan}; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover, .footer-links a:focus-visible { color: ${t.cream}; }
+.footer-col-title { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: ${t.tan}; margin-bottom: 0.65rem; }
+.footer-contact { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.footer-contact li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.72rem; color: ${t.tan}; line-height: 1.5; }
+.footer-contact a { color: ${t.tan}; text-decoration: none; transition: color 0.2s; }
+.footer-contact a:hover, .footer-contact a:focus-visible { color: ${t.cream}; }
+.footer-contact svg { flex-shrink: 0; margin-top: 0.15rem; color: ${t.tan}; }
+.footer-bottom { font-size: 0.62rem; color: ${t.tan}cc; padding-top: 0.75rem; border-top: 1px solid ${t.dark}88; }
 
 /* ── DESKTOP 768+ ── */
 @media (min-width: 768px) {
@@ -435,12 +478,26 @@ body::-webkit-scrollbar { width: 0; display: none; }
   .weekly-img { aspect-ratio: unset; order: 2; overflow: hidden; display: flex; min-height: 500px; position: relative; }
   .weekly-body { padding: 3rem 3rem; display: flex; flex-direction: column; justify-content: center; order: 1; }
 
+  /* ABOUT */
+  .about-section { padding: 6rem 3rem; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .about-img { aspect-ratio: 1/1; }
+  .about-body { justify-content: center; }
+
+  /* TESTIMONIALS */
+  .testi-section { padding: 6rem 3rem; }
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+
+  /* GALLERY */
+  .gallery-section { padding: 6rem 3rem; }
+  .gallery-grid { grid-template-columns: repeat(6, 1fr); gap: 0.75rem; }
+
   /* JOURNAL */
   .blog-section { padding: 6rem 3rem; }
   .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; flex-direction: unset; }
 
   /* FOOTER */
-  .footer { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2.5rem; flex-direction: unset; align-items: end; padding: 3rem; }
+  .footer { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2.5rem; flex-direction: unset; align-items: start; padding: 3rem; }
   .footer-bottom { grid-column: 1 / -1; text-align: right; }
 }
 `;
@@ -456,6 +513,30 @@ const products = [
   { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: ["Brown Butter Choc Chip", "Double Chocolate", "Macadamia Nut", "Oatmeal Raisin"], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
   { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Pistachio", "Almond", "Coconut", "Strawberry", "Blueberry (coming soon)", "Chocolate (coming soon)"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ]
+
+const testimonials = [
+  {
+    name: "Maneesha Domun",
+    source: "Google Reviews",
+    stars: 5,
+    text: "Five stars for Kind Crumb! The cakes are incredible, but the packaging is what truly sets them apart. Seeing each item so thoughtfully and securely wrapped was impressive. Highly recommend!",
+  },
+  {
+    name: "Lakshmi Mohan",
+    source: "Facebook",
+    stars: 5,
+    text: "All her cakes are vegetarian with vegan options — as a vegetarian it's difficult to find nice treats. The burfee cake was decadent with delicious frosting and cardamom flavour. Everyone loved the carrot cake best, rich and moist. The hot chocolate cake was to die for, with a rich chocolate ganache.",
+  },
+];
+
+const aboutStory = {
+  eyebrow: "Our story",
+  paragraphs: [
+    "Kind Crumb started the way most good things do — in a home kitchen, with a family recipe and no intention of becoming anything more than a treat for friends.",
+    "Every order is still baked in small batches, always eggless, and packed with the same care whether it's a single box of cookies or a full celebration order. Nothing sits pre-made — it's made when you ask for it.",
+  ],
+  signoff: "— Renata, founder of Kind Crumb",
+};
 
 const weeklyBake = {
   name: "Fresh\nDonut Bites",
@@ -478,6 +559,36 @@ function useReveal() {
 function R({ children, d = 0, className = "", style = {} }) {
   const ref = useReveal();
   return <div ref={ref} className={`reveal${d ? ` reveal-d${d}` : ""} ${className}`} style={style}>{children}</div>;
+}
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function useFocusTrap(active, containerRef, onClose) {
+  const prevFocus = useRef(null);
+  useEffect(() => {
+    if (!active) return;
+    prevFocus.current = document.activeElement;
+    const el = containerRef.current;
+    const focusables = () => el ? Array.from(el.querySelectorAll(FOCUSABLE)) : [];
+    const first = focusables()[0];
+    if (first) first.focus(); else el?.focus();
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (!items.length) return;
+      const firstEl = items[0], lastEl = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === firstEl) { e.preventDefault(); lastEl.focus(); }
+      else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); firstEl.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      prevFocus.current?.focus?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- containerRef is stable; onClose is re-created per render but we intentionally only re-arm on `active` change
+  }, [active]);
 }
 
 function SkeletonCard() {
@@ -508,6 +619,11 @@ export default function KindCrumb() {
   const [activeTab, setActiveTab] = useState("home");
 
   const [navScrolled, setNavScrolled] = useState(false);
+
+  const drawerRef = useRef(null);
+  const overlayRef = useRef(null);
+  useFocusTrap(drawerOpen, drawerRef, () => setDrawerOpen(false));
+  useFocusTrap(!!overlay && !overlayClosing, overlayRef, () => closeOverlay());
 
   useEffect(() => {
     const onScroll = () => {
@@ -604,10 +720,10 @@ export default function KindCrumb() {
       {/* PRODUCT OVERLAY */}
       <div className={`product-overlay${overlay ? " open" : ""}${overlayClosing ? " closing" : ""}`} onClick={e => { if (e.target === e.currentTarget) closeOverlay(); }}>
         {overlay && (
-          <div className="po-card">
+          <div className="po-card" ref={overlayRef} role="dialog" aria-modal="true" aria-label={`${overlay.product.name} details`}>
             <div className="po-img"><img src={`/images/${overlay.product.image}`} alt={overlay.product.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
             <div className="po-body">
-              <button className="po-close" onClick={closeOverlay}><X size={16} strokeWidth={1.5} /></button>
+              <button className="po-close" onClick={closeOverlay} aria-label="Close"><X size={16} strokeWidth={1.5} /></button>
               <p className="po-tag">{overlay.product.tag}</p>
               <h2 className="po-name">{overlay.product.name}</h2>
               <p className="po-desc">{overlay.product.desc}</p>
@@ -620,12 +736,12 @@ export default function KindCrumb() {
                         {cat.options.map((f, i) => {
                           const imgSrc = overlay.product.flavorImages?.[f];
                           return imgSrc ? (
-                            <span key={i} className={`po-flavor-img-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>
-                              <img src={`/images/${imgSrc}`} alt={f} />
+                            <button key={i} type="button" className={`po-flavor-img-pill${overlay.flavor === f ? " selected" : ""}`} aria-pressed={overlay.flavor === f} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>
+                              <img src={`/images/${imgSrc}`} alt="" loading="lazy" width="28" height="28" />
                               {f}
-                            </span>
+                            </button>
                           ) : (
-                            <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
+                            <button key={i} type="button" className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} aria-pressed={overlay.flavor === f} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</button>
                           );
                         })}
                       </div>
@@ -637,16 +753,16 @@ export default function KindCrumb() {
                   <p className="po-flavor-label">Choose your flavour</p>
                   <div className="po-flavors">
                     {overlay.product.flavors.map((f, i) => (
-                      <span key={i} className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</span>
+                      <button key={i} type="button" className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} aria-pressed={overlay.flavor === f} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</button>
                     ))}
                   </div>
                 </>
               )}
               <div className="po-order-row">
                 <span className="po-price">{overlay.product.price}</span>
-                <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: Math.max(1, o.qty - 1) }))}><Minus size={12} strokeWidth={2} /></button>
-                <span className="po-qty-val">{overlay.qty}</span>
-                <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: o.qty + 1 }))}><Plus size={12} strokeWidth={2} /></button>
+                <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: Math.max(1, o.qty - 1) }))} aria-label="Decrease quantity"><Minus size={12} strokeWidth={2} /></button>
+                <span className="po-qty-val" aria-live="polite">{overlay.qty}</span>
+                <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: o.qty + 1 }))} aria-label="Increase quantity"><Plus size={12} strokeWidth={2} /></button>
                 <button className={`po-add-btn${overlay.added ? " added" : ""}`} onClick={addFromOverlay}>
                   {overlay.added ? "Added" : <><Plus size={12} strokeWidth={2} />Add to order</>}
                 </button>
@@ -662,10 +778,10 @@ export default function KindCrumb() {
       </div>
 
       {/* CART DRAWER */}
-      <div className={`drawer${drawerOpen ? " open" : ""}`}>
+      <div className={`drawer${drawerOpen ? " open" : ""}`} ref={drawerRef} role="dialog" aria-modal="true" aria-label="Your order" aria-hidden={!drawerOpen}>
         <div className="drawer-head">
           <h2 className="drawer-title">Your <em>order</em></h2>
-          <button className="drawer-close" onClick={() => setDrawerOpen(false)}><X size={20} strokeWidth={1.5} /></button>
+          <button className="drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close cart"><X size={20} strokeWidth={1.5} /></button>
         </div>
         <div className="drawer-body">
           {cart.length === 0 ? (
@@ -684,9 +800,9 @@ export default function KindCrumb() {
                     <p className="drawer-line-price">{c.price}</p>
                   </div>
                   <div className="drawer-line-actions">
-                    <button className="dqty-btn" onClick={() => updateCartQty(i, -1)}><Minus size={11} strokeWidth={2} /></button>
-                    <span className="dqty-val">{c.qty}</span>
-                    <button className="dqty-btn" onClick={() => updateCartQty(i, 1)}><Plus size={11} strokeWidth={2} /></button>
+                    <button className="dqty-btn" onClick={() => updateCartQty(i, -1)} aria-label={`Decrease quantity of ${c.name}`}><Minus size={11} strokeWidth={2} /></button>
+                    <span className="dqty-val" aria-live="polite">{c.qty}</span>
+                    <button className="dqty-btn" onClick={() => updateCartQty(i, 1)} aria-label={`Increase quantity of ${c.name}`}><Plus size={11} strokeWidth={2} /></button>
                   </div>
                 </div>
               ))}
@@ -719,14 +835,15 @@ export default function KindCrumb() {
         </a>
         <ul className="nav-links">
           <li><a href="#products">Menu</a></li>
-          <li><a href="#how">How it works</a></li>
+          <li><a href="#about">Our Story</a></li>
+          <li><a href="#testimonials">Reviews</a></li>
           <li><a href="#blog">Journal</a></li>
         </ul>
         <div className="nav-right">
           <a href="https://wa.me/27689536500" className="nav-wa" target="_blank" rel="noreferrer">
             <MessageCircle size={13} strokeWidth={1.5} /> Order via WhatsApp
           </a>
-          <button className="nav-cart-btn" onClick={() => setDrawerOpen(true)}>
+          <button className="nav-cart-btn" onClick={() => setDrawerOpen(true)} aria-label={`Open cart${totalItems > 0 ? `, ${totalItems} items` : ""}`}>
             <ShoppingCart size={19} strokeWidth={1.5} />
             {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
           </button>
@@ -773,10 +890,17 @@ export default function KindCrumb() {
         <div className="menu-scroll-track">
           {products.map((p, i) => (
             <div key={i} className="menu-card">
-              <div className="menu-card-img-wrap" onClick={() => openOverlay(p)}>
-                <img src={`/images/${p.image}`} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+              <div
+                className="menu-card-img-wrap"
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${p.name} details`}
+                onClick={() => openOverlay(p)}
+                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOverlay(p); } }}
+              >
+                <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="300" height="400" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
                 <div className="menu-card-plus">
-                  <button className="menu-card-plus-btn" onClick={e => { e.stopPropagation(); openOverlay(p); }}>
+                  <button className="menu-card-plus-btn" onClick={e => { e.stopPropagation(); openOverlay(p); }} aria-label={`View ${p.name} details`}>
                     <Plus size={20} strokeWidth={1.5} />
                   </button>
                 </div>
@@ -830,7 +954,7 @@ export default function KindCrumb() {
         </R>
         <R d={1}>
           <div className="weekly-inner">
-            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name.replace("\n", " ")} loading="lazy" width="600" height="600" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
             <div className="weekly-body">
               <div className="weekly-eyebrow"><Flame size={12} color={t.warm} strokeWidth={1.5} />Limited this week</div>
               <h3 className="weekly-name">
@@ -843,6 +967,68 @@ export default function KindCrumb() {
               <button className="btn-primary" onClick={() => openOverlay(products[weeklyBake.productIdx])}>Order This Bake</button>
             </div>
           </div>
+        </R>
+      </section>
+
+      {/* ABOUT */}
+      <section id="about" className="about-section">
+        <div className="about-grid">
+          <R className="about-img">
+            <img src="/images/burfeecloseup.webp" alt="Close-up of a freshly baked Kind Crumb burfee mini cake, showing the frosting and texture" loading="lazy" width="600" height="600" />
+          </R>
+          <R d={1} className="about-body">
+            <p className="section-label">{aboutStory.eyebrow}</p>
+            <h2 className="section-title" style={{ marginBottom: "1.25rem" }}>Baked with <em>kindness</em>,<br />by hand, in Ladysmith.</h2>
+            {aboutStory.paragraphs.map((p, i) => <p key={i} className="about-text">{p}</p>)}
+            <p className="about-signoff">{aboutStory.signoff}</p>
+          </R>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section id="testimonials" className="testi-section">
+        <R>
+          <p className="section-label">What people say</p>
+          <h2 className="section-title">Loved by <em>Ladysmith</em></h2>
+        </R>
+        <div className="testi-grid">
+          {testimonials.map((tm, i) => (
+            <R key={i} d={i + 1} className="testi-card">
+              <Quote size={20} strokeWidth={1.5} className="testi-quote-icon" />
+              <div className="testi-stars" aria-label={`${tm.stars} out of 5 stars`}>
+                {Array.from({ length: tm.stars }).map((_, s) => <Star key={s} size={13} strokeWidth={1.5} fill="currentColor" />)}
+              </div>
+              <p className="testi-text">"{tm.text}"</p>
+              <div className="testi-meta">
+                <span className="testi-name">{tm.name}</span>
+                <span className="testi-source">{tm.source}</span>
+              </div>
+            </R>
+          ))}
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <section id="gallery" className="gallery-section">
+        <R className="gallery-header">
+          <div>
+            <p className="section-label">Follow along</p>
+            <h2 className="section-title">From our <em>kitchen</em></h2>
+          </div>
+        </R>
+        <R d={1}>
+          <div className="gallery-grid">
+            {["cinnamon-rolls", "redvelvet", "cookies", "milk-cake", "donuts", "carrotclosup"].map((img, i) => (
+              <div key={i} className="gallery-item">
+                <img src={`/images/${img}.webp`} alt={`Kind Crumb bake — ${img.replace(/[-.]/g, " ")}`} loading="lazy" width="300" height="300" />
+              </div>
+            ))}
+          </div>
+        </R>
+        <R d={2} style={{ marginTop: "1.5rem" }}>
+          <a href="https://wa.me/27689536500" className="gallery-ig-link" target="_blank" rel="noreferrer">
+            <MessageCircle size={14} strokeWidth={1.5} /> See more of our bakes on WhatsApp
+          </a>
         </R>
       </section>
 
@@ -868,10 +1054,17 @@ export default function KindCrumb() {
         </div>
         <ul className="footer-links">
           <li><a href="#products">Menu</a></li>
+          <li><a href="#about">Our Story</a></li>
+          <li><a href="#testimonials">Reviews</a></li>
           <li><a href="#blog">Journal</a></li>
-          <li><a href="https://wa.me/27689536500">WhatsApp</a></li>
         </ul>
-        <div />
+        <div>
+          <p className="footer-col-title">Get in touch</p>
+          <ul className="footer-contact">
+            <li><MapPin size={13} strokeWidth={1.5} /> Ladysmith, KwaZulu-Natal</li>
+            <li><MessageCircle size={13} strokeWidth={1.5} /> <a href="https://wa.me/27689536500" target="_blank" rel="noreferrer">Order via WhatsApp — we reply within 24 hours</a></li>
+          </ul>
+        </div>
         <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
       </footer>
 
