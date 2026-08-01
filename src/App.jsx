@@ -211,6 +211,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .po-name em { font-style: italic; }
 .po-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.85; margin-bottom: 1.75rem; }
 .po-flavor-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; }
+.po-flavor-sublabel { font-size: 0.66rem; font-weight: 500; color: ${t.brown}; margin-bottom: 0.5rem; }
 .po-flavors { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
 .po-flavor-pill { font: inherit; font-size: 0.75rem; color: ${t.warmText}; background: ${t.sand}; padding: 0.5rem 0.9rem; min-height: 44px; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
 .po-flavor-pill:focus-visible, .po-flavor-img-pill:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
@@ -502,17 +503,82 @@ body::-webkit-scrollbar { width: 0; display: none; }
 }
 `;
 
+// Two variant models, matching how prices actually depend on choices:
+//  - `flavors`: a single attribute where each option may carry its own price
+//    (e.g. Mini Cakes — price depends only on which flavour you pick).
+//  - `flavorGroups` + `quantities`: two independent attributes (flavour and
+//    pack size) where price depends on the combination of both — flavour
+//    determines a price "tier", quantity picks a price within that tier.
 const products = [
   { tag: "This Week", name: "Donut Bites", image: "donuts.webp", flavors: ["Cinnamon Sugar", "Vanilla Glaze", "Lemon Glaze", "Chocolate Dip"], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
-  { tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", categories: [{ name: "Flavours & Pricing", options: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"] }], flavors: ["Chocolate – R45ea", "Red Velvet – R48ea", "Mocha – R45ea", "Hot Chocolate – R48ea", "Burfi – R42ea", "Vanilla – R42ea", "Carrot Cake – R45ea"], flavorImages: { "Chocolate – R45ea": "choc.webp", "Red Velvet – R48ea": "redvelvet.webp", "Hot Chocolate – R48ea": "hotchocholate.webp", "Burfi – R42ea": "burfee.webp", "Carrot Cake – R45ea": "carrotclosup.webp" }, desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42" },
-  { tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", flavors: ["Classic (R25)"], categories: [
-    { name: "Classic Rolls", options: ["Classic (R25)", "Classic + Nuts/Coconut (R35)", "Iced (R30)", "CinnaCream (R45)"] },
-    { name: "Speciality Rolls", options: ["Almond Delight (R55)", "Chocolate Dream (R55)", "Royal Oreo (R55)", "Caramel Swirl (R55)"] },
-    { name: "Available as Packs", options: ["Classic 4-Pack (R90)", "Classic 6-Pack (R130)", "Classic 12-Pack (R250)", "Speciality 4-Pack (R200)", "Speciality 6-Pack (R290)", "Speciality 12-Pack (R580)"] }
-  ], desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25" },
+  {
+    tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp",
+    flavors: [
+      { name: "Chocolate", price: 45, image: "choc.webp" },
+      { name: "Red Velvet", price: 48, image: "redvelvet.webp" },
+      { name: "Mocha", price: 45 },
+      { name: "Hot Chocolate", price: 48, image: "hotchocholate.webp" },
+      { name: "Burfi", price: 42, image: "burfee.webp" },
+      { name: "Vanilla", price: 42 },
+      { name: "Carrot Cake", price: 45, image: "carrotclosup.webp" },
+    ],
+    desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42",
+  },
+  {
+    tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp",
+    flavorGroups: [
+      { tier: "Classic", label: "Classic Rolls", flavors: [
+        { name: "Classic", price: 25 },
+        { name: "Classic + Nuts/Coconut", price: 35 },
+        { name: "Iced", price: 30 },
+        { name: "CinnaCream", price: 45 },
+      ] },
+      { tier: "Speciality", label: "Speciality Rolls", flavors: [
+        { name: "Almond Delight", price: 55 },
+        { name: "Chocolate Dream", price: 55 },
+        { name: "Royal Oreo", price: 55 },
+        { name: "Caramel Swirl", price: 55 },
+      ] },
+    ],
+    quantities: [
+      { key: "single", label: "Single" },
+      { key: "pack4", label: "4-Pack", tierPrice: { Classic: 90, Speciality: 200 } },
+      { key: "pack6", label: "6-Pack", tierPrice: { Classic: 130, Speciality: 290 } },
+      { key: "pack12", label: "12-Pack", tierPrice: { Classic: 250, Speciality: 580 } },
+    ],
+    desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25",
+  },
   { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: ["Brown Butter Choc Chip", "Double Chocolate", "Macadamia Nut", "Oatmeal Raisin"], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
   { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Pistachio", "Almond", "Coconut", "Strawberry", "Blueberry (coming soon)", "Chocolate (coming soon)"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ]
+
+function flavorTier(product, flavorName) {
+  const group = product.flavorGroups.find(g => g.flavors.some(f => f.name === flavorName));
+  return group?.tier;
+}
+function flavorPrice(product, flavorName) {
+  for (const g of product.flavorGroups) {
+    const f = g.flavors.find(f => f.name === flavorName);
+    if (f) return f.price;
+  }
+  return null;
+}
+function unitPrice(overlay) {
+  const { product, flavor, quantity } = overlay;
+  if (product.flavorGroups) {
+    if (!quantity || quantity === "single") return flavorPrice(product, flavor);
+    const q = product.quantities.find(q => q.key === quantity);
+    return q ? q.tierPrice[flavorTier(product, flavor)] : null;
+  }
+  if (Array.isArray(product.flavors) && typeof product.flavors[0] === "object") {
+    return product.flavors.find(f => f.name === flavor)?.price ?? null;
+  }
+  return null;
+}
+function priceLabel(overlay) {
+  const p = unitPrice(overlay);
+  return p != null ? `R${p}` : overlay.product.price;
+}
 
 const testimonials = [
   {
@@ -673,7 +739,14 @@ export default function KindCrumb() {
     return () => { window.removeEventListener("scroll", update); clearTimeout(scrollTimer.current); };
   }, []);
 
-  const openOverlay = (product) => { setOverlayClosing(false); setOverlay({ product, flavor: product.categories ? product.categories[0].options[0] : product.flavors[0], qty: 1, added: false }); };
+  const openOverlay = (product) => {
+    setOverlayClosing(false);
+    let flavor;
+    if (product.flavorGroups) flavor = product.flavorGroups[0].flavors[0].name;
+    else if (typeof product.flavors[0] === "object") flavor = product.flavors[0].name;
+    else flavor = product.flavors[0];
+    setOverlay({ product, flavor, quantity: "single", qty: 1, added: false });
+  };
   const closeOverlay = () => { setOverlayClosing(true); setTimeout(() => { setOverlay(null); setOverlayClosing(false); }, 260); };
 
   const addToCart = (name, flavor, qty, price) => {
@@ -689,7 +762,9 @@ export default function KindCrumb() {
 
   const addFromOverlay = () => {
     if (!overlay) return;
-    addToCart(overlay.product.name, overlay.flavor, overlay.qty, overlay.product.price);
+    const qtyLabel = overlay.product.quantities?.find(q => q.key === overlay.quantity)?.label;
+    const flavorLabel = qtyLabel && overlay.quantity !== "single" ? `${overlay.flavor} · ${qtyLabel}` : overlay.flavor;
+    addToCart(overlay.product.name, flavorLabel, overlay.qty, priceLabel(overlay));
     setOverlay(o => ({ ...o, added: true }));
     setTimeout(() => closeOverlay(), 1100);
   };
@@ -727,27 +802,44 @@ export default function KindCrumb() {
               <p className="po-tag">{overlay.product.tag}</p>
               <h2 className="po-name">{overlay.product.name}</h2>
               <p className="po-desc">{overlay.product.desc}</p>
-              {overlay.product.categories ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "2rem" }}>
-                  {overlay.product.categories.map((cat, ci) => (
-                    <div key={ci}>
-                      <p className="po-flavor-label" style={{ marginBottom: "0.6rem" }}>{cat.name}</p>
-                      <div className="po-flavors" style={{ marginBottom: 0 }}>
-                        {cat.options.map((f, i) => {
-                          const imgSrc = overlay.product.flavorImages?.[f];
-                          return imgSrc ? (
-                            <button key={i} type="button" className={`po-flavor-img-pill${overlay.flavor === f ? " selected" : ""}`} aria-pressed={overlay.flavor === f} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>
-                              <img src={`/images/${imgSrc}`} alt="" loading="lazy" width="28" height="28" />
-                              {f}
-                            </button>
-                          ) : (
-                            <button key={i} type="button" className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} aria-pressed={overlay.flavor === f} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</button>
-                          );
-                        })}
+              {overlay.product.flavorGroups ? (
+                <>
+                  <p className="po-flavor-label">Choose your flavour</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "1.5rem" }}>
+                    {overlay.product.flavorGroups.map((g) => (
+                      <div key={g.tier}>
+                        <p className="po-flavor-sublabel">{g.label}</p>
+                        <div className="po-flavors" style={{ marginBottom: 0 }}>
+                          {g.flavors.map((f) => (
+                            <button key={f.name} type="button" className={`po-flavor-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>{f.name}</button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  <p className="po-flavor-label">Quantity</p>
+                  <div className="po-flavors">
+                    {overlay.product.quantities.map((q) => (
+                      <button key={q.key} type="button" className={`po-flavor-pill${overlay.quantity === q.key ? " selected" : ""}`} aria-pressed={overlay.quantity === q.key} onClick={() => setOverlay(o => ({ ...o, quantity: q.key }))}>{q.label}</button>
+                    ))}
+                  </div>
+                </>
+              ) : typeof overlay.product.flavors[0] === "object" ? (
+                <>
+                  <p className="po-flavor-label">Choose your flavour</p>
+                  <div className="po-flavors">
+                    {overlay.product.flavors.map((f) => (
+                      f.image ? (
+                        <button key={f.name} type="button" className={`po-flavor-img-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>
+                          <img src={`/images/${f.image}`} alt="" loading="lazy" width="28" height="28" />
+                          {f.name}
+                        </button>
+                      ) : (
+                        <button key={f.name} type="button" className={`po-flavor-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>{f.name}</button>
+                      )
+                    ))}
+                  </div>
+                </>
               ) : (
                 <>
                   <p className="po-flavor-label">Choose your flavour</p>
@@ -759,7 +851,7 @@ export default function KindCrumb() {
                 </>
               )}
               <div className="po-order-row">
-                <span className="po-price">{overlay.product.price}</span>
+                <span className="po-price">{priceLabel(overlay)}</span>
                 <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: Math.max(1, o.qty - 1) }))} aria-label="Decrease quantity"><Minus size={12} strokeWidth={2} /></button>
                 <span className="po-qty-val" aria-live="polite">{overlay.qty}</span>
                 <button className="po-qty-btn" onClick={() => setOverlay(o => ({ ...o, qty: o.qty + 1 }))} aria-label="Increase quantity"><Plus size={12} strokeWidth={2} /></button>
