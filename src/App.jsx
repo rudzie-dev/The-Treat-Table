@@ -510,7 +510,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 //    pack size) where price depends on the combination of both — flavour
 //    determines a price "tier", quantity picks a price within that tier.
 const products = [
-  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", flavors: ["Cinnamon Sugar", "Vanilla Glaze", "Lemon Glaze", "Chocolate Dip"], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
+  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", flavors: [{ name: "Cinnamon Sugar" }, { name: "Vanilla Glaze" }, { name: "Lemon Glaze" }, { name: "Chocolate Dip" }], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
   {
     tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp",
     flavors: [
@@ -548,8 +548,8 @@ const products = [
     ],
     desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25",
   },
-  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: ["Brown Butter Choc Chip", "Double Chocolate", "Macadamia Nut", "Oatmeal Raisin"], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
-  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: ["Pistachio", "Almond", "Coconut", "Strawberry", "Blueberry (coming soon)", "Chocolate (coming soon)"], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ]
 
 function flavorTier(product, flavorName) {
@@ -570,10 +570,7 @@ function unitPrice(overlay) {
     const q = product.quantities.find(q => q.key === quantity);
     return q ? q.tierPrice[flavorTier(product, flavor)] : null;
   }
-  if (Array.isArray(product.flavors) && typeof product.flavors[0] === "object") {
-    return product.flavors.find(f => f.name === flavor)?.price ?? null;
-  }
-  return null;
+  return product.flavors.find(f => f.name === flavor)?.price ?? null;
 }
 function priceLabel(overlay) {
   const p = unitPrice(overlay);
@@ -741,10 +738,7 @@ export default function KindCrumb() {
 
   const openOverlay = (product) => {
     setOverlayClosing(false);
-    let flavor;
-    if (product.flavorGroups) flavor = product.flavorGroups[0].flavors[0].name;
-    else if (typeof product.flavors[0] === "object") flavor = product.flavors[0].name;
-    else flavor = product.flavors[0];
+    const flavor = product.flavorGroups ? product.flavorGroups[0].flavors[0].name : product.flavors[0].name;
     setOverlay({ product, flavor, quantity: "single", qty: 1, added: false });
   };
   const closeOverlay = () => { setOverlayClosing(true); setTimeout(() => { setOverlay(null); setOverlayClosing(false); }, 260); };
@@ -824,7 +818,7 @@ export default function KindCrumb() {
                     ))}
                   </div>
                 </>
-              ) : typeof overlay.product.flavors[0] === "object" ? (
+              ) : (
                 <>
                   <p className="po-flavor-label">Choose your flavour</p>
                   <div className="po-flavors">
@@ -837,15 +831,6 @@ export default function KindCrumb() {
                       ) : (
                         <button key={f.name} type="button" className={`po-flavor-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>{f.name}</button>
                       )
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="po-flavor-label">Choose your flavour</p>
-                  <div className="po-flavors">
-                    {overlay.product.flavors.map((f, i) => (
-                      <button key={i} type="button" className={`po-flavor-pill${overlay.flavor === f ? " selected" : ""}`} aria-pressed={overlay.flavor === f} onClick={() => setOverlay(o => ({ ...o, flavor: f }))}>{f}</button>
                     ))}
                   </div>
                 </>
