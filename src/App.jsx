@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
   BookOpen, Home, Plus, Minus, ArrowRight, ShoppingCart,
-  Clock, Flame, Wheat, Star, Quote
+  Clock, Flame, Wheat, Star, Quote, Check
 } from "lucide-react";
 
 const t = {
@@ -214,12 +214,23 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .po-flavor-sublabel { font-size: 0.66rem; font-weight: 500; color: ${t.brown}; margin-bottom: 0.5rem; }
 .po-flavors { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
 .po-flavor-pill { font: inherit; font-size: 0.75rem; color: ${t.warmText}; background: ${t.sand}; padding: 0.5rem 0.9rem; min-height: 44px; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
-.po-flavor-pill:focus-visible, .po-flavor-img-pill:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
+.po-flavor-pill:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
 .po-flavor-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
-.po-flavor-img-pill { font: inherit; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: ${t.warmText}; background: ${t.sand}; padding: 0.3rem 0.75rem 0.3rem 0.3rem; min-height: 44px; border-radius: 20px; border: 1px solid ${t.tan}88; cursor: pointer; transition: all 0.15s; }
-.po-flavor-img-pill img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-.po-flavor-img-pill.selected { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
-.po-flavor-img-pill.selected img { outline: 2px solid ${t.cream}44; }
+
+/* Flavor card grid — one visual language whether or not a flavor has a
+   photo, so picking a flavour reads as "browsing bakes" instead of
+   "reading a list of buttons". Cards without a photo fall back to the
+   same placeholder gradient used elsewhere on the site (po-img, menu
+   cards) rather than a blank tile. */
+.flavor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 0.6rem; margin-bottom: 2rem; }
+.flavor-card { font: inherit; position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; padding: 0; cursor: pointer; border: 2px solid transparent; background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%); transition: border-color 0.15s, transform 0.15s; }
+.flavor-card:hover { transform: translateY(-2px); }
+.flavor-card:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
+.flavor-card.selected { border-color: ${t.brown}; }
+.flavor-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.flavor-card-check { position: absolute; top: 0.3rem; right: 0.3rem; width: 18px; height: 18px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; display: flex; align-items: center; justify-content: center; }
+.flavor-card-label { position: absolute; inset-inline: 0; bottom: 0; padding: 0.4rem 0.35rem 0.3rem; font-size: 0.64rem; font-weight: 500; line-height: 1.25; color: ${t.cream}; text-align: center; background: linear-gradient(to top, ${t.esp}cc 0%, transparent 100%); }
+.flavor-card-price { display: block; font-size: 0.58rem; font-weight: 400; opacity: 0.85; margin-top: 0.1rem; }
 .po-order-row { display: flex; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid ${t.sand}; }
 .po-price { font-size: 0.88rem; font-weight: 500; color: ${t.brown}; flex: 1; }
 .po-qty-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid ${t.tan}; background: transparent; color: ${t.brown}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
@@ -654,6 +665,25 @@ function useFocusTrap(active, containerRef, onClose) {
   }, [active]);
 }
 
+function FlavorCard({ flavor, selected, onSelect }) {
+  return (
+    <button
+      type="button"
+      className={`flavor-card${selected ? " selected" : ""}`}
+      aria-pressed={selected}
+      aria-label={flavor.price ? `${flavor.name}, R${flavor.price}` : flavor.name}
+      onClick={onSelect}
+    >
+      {flavor.image && <img src={`/images/${flavor.image}`} alt="" loading="lazy" width="96" height="96" />}
+      {selected && <span className="flavor-card-check"><Check size={11} strokeWidth={2.5} /></span>}
+      <span className="flavor-card-label">
+        {flavor.name}
+        {flavor.price != null && <span className="flavor-card-price">R{flavor.price}</span>}
+      </span>
+    </button>
+  );
+}
+
 function SkeletonCard() {
   return (
     <div className="blog-card">
@@ -803,9 +833,9 @@ export default function KindCrumb() {
                     {overlay.product.flavorGroups.map((g) => (
                       <div key={g.tier}>
                         <p className="po-flavor-sublabel">{g.label}</p>
-                        <div className="po-flavors" style={{ marginBottom: 0 }}>
+                        <div className="flavor-grid" style={{ marginBottom: 0 }}>
                           {g.flavors.map((f) => (
-                            <button key={f.name} type="button" className={`po-flavor-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>{f.name}</button>
+                            <FlavorCard key={f.name} flavor={f} selected={overlay.flavor === f.name} onSelect={() => setOverlay(o => ({ ...o, flavor: f.name }))} />
                           ))}
                         </div>
                       </div>
@@ -821,16 +851,9 @@ export default function KindCrumb() {
               ) : (
                 <>
                   <p className="po-flavor-label">Choose your flavour</p>
-                  <div className="po-flavors">
+                  <div className="flavor-grid">
                     {overlay.product.flavors.map((f) => (
-                      f.image ? (
-                        <button key={f.name} type="button" className={`po-flavor-img-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>
-                          <img src={`/images/${f.image}`} alt="" loading="lazy" width="28" height="28" />
-                          {f.name}
-                        </button>
-                      ) : (
-                        <button key={f.name} type="button" className={`po-flavor-pill${overlay.flavor === f.name ? " selected" : ""}`} aria-pressed={overlay.flavor === f.name} onClick={() => setOverlay(o => ({ ...o, flavor: f.name }))}>{f.name}</button>
-                      )
+                      <FlavorCard key={f.name} flavor={f} selected={overlay.flavor === f.name} onSelect={() => setOverlay(o => ({ ...o, flavor: f.name }))} />
                     ))}
                   </div>
                 </>
