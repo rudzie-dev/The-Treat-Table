@@ -327,39 +327,46 @@ body {
 .menu-intro { padding: 6rem 1.25rem 2.5rem; text-align: center; }
 
 /* ── MENU SHOWCASE — one product per scroll-reveal, flat alternating blocks ── */
-.showcase-section { padding: 3.5rem 1.25rem; overflow: hidden; }
-.showcase-grid { display: flex; flex-direction: column; gap: 2rem; max-width: 1100px; margin: 0 auto; }
-.showcase-img-wrap { width: 100%; aspect-ratio: 4/5; border-radius: 3px; overflow: hidden; }
+.showcase-section { background: ${t.cream}; padding: 1.5rem 1.25rem; }
+.showcase-card { position: relative; overflow: visible; border-radius: 28px; max-width: 1100px; margin: 0 auto; padding: 4.5rem 1.75rem 2.5rem; }
+.showcase-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.showcase-img-wrap {
+  width: 100%; aspect-ratio: 4/5; border-radius: 20px; overflow: hidden;
+  margin: -4.5rem 0 0; box-shadow: 0 20px 44px ${t.esp}33;
+}
 .showcase-body { display: flex; flex-direction: column; align-items: flex-start; }
-.showcase-tag { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.showcase-badge { display: inline-block; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
 .showcase-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; margin-bottom: 1rem; }
 .showcase-desc { font-size: 0.92rem; font-weight: 300; line-height: 1.8; margin-bottom: 1.25rem; max-width: 460px; }
 .showcase-price { font-size: 1rem; font-weight: 500; margin-bottom: 1.75rem; }
-.showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.75rem; border-radius: 2px; transition: transform 0.15s, background 0.2s; }
+.showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.9rem; border-radius: 999px; transition: transform 0.15s, background 0.2s; }
 .showcase-cta:hover { transform: translateY(-1px); }
 
-.showcase-dark { background: ${t.esp}; }
-.showcase-dark .showcase-tag, .showcase-dark .showcase-price { color: ${t.tan}; }
+.showcase-dark .showcase-card { background: ${t.esp}; }
+.showcase-dark .showcase-badge { background: ${t.cream}; color: ${t.esp}; }
+.showcase-dark .showcase-price { color: ${t.tan}; }
 .showcase-dark .showcase-name { color: ${t.cream}; }
 .showcase-dark .showcase-desc { color: ${t.tan}; }
 .showcase-dark .showcase-cta { background: ${t.cream}; color: ${t.esp}; }
 .showcase-dark .showcase-cta:hover { background: ${t.sand}; }
 
-.showcase-light { background: ${t.cream}; }
-.showcase-light .showcase-tag { color: ${t.warm}; }
+.showcase-light .showcase-card { background: ${t.sand}; }
+.showcase-light .showcase-badge { background: ${t.esp}; color: ${t.cream}; }
 .showcase-light .showcase-name { color: ${t.dark}; }
 .showcase-light .showcase-desc { color: ${t.warmText}; }
 .showcase-light .showcase-price { color: ${t.brown}; }
 .showcase-light .showcase-cta { background: ${t.esp}; color: ${t.cream}; }
 .showcase-light .showcase-cta:hover { background: ${t.dark}; }
 
-.showcase-brown { background: ${t.brown}; }
-.showcase-brown .showcase-tag, .showcase-brown .showcase-price { color: ${t.sand}; }
+.showcase-brown .showcase-card { background: ${t.brown}; }
+.showcase-brown .showcase-badge { background: ${t.cream}; color: ${t.brown}; }
+.showcase-brown .showcase-price { color: ${t.sand}; }
 .showcase-brown .showcase-name { color: ${t.cream}; }
 .showcase-brown .showcase-desc { color: ${t.sand}; }
 .showcase-brown .showcase-cta { background: ${t.cream}; color: ${t.brown}; }
 .showcase-brown .showcase-cta:hover { background: ${t.sand}; }
 
+.full-menu-section { background: ${t.esp}; padding: 3.5rem 1.25rem; }
 .full-menu-section .section-label { color: ${t.tan}; text-align: center; }
 .full-menu-section .section-title { color: ${t.cream}; text-align: center; margin-bottom: 2.5rem; }
 .full-menu-grid { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -528,11 +535,12 @@ body {
 
   /* MENU INTRO + SHOWCASE — desktop */
   .menu-intro { padding: 8rem 3rem 3rem; }
-  .showcase-section { padding: 6rem 3rem; }
+  .showcase-section { padding: 3rem; }
+  .showcase-card { padding: 4rem; }
   .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
-  .showcase-reverse .showcase-img-wrap { order: 2; }
+  .showcase-img-wrap { aspect-ratio: 1/1; margin: 0 0 0 -6rem; }
+  .showcase-reverse .showcase-img-wrap { order: 2; margin: 0 -6rem 0 0; }
   .showcase-reverse .showcase-body { order: 1; }
-  .showcase-img-wrap { aspect-ratio: 1/1; }
   .full-menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
   .menu-card-img-wrap { aspect-ratio: 3/4; }
 
@@ -1208,17 +1216,17 @@ export default function KindCrumb() {
         </R>
       </section>
 
-      {/* MENU SHOWCASE — one featured product per scroll, flat alternating color blocks */}
+      {/* MENU SHOWCASE — one featured product per scroll, flat alternating color cards */}
       {products.slice(0, 3).map((p, i) => {
         const variant = ["showcase-dark", "showcase-light", "showcase-brown"][i % 3];
         return (
           <section key={p.name} className={`showcase-section ${variant}${i % 2 === 1 ? " showcase-reverse" : ""}`}>
-            <R className="showcase-grid">
+            <R className="showcase-card showcase-grid">
               <div className="showcase-img-wrap">
                 <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="600" height="750" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
               </div>
               <div className="showcase-body">
-                <p className="showcase-tag">{p.tag}</p>
+                <p className="showcase-badge">{p.tag}</p>
                 <h3 className="showcase-name">{p.name}</h3>
                 <p className="showcase-desc">{p.desc}</p>
                 <p className="showcase-price">{p.price}</p>
@@ -1230,7 +1238,7 @@ export default function KindCrumb() {
       })}
 
       {/* FULL MENU */}
-      <section id="full-menu" className="showcase-section showcase-dark full-menu-section">
+      <section id="full-menu" className="full-menu-section">
         <R>
           <p className="section-label">Everything we bake</p>
           <h2 className="section-title">View Full <em>Menu</em></h2>
