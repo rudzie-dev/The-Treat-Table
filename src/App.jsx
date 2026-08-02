@@ -587,6 +587,11 @@ function priceLabel(overlay) {
   const p = unitPrice(overlay);
   return p != null ? `R${p}` : overlay.product.price;
 }
+function overlayImage(overlay) {
+  const { product, flavor } = overlay;
+  const flavors = product.flavorGroups ? product.flavorGroups.flatMap(g => g.flavors) : product.flavors;
+  return flavors.find(f => f.name === flavor)?.image ?? product.image;
+}
 
 const testimonials = [
   {
@@ -820,7 +825,7 @@ export default function KindCrumb() {
       <div className={`product-overlay${overlay ? " open" : ""}${overlayClosing ? " closing" : ""}`} onClick={e => { if (e.target === e.currentTarget) closeOverlay(); }}>
         {overlay && (
           <div className="po-card" ref={overlayRef} role="dialog" aria-modal="true" aria-label={`${overlay.product.name} details`}>
-            <div className="po-img"><img src={`/images/${overlay.product.image}`} alt={overlay.product.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="po-img"><img src={`/images/${overlayImage(overlay)}`} alt={`${overlay.product.name} — ${overlay.flavor}`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
             <div className="po-body">
               <button className="po-close" onClick={closeOverlay} aria-label="Close"><X size={16} strokeWidth={1.5} /></button>
               <p className="po-tag">{overlay.product.tag}</p>
