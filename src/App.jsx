@@ -338,35 +338,20 @@ body {
 /* ── MENU INTRO — breathing room between hero and showcase ── */
 .menu-intro { padding: 6rem 1.25rem 2.5rem; text-align: center; }
 
-/* ── MENU SHOWCASE — photo-first cards; the color+info panel is revealed
-   on hover (desktop) or when scrolled into center-focus (touch/mobile) ── */
-.showcase-section { background: ${t.cream}; padding: 1.5rem 1.25rem; }
-.showcase-outer { max-width: 1000px; margin: 0 auto; }
-.showcase-card {
-  position: relative; border-radius: 28px; overflow: hidden;
-  aspect-ratio: 4/5; box-shadow: 0 20px 44px ${t.esp}22; cursor: pointer;
-}
-.showcase-card:focus-visible { outline: 3px solid ${t.brown}; outline-offset: 3px; }
-.showcase-photo { position: absolute; inset: 0; }
-.showcase-photo img { transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
-.showcase-card:hover .showcase-photo img, .showcase-card.in-focus .showcase-photo img { transform: scale(1.05); }
-.showcase-overlay {
-  position: absolute; inset: 0; z-index: 1;
-  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
-  padding: 2.5rem; opacity: 0; transition: opacity 0.4s ease;
-  pointer-events: none;
-}
-.showcase-card:hover .showcase-overlay,
-.showcase-card.in-focus .showcase-overlay,
-.showcase-card:focus-within .showcase-overlay {
-  opacity: 1; pointer-events: all;
-}
-.showcase-badge { display: inline-block; background: ${t.cream}; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
-.showcase-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; margin-bottom: 1rem; color: ${t.cream}; }
-.showcase-desc { font-size: 0.92rem; font-weight: 300; line-height: 1.8; margin-bottom: 1.25rem; max-width: 420px; color: ${t.cream}; }
-.showcase-price { font-size: 1rem; font-weight: 500; margin-bottom: 1.75rem; color: ${t.cream}; }
-.showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; background: ${t.cream}; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.9rem; border-radius: 999px; transition: transform 0.15s; }
-.showcase-cta:hover { transform: translateY(-1px); }
+/* ── MENU SHOWCASE — plain alternating rows; text always visible, the photo
+   sits in its own block tinted with that product's matched color ── */
+.showcase-row-section { background: ${t.cream}; padding: 2.5rem 1.25rem; }
+.showcase-row { display: flex; flex-direction: column; gap: 1.75rem; max-width: 1000px; margin: 0 auto; }
+.showcase-photo-block { padding: 1rem; border-radius: 20px; aspect-ratio: 1/1; }
+.showcase-photo-block img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
+.showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; }
+.showcase-badge { display: inline-block; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
+.showcase-row-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; }
+.showcase-row-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.75; margin-bottom: 0.75rem; max-width: 420px; }
+.showcase-row-price { font-size: 0.85rem; font-weight: 500; color: ${t.brown}; margin-bottom: 1.25rem; }
+.showcase-row-links { display: flex; align-items: center; gap: 1.75rem; }
+.showcase-link { background: none; border: none; padding: 0; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.03em; cursor: pointer; color: ${t.dark}; text-decoration: underline; text-underline-offset: 3px; transition: opacity 0.15s; }
+.showcase-link:hover { opacity: 0.6; }
 
 /* ── HOW IT WORKS ── */
 .how-section { padding: 3.5rem 1.25rem; background: ${t.dark}; }
@@ -480,9 +465,11 @@ body {
 
   /* MENU INTRO + SHOWCASE — desktop */
   .menu-intro { padding: 8rem 3rem 3rem; }
-  .showcase-section { padding: 3rem; }
-  .showcase-card { aspect-ratio: 21/9; }
-  .showcase-overlay { padding: 4rem; }
+  .showcase-row-section { padding: 4rem 3rem; }
+  .showcase-row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
+  .showcase-photo-block { max-width: 420px; margin: 0 auto; }
+  .showcase-reverse .showcase-photo-block { order: 2; }
+  .showcase-reverse .showcase-row-body { order: 1; }
 
   /* PRODUCT OVERLAY — side-by-side on desktop */
   .po-card { grid-template-columns: 1fr 1fr; max-height: 80vh; }
@@ -742,54 +729,24 @@ function useFocusTrap(active, containerRef, onClose) {
   }, [active]);
 }
 
-// Toggles a re-triggerable "in-focus" class whenever the element sits in the
-// vertical center band of the viewport — the touch-device equivalent of
-// :hover, so scrolling to a showcase card and pausing on it reveals its
-// color/info overlay the same way a mouse hover would on desktop.
-function useScrollFocus(ref) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    // Desktop already gets the reveal from :hover — only simulate it via
-    // scroll position on devices that can't hover (touch/mobile), so
-    // scrolling a card into view on desktop doesn't reveal it prematurely.
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { el.classList.toggle("in-focus", entry.isIntersecting); },
-      { threshold: 0.4, rootMargin: "-25% 0px -25% 0px" }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [ref]);
-}
-
-function ShowcaseCard({ product: p, onOpen }) {
+function ShowcaseRow({ product: p, reverse, onOpen }) {
   const revealRef = useReveal();
-  const focusRef = useRef(null);
-  useScrollFocus(focusRef);
   const color = p.showcaseColor;
   const open = () => onOpen(p);
   return (
-    <section className="showcase-section">
-      <div ref={revealRef} className="reveal showcase-outer">
-        <div
-          ref={focusRef}
-          className="showcase-card"
-          role="button"
-          tabIndex={0}
-          aria-label={`View ${p.name} details`}
-          onClick={open}
-          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
-        >
-          <div className="showcase-photo">
-            <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="800" height="1000" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
-          </div>
-          <div className="showcase-overlay" style={{ background: color }}>
-            <p className="showcase-badge" style={{ color }}>{p.tag}</p>
-            <h3 className="showcase-name">{p.name}</h3>
-            <p className="showcase-desc">{p.desc}</p>
-            <p className="showcase-price">{p.price}</p>
-            <button className="showcase-cta" style={{ color }} onClick={e => { e.stopPropagation(); open(); }}>View & Add <ArrowRight size={14} strokeWidth={1.5} /></button>
+    <section className="showcase-row-section">
+      <div ref={revealRef} className={`reveal showcase-row${reverse ? " showcase-reverse" : ""}`}>
+        <div className="showcase-photo-block" style={{ background: color }}>
+          <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+        <div className="showcase-row-body">
+          <p className="showcase-badge" style={{ background: `${color}1a`, color }}>{p.tag}</p>
+          <h3 className="showcase-row-name">{p.name}</h3>
+          <p className="showcase-row-desc">{p.desc}</p>
+          <p className="showcase-row-price">{p.price}</p>
+          <div className="showcase-row-links">
+            <button className="showcase-link" onClick={open}>Learn More</button>
+            <button className="showcase-link showcase-link-primary" style={{ color }} onClick={open}>Order Now</button>
           </div>
         </div>
       </div>
@@ -1243,10 +1200,10 @@ function HomePage({ openOverlay }) {
         </R>
       </section>
 
-      {/* MENU SHOWCASE — the entire menu, one product per scroll; photo-first,
-          color reveals on hover (desktop) or scroll-and-stop focus (mobile) */}
-      {products.map((p) => (
-        <ShowcaseCard key={p.name} product={p} onOpen={openOverlay} />
+      {/* MENU SHOWCASE — the entire menu, alternating rows, photo tinted with
+          that product's matched color, text always visible */}
+      {products.map((p, i) => (
+        <ShowcaseRow key={p.name} product={p} reverse={i % 2 === 1} onOpen={openOverlay} />
       ))}
     </>
   );
