@@ -326,45 +326,35 @@ body {
 /* ── MENU INTRO — breathing room between hero and showcase ── */
 .menu-intro { padding: 6rem 1.25rem 2.5rem; text-align: center; }
 
-/* ── MENU SHOWCASE — one product per scroll-reveal, flat alternating blocks ── */
+/* ── MENU SHOWCASE — photo-first cards; the color+info panel is revealed
+   on hover (desktop) or when scrolled into center-focus (touch/mobile) ── */
 .showcase-section { background: ${t.cream}; padding: 1.5rem 1.25rem; }
-.showcase-card { position: relative; overflow: visible; border-radius: 28px; max-width: 1100px; margin: 0 auto; padding: 4.5rem 1.75rem 2.5rem; }
-.showcase-grid { display: flex; flex-direction: column; gap: 1.5rem; }
-.showcase-img-wrap {
-  width: 100%; aspect-ratio: 4/5; border-radius: 20px; overflow: hidden;
-  margin: -4.5rem 0 0; box-shadow: 0 20px 44px ${t.esp}33;
+.showcase-outer { max-width: 1000px; margin: 0 auto; }
+.showcase-card {
+  position: relative; border-radius: 28px; overflow: hidden;
+  aspect-ratio: 4/5; box-shadow: 0 20px 44px ${t.esp}22; cursor: pointer;
 }
-.showcase-body { display: flex; flex-direction: column; align-items: flex-start; }
-.showcase-badge { display: inline-block; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
-.showcase-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; margin-bottom: 1rem; }
-.showcase-desc { font-size: 0.92rem; font-weight: 300; line-height: 1.8; margin-bottom: 1.25rem; max-width: 460px; }
-.showcase-price { font-size: 1rem; font-weight: 500; margin-bottom: 1.75rem; }
-.showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.9rem; border-radius: 999px; transition: transform 0.15s, background 0.2s; }
+.showcase-card:focus-visible { outline: 3px solid ${t.brown}; outline-offset: 3px; }
+.showcase-photo { position: absolute; inset: 0; }
+.showcase-photo img { transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.showcase-card:hover .showcase-photo img, .showcase-card.in-focus .showcase-photo img { transform: scale(1.05); }
+.showcase-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  padding: 2.5rem; opacity: 0; transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.showcase-card:hover .showcase-overlay,
+.showcase-card.in-focus .showcase-overlay,
+.showcase-card:focus-within .showcase-overlay {
+  opacity: 1; pointer-events: all;
+}
+.showcase-badge { display: inline-block; background: ${t.cream}; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
+.showcase-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; margin-bottom: 1rem; color: ${t.cream}; }
+.showcase-desc { font-size: 0.92rem; font-weight: 300; line-height: 1.8; margin-bottom: 1.25rem; max-width: 420px; color: ${t.cream}; }
+.showcase-price { font-size: 1rem; font-weight: 500; margin-bottom: 1.75rem; color: ${t.cream}; }
+.showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; background: ${t.cream}; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.9rem; border-radius: 999px; transition: transform 0.15s; }
 .showcase-cta:hover { transform: translateY(-1px); }
-
-.showcase-dark .showcase-card { background: ${t.esp}; }
-.showcase-dark .showcase-badge { background: ${t.cream}; color: ${t.esp}; }
-.showcase-dark .showcase-price { color: ${t.tan}; }
-.showcase-dark .showcase-name { color: ${t.cream}; }
-.showcase-dark .showcase-desc { color: ${t.tan}; }
-.showcase-dark .showcase-cta { background: ${t.cream}; color: ${t.esp}; }
-.showcase-dark .showcase-cta:hover { background: ${t.sand}; }
-
-.showcase-light .showcase-card { background: ${t.sand}; }
-.showcase-light .showcase-badge { background: ${t.esp}; color: ${t.cream}; }
-.showcase-light .showcase-name { color: ${t.dark}; }
-.showcase-light .showcase-desc { color: ${t.warmText}; }
-.showcase-light .showcase-price { color: ${t.brown}; }
-.showcase-light .showcase-cta { background: ${t.esp}; color: ${t.cream}; }
-.showcase-light .showcase-cta:hover { background: ${t.dark}; }
-
-.showcase-brown .showcase-card { background: ${t.brown}; }
-.showcase-brown .showcase-badge { background: ${t.cream}; color: ${t.brown}; }
-.showcase-brown .showcase-price { color: ${t.sand}; }
-.showcase-brown .showcase-name { color: ${t.cream}; }
-.showcase-brown .showcase-desc { color: ${t.sand}; }
-.showcase-brown .showcase-cta { background: ${t.cream}; color: ${t.brown}; }
-.showcase-brown .showcase-cta:hover { background: ${t.sand}; }
 
 .full-menu-section { background: ${t.esp}; padding: 3.5rem 1.25rem; }
 .full-menu-section .section-label { color: ${t.tan}; text-align: center; }
@@ -536,11 +526,8 @@ body {
   /* MENU INTRO + SHOWCASE — desktop */
   .menu-intro { padding: 8rem 3rem 3rem; }
   .showcase-section { padding: 3rem; }
-  .showcase-card { padding: 4rem; }
-  .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
-  .showcase-img-wrap { aspect-ratio: 1/1; margin: 0 0 0 -6rem; }
-  .showcase-reverse .showcase-img-wrap { order: 2; margin: 0 -6rem 0 0; }
-  .showcase-reverse .showcase-body { order: 1; }
+  .showcase-card { aspect-ratio: 21/9; }
+  .showcase-overlay { padding: 4rem; }
   .full-menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
   .menu-card-img-wrap { aspect-ratio: 3/4; }
 
@@ -599,9 +586,9 @@ body {
 //    pack size) where price depends on the combination of both — flavour
 //    determines a price "tier", quantity picks a price within that tier.
 const products = [
-  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", flavors: [{ name: "Cinnamon Sugar" }, { name: "Vanilla Glaze" }, { name: "Lemon Glaze" }, { name: "Chocolate Dip" }], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
+  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", showcaseColor: "#955431", flavors: [{ name: "Cinnamon Sugar" }, { name: "Vanilla Glaze" }, { name: "Lemon Glaze" }, { name: "Chocolate Dip" }], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
   {
-    tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp",
+    tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", showcaseColor: "#7F5C41",
     flavors: [
       { name: "Chocolate", price: 45, image: "choc.webp" },
       { name: "Red Velvet", price: 48, image: "redvelvet.webp" },
@@ -614,7 +601,7 @@ const products = [
     desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42",
   },
   {
-    tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp",
+    tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", showcaseColor: "#8A4C24",
     flavorGroups: [
       { tier: "Classic", label: "Classic Rolls", flavors: [
         { name: "Classic", price: 25 },
@@ -783,6 +770,61 @@ function useFocusTrap(active, containerRef, onClose) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- containerRef is stable; onClose is re-created per render but we intentionally only re-arm on `active` change
   }, [active]);
+}
+
+// Toggles a re-triggerable "in-focus" class whenever the element sits in the
+// vertical center band of the viewport — the touch-device equivalent of
+// :hover, so scrolling to a showcase card and pausing on it reveals its
+// color/info overlay the same way a mouse hover would on desktop.
+function useScrollFocus(ref) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Desktop already gets the reveal from :hover — only simulate it via
+    // scroll position on devices that can't hover (touch/mobile), so
+    // scrolling a card into view on desktop doesn't reveal it prematurely.
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { el.classList.toggle("in-focus", entry.isIntersecting); },
+      { threshold: 0.4, rootMargin: "-25% 0px -25% 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [ref]);
+}
+
+function ShowcaseCard({ product: p, onOpen }) {
+  const revealRef = useReveal();
+  const focusRef = useRef(null);
+  useScrollFocus(focusRef);
+  const color = p.showcaseColor;
+  const open = () => onOpen(p);
+  return (
+    <section className="showcase-section">
+      <div ref={revealRef} className="reveal showcase-outer">
+        <div
+          ref={focusRef}
+          className="showcase-card"
+          role="button"
+          tabIndex={0}
+          aria-label={`View ${p.name} details`}
+          onClick={open}
+          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
+        >
+          <div className="showcase-photo">
+            <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="800" height="1000" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+          </div>
+          <div className="showcase-overlay" style={{ background: color }}>
+            <p className="showcase-badge" style={{ color }}>{p.tag}</p>
+            <h3 className="showcase-name">{p.name}</h3>
+            <p className="showcase-desc">{p.desc}</p>
+            <p className="showcase-price">{p.price}</p>
+            <button className="showcase-cta" style={{ color }} onClick={e => { e.stopPropagation(); open(); }}>View & Add <ArrowRight size={14} strokeWidth={1.5} /></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function ProductCard({ product: p, onOpen }) {
@@ -1216,26 +1258,11 @@ export default function KindCrumb() {
         </R>
       </section>
 
-      {/* MENU SHOWCASE — one featured product per scroll, flat alternating color cards */}
-      {products.slice(0, 3).map((p, i) => {
-        const variant = ["showcase-dark", "showcase-light", "showcase-brown"][i % 3];
-        return (
-          <section key={p.name} className={`showcase-section ${variant}${i % 2 === 1 ? " showcase-reverse" : ""}`}>
-            <R className="showcase-card showcase-grid">
-              <div className="showcase-img-wrap">
-                <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="600" height="750" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
-              </div>
-              <div className="showcase-body">
-                <p className="showcase-badge">{p.tag}</p>
-                <h3 className="showcase-name">{p.name}</h3>
-                <p className="showcase-desc">{p.desc}</p>
-                <p className="showcase-price">{p.price}</p>
-                <button className="showcase-cta" onClick={() => openOverlay(p)}>View & Add <ArrowRight size={14} strokeWidth={1.5} /></button>
-              </div>
-            </R>
-          </section>
-        );
-      })}
+      {/* MENU SHOWCASE — one featured product per scroll; photo-first, color
+          reveals on hover (desktop) or scroll-and-stop focus (mobile) */}
+      {products.slice(0, 3).map((p) => (
+        <ShowcaseCard key={p.name} product={p} onOpen={openOverlay} />
+      ))}
 
       {/* FULL MENU */}
       <section id="full-menu" className="full-menu-section">
