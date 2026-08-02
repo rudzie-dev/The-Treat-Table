@@ -218,7 +218,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .po-close:hover { background: ${t.tan}; }
 
 .po-img {
-  width: 100%; aspect-ratio: 16/7;
+  width: 100%; aspect-ratio: 4/5;
   background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
