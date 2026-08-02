@@ -338,20 +338,41 @@ body {
 /* ── MENU INTRO — breathing room between hero and showcase ── */
 .menu-intro { padding: 6rem 1.25rem 2.5rem; text-align: center; }
 
-/* ── MENU SHOWCASE — plain alternating rows; text always visible, the photo
-   sits in its own block tinted with that product's matched color ── */
+/* ── MENU SHOWCASE — alternating rows that start plain and "light up" with
+   that product's matched color once scrolled into view (one-time, via the
+   same reveal/visible mechanism the rest of the site uses for entrances) ── */
 .showcase-row-section { background: ${t.cream}; padding: 2.5rem 1.25rem; }
-.showcase-row { display: flex; flex-direction: column; gap: 1.75rem; max-width: 1000px; margin: 0 auto; }
-.showcase-photo-block { padding: 1rem; border-radius: 20px; aspect-ratio: 1/1; }
-.showcase-photo-block img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
+.showcase-card {
+  position: relative; max-width: 1000px; margin: 0 auto;
+  border-radius: 28px; overflow: visible;
+  padding: 4.5rem 1.75rem 2.5rem;
+  background-color: transparent;
+  transition: background-color 0.7s ease;
+}
+.showcase-row.visible .showcase-card { background-color: var(--pcolor); }
+.showcase-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.showcase-photo-block {
+  width: 100%; aspect-ratio: 4/5; border-radius: 20px; overflow: hidden;
+  margin: -4.5rem 0 0; box-shadow: 0 20px 44px ${t.esp}22;
+}
+.showcase-photo-block img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; }
-.showcase-badge { display: inline-block; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
-.showcase-row-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; }
-.showcase-row-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.75; margin-bottom: 0.75rem; max-width: 420px; }
-.showcase-row-price { font-size: 0.85rem; font-weight: 500; color: ${t.brown}; margin-bottom: 1.25rem; }
-.showcase-row-links { display: flex; align-items: center; gap: 1.75rem; }
-.showcase-link { background: none; border: none; padding: 0; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.03em; cursor: pointer; color: ${t.dark}; text-decoration: underline; text-underline-offset: 3px; transition: opacity 0.15s; }
-.showcase-link:hover { opacity: 0.6; }
+.showcase-badge { display: inline-block; background: ${t.sand}; color: ${t.brown}; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
+.showcase-row-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; transition: color 0.7s ease; }
+.showcase-row.visible .showcase-row-name { color: ${t.cream}; }
+.showcase-row-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.75; margin-bottom: 0.75rem; max-width: 420px; transition: color 0.7s ease; }
+.showcase-row.visible .showcase-row-desc { color: ${t.cream}; }
+.showcase-row-price { font-size: 0.85rem; font-weight: 500; color: ${t.brown}; margin-bottom: 1.25rem; transition: color 0.7s ease; }
+.showcase-row.visible .showcase-row-price { color: ${t.cream}; }
+.showcase-row-links { display: flex; align-items: center; gap: 1rem; }
+.showcase-link {
+  background: none; border: 1px solid transparent; padding: 0; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 500; cursor: pointer; color: ${t.dark};
+  text-decoration: underline; text-underline-offset: 3px;
+  transition: color 0.5s ease, border-color 0.5s ease, background-color 0.5s ease, padding 0.5s ease;
+}
+.showcase-row.visible .showcase-link { color: ${t.esp}; border-color: ${t.esp}; padding: 0.75rem 1.5rem; text-decoration: none; }
+.showcase-row.visible .showcase-link-primary { background-color: ${t.esp}; color: var(--pcolor); }
 
 /* ── HOW IT WORKS ── */
 .how-section { padding: 3.5rem 1.25rem; background: ${t.dark}; }
@@ -465,10 +486,11 @@ body {
 
   /* MENU INTRO + SHOWCASE — desktop */
   .menu-intro { padding: 8rem 3rem 3rem; }
-  .showcase-row-section { padding: 4rem 3rem; }
-  .showcase-row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
-  .showcase-photo-block { max-width: 420px; margin: 0 auto; }
-  .showcase-reverse .showcase-photo-block { order: 2; }
+  .showcase-row-section { padding: 3rem; }
+  .showcase-card { padding: 4rem; }
+  .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
+  .showcase-photo-block { aspect-ratio: 1/1; margin: 0 0 0 -6rem; }
+  .showcase-reverse .showcase-photo-block { order: 2; margin: 0 -6rem 0 0; }
   .showcase-reverse .showcase-row-body { order: 1; }
 
   /* PRODUCT OVERLAY — side-by-side on desktop */
@@ -730,26 +752,28 @@ function useFocusTrap(active, containerRef, onClose) {
 }
 
 function ShowcaseRow({ product: p, reverse, onOpen }) {
-  const revealRef = useReveal();
-  const color = p.showcaseColor;
   const open = () => onOpen(p);
   return (
     <section className="showcase-row-section">
-      <div ref={revealRef} className={`reveal showcase-row${reverse ? " showcase-reverse" : ""}`}>
-        <div className="showcase-photo-block" style={{ background: color }}>
-          <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-        <div className="showcase-row-body">
-          <p className="showcase-badge" style={{ background: `${color}1a`, color }}>{p.tag}</p>
-          <h3 className="showcase-row-name">{p.name}</h3>
-          <p className="showcase-row-desc">{p.desc}</p>
-          <p className="showcase-row-price">{p.price}</p>
-          <div className="showcase-row-links">
-            <button className="showcase-link" onClick={open}>Learn More</button>
-            <button className="showcase-link showcase-link-primary" style={{ color }} onClick={open}>Order Now</button>
+      <R className={`showcase-row${reverse ? " showcase-reverse" : ""}`} style={{ "--pcolor": p.showcaseColor }}>
+        <div className="showcase-card">
+          <div className="showcase-grid">
+            <div className="showcase-photo-block">
+              <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <div className="showcase-row-body">
+              <p className="showcase-badge">{p.tag}</p>
+              <h3 className="showcase-row-name">{p.name}</h3>
+              <p className="showcase-row-desc">{p.desc}</p>
+              <p className="showcase-row-price">{p.price}</p>
+              <div className="showcase-row-links">
+                <button className="showcase-link" onClick={open}>Learn More</button>
+                <button className="showcase-link showcase-link-primary" onClick={open}>Order Now</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </R>
     </section>
   );
 }
