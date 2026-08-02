@@ -18,30 +18,31 @@ const fonts = ``; // Fonts loaded via <link> in index.html
 
 const css = `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html {
-  scroll-behavior: smooth;
+/* Native scrollbars render differently (or not at all) across browsers/OSes —
+   hide them everywhere, on every current and future scrollable element, and
+   rely entirely on our own custom thumb for scroll affordance instead. */
+* {
   scrollbar-width: none;
-  overflow-y: scroll;
+  -ms-overflow-style: none;
 }
-html::-webkit-scrollbar { width: 0; display: none; }
+*::-webkit-scrollbar { width: 0; height: 0; display: none; }
+html { scroll-behavior: smooth; overflow-y: scroll; }
 body {
   background: ${t.cream}; font-family: 'DM Sans', sans-serif;
   color: ${t.esp}; overflow-x: hidden;
-  scrollbar-width: none;
 }
-body::-webkit-scrollbar { width: 0; display: none; }
-.drawer, .po-card, .drawer-body { scrollbar-width: none; }
-.drawer::-webkit-scrollbar, .po-card::-webkit-scrollbar, .drawer-body::-webkit-scrollbar { display: none; }
 
-/* custom overlay scrollbar */
-.scroll-thumb {
-  position: fixed; right: 3px; z-index: 9999;
+/* custom scrollbar thumb — shared look for the page and any local
+   scroll container (product overlay, cart drawer, ...) */
+.scroll-thumb, .local-scroll-thumb {
   width: 3px; border-radius: 3px;
   background: ${t.tan};
   opacity: 0; pointer-events: none;
   transition: opacity 0.4s ease;
   top: 0;
 }
+.scroll-thumb { position: fixed; right: 3px; z-index: 9999; }
+.local-scroll-thumb { position: absolute; right: 3px; z-index: 20; }
 
 /* ── NAV GHOST ── */
 .nav {
@@ -145,7 +146,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .drawer-title em { font-style: italic; }
 .drawer-close { background: none; border: none; cursor: pointer; color: ${t.tan}; padding: 0.25rem; display: flex; align-items: center; transition: color 0.2s; }
 .drawer-close:hover { color: ${t.dark}; }
-.drawer-body { flex: 1; overflow-y: auto; padding: 0 1.5rem; }
+.drawer-body { position: relative; flex: 1; overflow-y: auto; padding: 0 1.5rem; }
 .drawer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 1rem; padding: 3rem 0; }
 .drawer-empty-icon { color: ${t.tan}; }
 .drawer-empty-text { font-size: 0.85rem; color: ${t.warmText}; text-align: center; line-height: 1.7; }
@@ -239,7 +240,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
   font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
   color: ${t.warm}88; letter-spacing: 0.15em; flex-shrink: 0;
 }
-.po-body { padding: 2rem 1.75rem 2.5rem; }
+.po-body { position: relative; padding: 2rem 1.75rem 2.5rem; }
 .po-tag { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.4rem; }
 .po-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; margin-bottom: 1rem; }
 .po-name em { font-style: italic; }
@@ -711,6 +712,43 @@ function R({ children, d = 0, className = "", style = {} }) {
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+// Drives a .local-scroll-thumb to mirror a container's own scroll position —
+// the same custom-scrollbar treatment the page itself uses, applied to any
+// internally-scrolling element (product overlay, cart drawer, ...) so native
+// browser scrollbars never have a chance to render there either.
+function useLocalScrollThumb(containerRef, thumbRef, active) {
+  useEffect(() => {
+    const container = containerRef.current;
+    const thumb = thumbRef.current;
+    if (!container || !thumb || !active) return;
+    let hideTimer;
+    const measure = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      if (scrollHeight <= clientHeight + 1) { thumb.style.opacity = "0"; return; }
+      const thumbHeight = Math.max(30, (clientHeight / scrollHeight) * clientHeight);
+      const maxTop = clientHeight - thumbHeight;
+      const ratio = maxTop > 0 ? scrollTop / (scrollHeight - clientHeight) : 0;
+      thumb.style.height = `${thumbHeight}px`;
+      thumb.style.top = `${ratio * maxTop}px`;
+    };
+    const onScroll = () => {
+      measure();
+      thumb.style.opacity = "0.7";
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => { thumb.style.opacity = "0"; }, 1000);
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+    measure();
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+      clearTimeout(hideTimer);
+    };
+  }, [containerRef, thumbRef, active]);
+}
+
 function useFocusTrap(active, containerRef, onClose) {
   const prevFocus = useRef(null);
   useEffect(() => {
@@ -842,6 +880,19 @@ export default function KindCrumb() {
   useFocusTrap(drawerOpen, drawerRef, () => setDrawerOpen(false));
   useFocusTrap(!!overlay && !overlayClosing, overlayRef, () => closeOverlay());
 
+  // Local custom scrollbars for the product overlay and cart drawer — which
+  // element actually scrolls varies by breakpoint (po-card on mobile,
+  // po-body on the desktop side-by-side layout), so both get a thumb and
+  // whichever one has no overflow simply stays hidden.
+  const poCardThumbRef = useRef(null);
+  const poBodyRef = useRef(null);
+  const poBodyThumbRef = useRef(null);
+  const drawerBodyRef = useRef(null);
+  const drawerBodyThumbRef = useRef(null);
+  useLocalScrollThumb(overlayRef, poCardThumbRef, !!overlay);
+  useLocalScrollThumb(poBodyRef, poBodyThumbRef, !!overlay);
+  useLocalScrollThumb(drawerBodyRef, drawerBodyThumbRef, drawerOpen);
+
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -970,8 +1021,10 @@ export default function KindCrumb() {
       <div className={`product-overlay${overlay ? " open" : ""}${overlayClosing ? " closing" : ""}`} onClick={e => { if (e.target === e.currentTarget) closeOverlay(); }}>
         {overlay && (
           <div className="po-card" ref={overlayRef} role="dialog" aria-modal="true" aria-label={`${overlay.product.name} details`}>
+            <div ref={poCardThumbRef} className="local-scroll-thumb" />
             <div className="po-img"><img src={`/images/${overlayImage(overlay)}`} alt={`${overlay.product.name} — ${overlay.flavor}`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
-            <div className="po-body">
+            <div className="po-body" ref={poBodyRef}>
+              <div ref={poBodyThumbRef} className="local-scroll-thumb" />
               <button className="po-close" onClick={closeOverlay} aria-label="Close"><X size={16} strokeWidth={1.5} /></button>
               <p className="po-tag">{overlay.product.tag}</p>
               <h2 className="po-name">{overlay.product.name}</h2>
@@ -1033,7 +1086,8 @@ export default function KindCrumb() {
           <h2 className="drawer-title">Your <em>order</em></h2>
           <button className="drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close cart"><X size={20} strokeWidth={1.5} /></button>
         </div>
-        <div className="drawer-body">
+        <div className="drawer-body" ref={drawerBodyRef}>
+          <div ref={drawerBodyThumbRef} className="local-scroll-thumb" />
           {orderSent ? (
             <div className="drawer-empty">
               <span className="drawer-sent-check"><Check size={28} strokeWidth={2} /></span>
