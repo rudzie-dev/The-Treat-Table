@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
   BookOpen, Home, Plus, Minus, ArrowRight, ShoppingCart,
@@ -86,18 +87,29 @@ body {
 }
 .nav-menu-btn:hover { opacity: 0.6; }
 .nav-menu-btn span { display: none; }
-.nav-menu-panel {
-  position: absolute; top: calc(100% + 0.75rem); left: 0; z-index: 10;
-  min-width: 170px; background: ${t.cream}; border: 1px solid ${t.sand};
-  border-radius: 3px; box-shadow: 0 12px 32px ${t.esp}28;
-  padding: 0.6rem; display: flex; flex-direction: column; gap: 0.15rem;
+
+/* ── NAV SIDEBAR — full-screen on mobile, half-screen on desktop ── */
+.sidebar-overlay { position: fixed; inset: 0; z-index: 300; background: ${t.esp}55; backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.sidebar-overlay.open { opacity: 1; pointer-events: all; }
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 400;
+  width: 100vw; background: ${t.cream};
+  display: flex; flex-direction: column;
+  transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 8px 0 40px ${t.esp}22;
 }
-.nav-menu-panel a {
-  font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: ${t.brown}; text-decoration: none; padding: 0.6rem 0.7rem;
-  border-radius: 2px; transition: background 0.15s;
-}
-.nav-menu-panel a:hover, .nav-menu-panel a:focus-visible { background: ${t.sand}; outline: none; }
+.sidebar.open { transform: translateX(0); }
+.sidebar-head { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1.25rem; border-bottom: 1px solid ${t.sand}; flex-shrink: 0; }
+.sidebar-brand { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.dark}; text-transform: uppercase; }
+.sidebar-close { background: none; border: none; cursor: pointer; color: ${t.tan}; padding: 0.25rem; display: flex; align-items: center; transition: color 0.2s; }
+.sidebar-close:hover { color: ${t.dark}; }
+.sidebar-links { flex: 1; overflow-y: auto; list-style: none; display: flex; flex-direction: column; padding: 1rem 0; }
+.sidebar-links a { display: flex; align-items: center; font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 400; color: ${t.dark}; text-decoration: none; padding: 1rem 1.75rem; transition: background 0.15s, color 0.15s; }
+.sidebar-links a:hover, .sidebar-links a:focus-visible { background: ${t.sand}55; color: ${t.brown}; outline: none; }
+.sidebar-links a em { font-style: italic; color: ${t.warm}; }
+.sidebar-foot { padding: 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; }
+.sidebar-wa { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; text-decoration: none; padding: 1rem; border-radius: 2px; transition: background 0.2s; }
+.sidebar-wa:hover { background: ${t.esp}; }
 .nav-right { justify-self: end; display: flex; align-items: center; gap: 1.25rem; }
 .nav-wa {
   display: none; align-items: center; gap: 0.5rem;
@@ -356,64 +368,6 @@ body {
 .showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; background: ${t.cream}; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.9rem; border-radius: 999px; transition: transform 0.15s; }
 .showcase-cta:hover { transform: translateY(-1px); }
 
-.full-menu-section { background: ${t.esp}; padding: 3.5rem 1.25rem; }
-.full-menu-section .section-label { color: ${t.tan}; text-align: center; }
-.full-menu-section .section-title { color: ${t.cream}; text-align: center; margin-bottom: 2.5rem; }
-.full-menu-grid { display: flex; flex-direction: column; gap: 1.25rem; }
-
-.menu-card {
-  background: ${t.cream}; padding: 0;
-  display: flex; flex-direction: column; cursor: pointer;
-  border: 1px solid ${t.sand}; border-radius: 3px; overflow: hidden;
-}
-.menu-card-img-wrap {
-  position: relative; width: 100%; aspect-ratio: 3/4;
-  overflow: hidden; cursor: pointer;
-}
-.menu-card-img-wrap:focus-visible { outline: 2px solid ${t.brown}; outline-offset: 2px; }
-.menu-card-img-bg {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Cormorant Garamond', serif; font-size: 0.8rem;
-  color: ${t.warm}88; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
-}
-.menu-card-img-wrap:hover .menu-card-img-bg { transform: scale(1.04); }
-.menu-card-plus {
-  position: absolute; bottom: 0.85rem; right: 0.85rem;
-  opacity: 0; pointer-events: none;
-  transform: scale(0.5);
-}
-.menu-card-img-wrap:hover .menu-card-plus,
-.menu-card-img-wrap:active .menu-card-plus {
-  opacity: 1; pointer-events: all;
-  animation: plusPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-@keyframes plusPop {
-  0%   { transform: scale(0.5); }
-  70%  { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
-@media (hover: none) {
-  .menu-card-plus { opacity: 1; pointer-events: all; transform: scale(1); animation: none; }
-}
-.menu-card-plus-btn {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: ${t.cream}; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px ${t.esp}44;
-  transition: background 0.2s, transform 0.15s;
-  color: ${t.dark};
-}
-.menu-card-plus-btn:hover { background: ${t.dark}; color: ${t.cream}; transform: scale(1.08); }
-.menu-card-info { padding: 0.9rem 1rem 1.1rem; }
-.menu-card-tag { font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.3rem; }
-.menu-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 400; color: ${t.dark}; margin-bottom: 0.2rem; line-height: 1.15; }
-.menu-card-price { font-size: 0.72rem; color: ${t.brown}; font-weight: 500; }
-.menu-eggless { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.55rem; }
-.eggless-text { font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: ${t.warm}; }
-.vegan-note { font-size: 0.52rem; color: ${t.tan}; }
-
 /* ── HOW IT WORKS ── */
 .how-section { padding: 3.5rem 1.25rem; background: ${t.dark}; }
 .how-section .section-label { color: ${t.tan}; }
@@ -503,6 +457,7 @@ body {
   .nav-brand-name { font-size: 1.2rem; }
   .nav-brand-sub { font-size: 0.62rem; }
   .nav-menu-btn span { display: inline; }
+  .sidebar { width: 50vw; max-width: 640px; }
   .nav-wa { display: flex; opacity: 0; pointer-events: none; transform: translateY(-4px); }
   .nav-right { gap: 1.5rem; }
   .bottom-tab-bar { display: none; }
@@ -528,8 +483,6 @@ body {
   .showcase-section { padding: 3rem; }
   .showcase-card { aspect-ratio: 21/9; }
   .showcase-overlay { padding: 4rem; }
-  .full-menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
-  .menu-card-img-wrap { aspect-ratio: 3/4; }
 
   /* PRODUCT OVERLAY — side-by-side on desktop */
   .po-card { grid-template-columns: 1fr 1fr; max-height: 80vh; }
@@ -624,8 +577,8 @@ const products = [
     ],
     desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25",
   },
-  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", basePrice: 35, flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
-  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", basePrice: 350, flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", showcaseColor: "#815937", basePrice: 35, flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", showcaseColor: "#7D5128", basePrice: 350, flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ]
 
 function flavorTier(product, flavorName) {
@@ -688,6 +641,23 @@ const weeklyBake = {
   meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Fried fresh" }, { icon: Wheat, label: "Eggless" }],
   productIdx: 0,
 };
+
+// Scrolls to a #hash target on navigation — needed because plain <a href="#id">
+// anchors only work within the current page; moving content across routes
+// (e.g. a footer link from "/" to "/story#about") needs this to run the
+// scroll after the target route has actually mounted.
+function ScrollToHash() {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.slice(1);
+      requestAnimationFrame(() => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); });
+    } else {
+      window.scrollTo({ top: 0 });
+    }
+  }, [location]);
+  return null;
+}
 
 function useReveal() {
   const ref = useRef(null);
@@ -827,40 +797,6 @@ function ShowcaseCard({ product: p, onOpen }) {
   );
 }
 
-function ProductCard({ product: p, onOpen }) {
-  return (
-    <div className="menu-card">
-      <div
-        className="menu-card-img-wrap"
-        role="button"
-        tabIndex={0}
-        aria-label={`View ${p.name} details`}
-        onClick={() => onOpen(p)}
-        onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(p); } }}
-      >
-        <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="300" height="400" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
-        <div className="menu-card-plus">
-          <button className="menu-card-plus-btn" onClick={e => { e.stopPropagation(); onOpen(p); }} aria-label={`View ${p.name} details`}>
-            <Plus size={20} strokeWidth={1.5} />
-          </button>
-        </div>
-      </div>
-      <div className="menu-card-info">
-        <p className="menu-card-tag">{p.tag}</p>
-        <p className="menu-card-name">{p.name}</p>
-        <p style={{ fontSize: "0.78rem", color: t.warm, marginTop: "0.4rem", marginBottom: "0.85rem", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: "2", WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.desc}</p>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <p className="menu-card-price">{p.price}</p>
-          <div className="menu-eggless" style={{ marginTop: 0 }}>
-            <Leaf size={10} color={t.warm} strokeWidth={1.5} />
-            <span className="eggless-text">Eggless</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function FlavorCard({ flavor, selected, onSelect }) {
   return (
     <button
@@ -898,7 +834,9 @@ function SkeletonCard() {
 
 
 
-export default function KindCrumb() {
+function AppShell() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [overlay, setOverlay] = useState(null);
@@ -910,25 +848,14 @@ export default function KindCrumb() {
   const [activeTab, setActiveTab] = useState("home");
 
   const [navScrolled, setNavScrolled] = useState(false);
-  const [navMenuOpen, setNavMenuOpen] = useState(false);
-  const navMenuRef = useRef(null);
-
-  useEffect(() => {
-    if (!navMenuOpen) return;
-    const onKeyDown = (e) => { if (e.key === "Escape") setNavMenuOpen(false); };
-    const onClickOutside = (e) => { if (navMenuRef.current && !navMenuRef.current.contains(e.target)) setNavMenuOpen(false); };
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("mousedown", onClickOutside);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("mousedown", onClickOutside);
-    };
-  }, [navMenuOpen]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
   useFocusTrap(drawerOpen, drawerRef, () => setDrawerOpen(false));
   useFocusTrap(!!overlay && !overlayClosing, overlayRef, () => closeOverlay());
+  useFocusTrap(sidebarOpen, sidebarRef, () => setSidebarOpen(false));
 
   // Local custom scrollbars for the product overlay and cart drawer — which
   // element actually scrolls varies by breakpoint (po-card on mobile,
@@ -944,17 +871,23 @@ export default function KindCrumb() {
   useLocalScrollThumb(drawerBodyRef, drawerBodyThumbRef, drawerOpen);
 
   useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveTab("blog");
+      setNavScrolled(true);
+      return;
+    }
     const onScroll = () => {
       const y = window.scrollY;
       setNavScrolled(y > 60);
-      const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }, { id: "blog", el: document.getElementById("blog") }];
+      const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }];
       let cur = "home";
       secs.forEach(({ id, el }) => { if (el && el.offsetTop <= y + window.innerHeight / 2) cur = id; });
       setActiveTab(cur);
     };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (drawerOpen || overlay) {
@@ -1047,8 +980,6 @@ export default function KindCrumb() {
       setDrawerOpen(false);
     }, 1800);
   };
-
-  const tickerItems = ["Baked to order", "Pickup available", "Ladysmith", "Always eggless", "Small batch", "No artificial additives"];
 
   return (
     <>
@@ -1147,7 +1078,7 @@ export default function KindCrumb() {
             <div className="drawer-empty">
               <ShoppingCart size={36} strokeWidth={1} className="drawer-empty-icon" />
               <p className="drawer-empty-text">Nothing here yet.<br />Pick something from the menu.</p>
-              <button className="drawer-empty-cta" onClick={() => { setDrawerOpen(false); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}>View Menu</button>
+              <button className="drawer-empty-cta" onClick={() => { setDrawerOpen(false); navigate("/#products"); }}>View Menu</button>
             </div>
           ) : (
             <>
@@ -1193,23 +1124,15 @@ export default function KindCrumb() {
 
       {/* NAV */}
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
-        <div className="nav-left" ref={navMenuRef}>
-          <button className="nav-menu-btn" onClick={() => setNavMenuOpen(o => !o)} aria-expanded={navMenuOpen} aria-controls="nav-menu-panel">
+        <div className="nav-left">
+          <button className="nav-menu-btn" onClick={() => setSidebarOpen(true)} aria-expanded={sidebarOpen} aria-controls="nav-sidebar">
             <MenuIcon size={18} strokeWidth={1.5} /> <span>Menu</span>
           </button>
-          {navMenuOpen && (
-            <div id="nav-menu-panel" className="nav-menu-panel" role="menu">
-              <a href="#products" role="menuitem" onClick={() => setNavMenuOpen(false)}>Menu</a>
-              <a href="#about" role="menuitem" onClick={() => setNavMenuOpen(false)}>Our Story</a>
-              <a href="#testimonials" role="menuitem" onClick={() => setNavMenuOpen(false)}>Reviews</a>
-              <a href="#blog" role="menuitem" onClick={() => setNavMenuOpen(false)}>Journal</a>
-            </div>
-          )}
         </div>
-        <a href="#home" className="nav-brand">
+        <Link to="/" className="nav-brand">
           <span className="nav-brand-name">Kind Crumb</span>
           <span className="nav-brand-sub">The Treat Table</span>
-        </a>
+        </Link>
         <div className="nav-right">
           <a href="https://wa.me/27689536500" className="nav-wa" target="_blank" rel="noreferrer">
             <MessageCircle size={13} strokeWidth={1.5} /> Order Now
@@ -1221,6 +1144,68 @@ export default function KindCrumb() {
         </div>
       </nav>
 
+      {/* NAV SIDEBAR */}
+      <div className={`sidebar-overlay${sidebarOpen ? " open" : ""}`} onClick={() => setSidebarOpen(false)} />
+      <div id="nav-sidebar" className={`sidebar${sidebarOpen ? " open" : ""}`} ref={sidebarRef} role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden={!sidebarOpen}>
+        <div className="sidebar-head">
+          <span className="sidebar-brand">Kind Crumb</span>
+          <button className="sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="Close menu"><X size={22} strokeWidth={1.5} /></button>
+        </div>
+        <ul className="sidebar-links">
+          <li><Link to="/" onClick={() => setSidebarOpen(false)}>Menu</Link></li>
+          <li><Link to="/story#about" onClick={() => setSidebarOpen(false)}>Our <em>Story</em></Link></li>
+          <li><Link to="/story#testimonials" onClick={() => setSidebarOpen(false)}>Reviews</Link></li>
+          <li><Link to="/story#blog" onClick={() => setSidebarOpen(false)}>Journal</Link></li>
+        </ul>
+      </div>
+
+      <ScrollToHash />
+      <Routes>
+        <Route path="/" element={<HomePage openOverlay={openOverlay} />} />
+        <Route path="/story" element={<StoryPage openOverlay={openOverlay} />} />
+      </Routes>
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <div>
+          <p className="footer-brand">Kind Crumb · The Treat Table</p>
+          <p className="footer-tagline">Small-batch baking, made to order.<br />Ladysmith, KZN.</p>
+        </div>
+        <ul className="footer-links">
+          <li><Link to="/">Menu</Link></li>
+          <li><Link to="/story#about">Our Story</Link></li>
+          <li><Link to="/story#testimonials">Reviews</Link></li>
+          <li><Link to="/story#blog">Journal</Link></li>
+        </ul>
+        <div>
+          <p className="footer-col-title">Get in touch</p>
+          <ul className="footer-contact">
+            <li><MapPin size={13} strokeWidth={1.5} /> Ladysmith, KwaZulu-Natal</li>
+            <li><MessageCircle size={13} strokeWidth={1.5} /> <a href="https://wa.me/27689536500" target="_blank" rel="noreferrer">Order via WhatsApp — we reply within 24 hours</a></li>
+          </ul>
+        </div>
+        <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
+      </footer>
+
+      <div className="page-end-pad" />
+
+      {/* BOTTOM TAB BAR */}
+      <nav className="bottom-tab-bar">
+        <button className={`tab-item${activeTab === "home" ? " active" : ""}`} onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}><Home size={18} strokeWidth={1.5} /><span>Home</span></button>
+        <Link to="/#products" className={`tab-item${activeTab === "products" ? " active" : ""}`}><ShoppingBag size={18} strokeWidth={1.5} /><span>Menu</span></Link>
+        <button className="tab-cart-btn" onClick={() => setDrawerOpen(true)}>
+          {totalItems > 0 && <span className="tab-cart-count">{totalItems}</span>}
+          <ShoppingCart size={18} strokeWidth={1.5} /><span>Order</span>
+        </button>
+        <Link to="/story#blog" className={`tab-item${activeTab === "blog" ? " active" : ""}`}><BookOpen size={18} strokeWidth={1.5} /><span>Journal</span></Link>
+      </nav>
+    </>
+  );
+}
+function HomePage({ openOverlay }) {
+  const tickerItems = ["Baked to order", "Pickup available", "Ladysmith", "Always eggless", "Small batch", "No artificial additives"];
+  return (
+    <>
       {/* HERO */}
       <section className="hero">
         <div className="hero-bg">
@@ -1236,7 +1221,7 @@ export default function KindCrumb() {
           <p className="hero-sub">Small-batch baking made to order. Experience our soft, fluffy dough swirled with rich cinnamon sugar and topped with cream cheese frosting.</p>
           <div className="hero-actions">
             <a href="#products" className="btn-primary">View the Menu</a>
-            <a href="#how" className="btn-ghost">How it works <ArrowDown size={13} strokeWidth={1.5} /></a>
+            <Link to="/story#how" className="btn-ghost">How it works <ArrowDown size={13} strokeWidth={1.5} /></Link>
           </div>
         </div>
       </section>
@@ -1258,23 +1243,18 @@ export default function KindCrumb() {
         </R>
       </section>
 
-      {/* MENU SHOWCASE — one featured product per scroll; photo-first, color
-          reveals on hover (desktop) or scroll-and-stop focus (mobile) */}
-      {products.slice(0, 3).map((p) => (
+      {/* MENU SHOWCASE — the entire menu, one product per scroll; photo-first,
+          color reveals on hover (desktop) or scroll-and-stop focus (mobile) */}
+      {products.map((p) => (
         <ShowcaseCard key={p.name} product={p} onOpen={openOverlay} />
       ))}
+    </>
+  );
+}
 
-      {/* FULL MENU */}
-      <section id="full-menu" className="full-menu-section">
-        <R>
-          <p className="section-label">Everything we bake</p>
-          <h2 className="section-title">View Full <em>Menu</em></h2>
-        </R>
-        <R d={1} className="full-menu-grid">
-          {products.map((p, i) => <ProductCard key={i} product={p} onOpen={openOverlay} />)}
-        </R>
-      </section>
-
+function StoryPage({ openOverlay }) {
+  return (
+    <>
       {/* HOW IT WORKS */}
       <section id="how" className="how-section">
         <R>
@@ -1398,41 +1378,14 @@ export default function KindCrumb() {
           <SkeletonCard /><SkeletonCard /><SkeletonCard />
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="footer">
-        <div>
-          <p className="footer-brand">Kind Crumb · The Treat Table</p>
-          <p className="footer-tagline">Small-batch baking, made to order.<br />Ladysmith, KZN.</p>
-        </div>
-        <ul className="footer-links">
-          <li><a href="#products">Menu</a></li>
-          <li><a href="#about">Our Story</a></li>
-          <li><a href="#testimonials">Reviews</a></li>
-          <li><a href="#blog">Journal</a></li>
-        </ul>
-        <div>
-          <p className="footer-col-title">Get in touch</p>
-          <ul className="footer-contact">
-            <li><MapPin size={13} strokeWidth={1.5} /> Ladysmith, KwaZulu-Natal</li>
-            <li><MessageCircle size={13} strokeWidth={1.5} /> <a href="https://wa.me/27689536500" target="_blank" rel="noreferrer">Order via WhatsApp — we reply within 24 hours</a></li>
-          </ul>
-        </div>
-        <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
-      </footer>
-
-      <div className="page-end-pad" />
-
-      {/* BOTTOM TAB BAR */}
-      <nav className="bottom-tab-bar">
-        <button className={`tab-item${activeTab === "home" ? " active" : ""}`} onClick={() => window.scrollTo({top:0,behavior:"smooth"})}><Home size={18} strokeWidth={1.5} /><span>Home</span></button>
-        <a href="#products" className={`tab-item${activeTab === "products" ? " active" : ""}`}><ShoppingBag size={18} strokeWidth={1.5} /><span>Menu</span></a>
-        <button className="tab-cart-btn" onClick={() => setDrawerOpen(true)}>
-          {totalItems > 0 && <span className="tab-cart-count">{totalItems}</span>}
-          <ShoppingCart size={18} strokeWidth={1.5} /><span>Order</span>
-        </button>
-        <a href="#blog" className={`tab-item${activeTab === "blog" ? " active" : ""}`}><BookOpen size={18} strokeWidth={1.5} /><span>Journal</span></a>
-      </nav>
     </>
+  );
+}
+
+export default function KindCrumb() {
+  return (
+    <HashRouter>
+      <AppShell />
+    </HashRouter>
   );
 }
