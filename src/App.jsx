@@ -322,17 +322,48 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; }
 .section-title em { font-style: italic; }
 
-/* ── MENU — mobile stacked ── */
-.menu-section { padding: 3.5rem 0 3.5rem; }
-.menu-header { padding: 0 1.25rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: flex-end; }
-.menu-scroll-track {
-  display: flex; gap: 12px; background: transparent;
-  overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
-  scrollbar-width: none; padding: 0 1.25rem 0.25rem;
-}
-.menu-scroll-track::-webkit-scrollbar { display: none; }
+/* ── MENU INTRO — breathing room between hero and showcase ── */
+.menu-intro { padding: 6rem 1.25rem 2.5rem; text-align: center; }
+
+/* ── MENU SHOWCASE — one product per scroll-reveal, flat alternating blocks ── */
+.showcase-section { padding: 3.5rem 1.25rem; overflow: hidden; }
+.showcase-grid { display: flex; flex-direction: column; gap: 2rem; max-width: 1100px; margin: 0 auto; }
+.showcase-img-wrap { width: 100%; aspect-ratio: 4/5; border-radius: 3px; overflow: hidden; }
+.showcase-body { display: flex; flex-direction: column; align-items: flex-start; }
+.showcase-tag { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.showcase-name { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; margin-bottom: 1rem; }
+.showcase-desc { font-size: 0.92rem; font-weight: 300; line-height: 1.8; margin-bottom: 1.25rem; max-width: 460px; }
+.showcase-price { font-size: 1rem; font-weight: 500; margin-bottom: 1.75rem; }
+.showcase-cta { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; padding: 0.9rem 1.75rem; border-radius: 2px; transition: transform 0.15s, background 0.2s; }
+.showcase-cta:hover { transform: translateY(-1px); }
+
+.showcase-dark { background: ${t.esp}; }
+.showcase-dark .showcase-tag, .showcase-dark .showcase-price { color: ${t.tan}; }
+.showcase-dark .showcase-name { color: ${t.cream}; }
+.showcase-dark .showcase-desc { color: ${t.tan}; }
+.showcase-dark .showcase-cta { background: ${t.cream}; color: ${t.esp}; }
+.showcase-dark .showcase-cta:hover { background: ${t.sand}; }
+
+.showcase-light { background: ${t.cream}; }
+.showcase-light .showcase-tag { color: ${t.warm}; }
+.showcase-light .showcase-name { color: ${t.dark}; }
+.showcase-light .showcase-desc { color: ${t.warmText}; }
+.showcase-light .showcase-price { color: ${t.brown}; }
+.showcase-light .showcase-cta { background: ${t.esp}; color: ${t.cream}; }
+.showcase-light .showcase-cta:hover { background: ${t.dark}; }
+
+.showcase-brown { background: ${t.brown}; }
+.showcase-brown .showcase-tag, .showcase-brown .showcase-price { color: ${t.sand}; }
+.showcase-brown .showcase-name { color: ${t.cream}; }
+.showcase-brown .showcase-desc { color: ${t.sand}; }
+.showcase-brown .showcase-cta { background: ${t.cream}; color: ${t.brown}; }
+.showcase-brown .showcase-cta:hover { background: ${t.sand}; }
+
+.full-menu-section .section-label { color: ${t.tan}; text-align: center; }
+.full-menu-section .section-title { color: ${t.cream}; text-align: center; margin-bottom: 2.5rem; }
+.full-menu-grid { display: flex; flex-direction: column; gap: 1.25rem; }
+
 .menu-card {
-  flex: 0 0 68vw; scroll-snap-align: start;
   background: ${t.cream}; padding: 0;
   display: flex; flex-direction: column; cursor: pointer;
   border: 1px solid ${t.sand}; border-radius: 3px; overflow: hidden;
@@ -494,11 +525,14 @@ body::-webkit-scrollbar { width: 0; display: none; }
   .hero-badge-label { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.3rem; }
   .hero-badge-value { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: ${t.dark}; }
 
-  /* MENU — horizontal scroll desktop */
-  .menu-section { padding: 6rem 0; }
-  .menu-header { padding: 0 3rem; margin-bottom: 2.5rem; }
-  .menu-scroll-track { padding: 0 3rem 0.5rem; gap: 1.25rem; }
-  .menu-card { flex: 0 0 280px; border-radius: 3px; }
+  /* MENU INTRO + SHOWCASE — desktop */
+  .menu-intro { padding: 8rem 3rem 3rem; }
+  .showcase-section { padding: 6rem 3rem; }
+  .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
+  .showcase-reverse .showcase-img-wrap { order: 2; }
+  .showcase-reverse .showcase-body { order: 1; }
+  .showcase-img-wrap { aspect-ratio: 1/1; }
+  .full-menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
   .menu-card-img-wrap { aspect-ratio: 3/4; }
 
   /* PRODUCT OVERLAY — side-by-side on desktop */
@@ -703,6 +737,40 @@ function useFocusTrap(active, containerRef, onClose) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- containerRef is stable; onClose is re-created per render but we intentionally only re-arm on `active` change
   }, [active]);
+}
+
+function ProductCard({ product: p, onOpen }) {
+  return (
+    <div className="menu-card">
+      <div
+        className="menu-card-img-wrap"
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${p.name} details`}
+        onClick={() => onOpen(p)}
+        onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(p); } }}
+      >
+        <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="300" height="400" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+        <div className="menu-card-plus">
+          <button className="menu-card-plus-btn" onClick={e => { e.stopPropagation(); onOpen(p); }} aria-label={`View ${p.name} details`}>
+            <Plus size={20} strokeWidth={1.5} />
+          </button>
+        </div>
+      </div>
+      <div className="menu-card-info">
+        <p className="menu-card-tag">{p.tag}</p>
+        <p className="menu-card-name">{p.name}</p>
+        <p style={{ fontSize: "0.78rem", color: t.warm, marginTop: "0.4rem", marginBottom: "0.85rem", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: "2", WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.desc}</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <p className="menu-card-price">{p.price}</p>
+          <div className="menu-eggless" style={{ marginTop: 0 }}>
+            <Leaf size={10} color={t.warm} strokeWidth={1.5} />
+            <span className="eggless-text">Eggless</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function FlavorCard({ flavor, selected, onSelect }) {
@@ -1078,47 +1146,44 @@ export default function KindCrumb() {
         </div>
       </div>
 
-      {/* MENU */}
-      <section id="products" className="menu-section">
-        <R className="menu-header">
-          <div>
-            <p className="section-label">What we make</p>
-            <h2 className="section-title">The <em>menu</em></h2>
-          </div>
+      {/* MENU INTRO — breathing room after the hero before the showcase starts */}
+      <section id="products" className="menu-intro">
+        <R>
+          <p className="section-label">What we make</p>
+          <h2 className="section-title">The <em>menu</em></h2>
         </R>
-        <div className="menu-scroll-track">
-          {products.map((p, i) => (
-            <div key={i} className="menu-card">
-              <div
-                className="menu-card-img-wrap"
-                role="button"
-                tabIndex={0}
-                aria-label={`View ${p.name} details`}
-                onClick={() => openOverlay(p)}
-                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOverlay(p); } }}
-              >
-                <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="300" height="400" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
-                <div className="menu-card-plus">
-                  <button className="menu-card-plus-btn" onClick={e => { e.stopPropagation(); openOverlay(p); }} aria-label={`View ${p.name} details`}>
-                    <Plus size={20} strokeWidth={1.5} />
-                  </button>
-                </div>
+      </section>
+
+      {/* MENU SHOWCASE — one featured product per scroll, flat alternating color blocks */}
+      {products.slice(0, 3).map((p, i) => {
+        const variant = ["showcase-dark", "showcase-light", "showcase-brown"][i % 3];
+        return (
+          <section key={p.name} className={`showcase-section ${variant}${i % 2 === 1 ? " showcase-reverse" : ""}`}>
+            <R className="showcase-grid">
+              <div className="showcase-img-wrap">
+                <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="600" height="750" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
               </div>
-              <div className="menu-card-info">
-                <p className="menu-card-tag">{p.tag}</p>
-                <p className="menu-card-name">{p.name}</p>
-                <p style={{ fontSize: "0.78rem", color: t.warm, marginTop: "0.4rem", marginBottom: "0.85rem", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: "2", WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.desc}</p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <p className="menu-card-price">{p.price}</p>
-                  <div className="menu-eggless" style={{ marginTop: 0 }}>
-                    <Leaf size={10} color={t.warm} strokeWidth={1.5} />
-                    <span className="eggless-text">Eggless</span>
-                  </div>
-                </div>
+              <div className="showcase-body">
+                <p className="showcase-tag">{p.tag}</p>
+                <h3 className="showcase-name">{p.name}</h3>
+                <p className="showcase-desc">{p.desc}</p>
+                <p className="showcase-price">{p.price}</p>
+                <button className="showcase-cta" onClick={() => openOverlay(p)}>View & Add <ArrowRight size={14} strokeWidth={1.5} /></button>
               </div>
-            </div>
-          ))}
-        </div>
+            </R>
+          </section>
+        );
+      })}
+
+      {/* FULL MENU */}
+      <section id="full-menu" className="showcase-section showcase-dark full-menu-section">
+        <R>
+          <p className="section-label">Everything we bake</p>
+          <h2 className="section-title">View Full <em>Menu</em></h2>
+        </R>
+        <R d={1} className="full-menu-grid">
+          {products.map((p, i) => <ProductCard key={i} product={p} onOpen={openOverlay} />)}
+        </R>
       </section>
 
       {/* HOW IT WORKS */}
