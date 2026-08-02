@@ -107,6 +107,19 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .tab-cart-count { position: absolute; top: 6px; right: calc(50% - 18px); width: 15px; height: 15px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
 .page-end-pad { height: 5rem; }
 
+/* ── ADD-TO-CART TOAST ── */
+.cart-toast {
+  position: fixed; left: 1rem; right: 1rem;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom)); z-index: 250;
+  background: ${t.esp}; color: ${t.cream}; border-radius: 3px;
+  padding: 0.85rem 1rem; box-shadow: 0 8px 28px ${t.esp}44;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  animation: toastIn 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.cart-toast-text { font-size: 0.78rem; line-height: 1.4; }
+.cart-toast-btn { flex-shrink: 0; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: ${t.esp}; background: ${t.cream}; border: none; border-radius: 2px; padding: 0.5rem 0.85rem; cursor: pointer; }
+
 /* ── CART DRAWER ── */
 .drawer-overlay { position: fixed; inset: 0; z-index: 300; background: ${t.esp}55; backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 .drawer-overlay.open { opacity: 1; pointer-events: all; }
@@ -132,6 +145,9 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .dqty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid ${t.tan}; background: transparent; color: ${t.brown}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .dqty-btn:hover { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
 .dqty-val { font-size: 0.85rem; font-weight: 500; color: ${t.dark}; min-width: 1.2rem; text-align: center; }
+.drawer-total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 1rem 0 0; font-size: 0.85rem; font-weight: 500; color: ${t.dark}; }
+.drawer-total-note { font-size: 0.66rem; color: ${t.warmText}; margin-top: 0.35rem; line-height: 1.5; }
+.drawer-sent-check { width: 56px; height: 56px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; display: flex; align-items: center; justify-content: center; }
 .drawer-form-wrap { padding: 1.5rem 0 1rem; }
 .drawer-form-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: ${t.dark}; margin-bottom: 1.25rem; }
 .drawer-form-title em { font-style: italic; }
@@ -145,6 +161,8 @@ body::-webkit-scrollbar { width: 0; display: none; }
 .drawer-note { font-size: 0.68rem; color: ${t.warmText}; font-style: italic; }
 .drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 2px; width: 100%; transition: background 0.2s; }
 .drawer-wa-btn:hover { background: ${t.esp}; }
+.drawer-wa-btn:disabled { background: ${t.tan}; cursor: not-allowed; }
+.drawer-wa-btn:disabled:hover { background: ${t.tan}; }
 .drawer-wa-alt { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: ${t.brown}; text-decoration: none; padding: 0.5rem; transition: color 0.2s; }
 .drawer-wa-alt:hover { color: ${t.dark}; }
 
@@ -163,6 +181,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
   transition: opacity 0.35s ease;
 }
 .product-overlay.open { pointer-events: all; }
+.product-overlay.open.closing { pointer-events: none; }
 .product-overlay.open::before { opacity: 1; }
 .product-overlay.closing::before { opacity: 0; transition: opacity 0.26s ease; }
 
@@ -444,6 +463,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
   .nav-right { gap: 1.5rem; }
   .bottom-tab-bar { display: none; }
   .page-end-pad { display: none; }
+  .cart-toast { left: auto; right: 2rem; bottom: 1.5rem; max-width: 360px; }
 
   /* HERO */
   .hero { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; padding: 0; flex-direction: unset; align-items: stretch; }
@@ -559,8 +579,8 @@ const products = [
     ],
     desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25",
   },
-  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
-  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", basePrice: 35, flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", basePrice: 350, flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ]
 
 function flavorTier(product, flavorName) {
@@ -581,7 +601,7 @@ function unitPrice(overlay) {
     const q = product.quantities.find(q => q.key === quantity);
     return q ? q.tierPrice[flavorTier(product, flavor)] : null;
   }
-  return product.flavors.find(f => f.name === flavor)?.price ?? null;
+  return product.flavors.find(f => f.name === flavor)?.price ?? product.basePrice ?? null;
 }
 function priceLabel(overlay) {
   const p = unitPrice(overlay);
@@ -712,6 +732,8 @@ export default function KindCrumb() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [overlay, setOverlay] = useState(null);
   const [overlayClosing, setOverlayClosing] = useState(false); // { product, flavor, qty, added }
+  const [toast, setToast] = useState(null); // { name, flavor } — transient "added to cart" confirmation
+  const [orderSent, setOrderSent] = useState(false);
 
   const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
   const [activeTab, setActiveTab] = useState("home");
@@ -752,6 +774,8 @@ export default function KindCrumb() {
 
   const thumbRef = useRef(null);
   const scrollTimer = useRef(null);
+  const toastTimer = useRef(null);
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
 
   useEffect(() => {
     const thumb = thumbRef.current;
@@ -778,22 +802,25 @@ export default function KindCrumb() {
   };
   const closeOverlay = () => { setOverlayClosing(true); setTimeout(() => { setOverlay(null); setOverlayClosing(false); }, 260); };
 
-  const addToCart = (name, flavor, qty, price) => {
+  const addToCart = (name, flavor, qty, price, unit) => {
     setCart(prev => {
       const idx = prev.findIndex(c => c.name === name && c.flavor === flavor);
       if (idx >= 0) { const u = [...prev]; u[idx].qty += qty; return u; }
-      return [...prev, { name, flavor, qty, price }];
+      return [...prev, { name, flavor, qty, price, unitPrice: unit }];
     });
-    setDrawerOpen(true);
+    // A toast instead of force-opening the drawer — popping the cart open on
+    // every add blocks the menu underneath, which makes building a multi-item
+    // order tedious (close, browse, add, drawer pops again, close...).
+    setToast({ name, flavor });
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3200);
   };
-
-
 
   const addFromOverlay = () => {
     if (!overlay) return;
     const qtyLabel = overlay.product.quantities?.find(q => q.key === overlay.quantity)?.label;
     const flavorLabel = qtyLabel && overlay.quantity !== "single" ? `${overlay.flavor} · ${qtyLabel}` : overlay.flavor;
-    addToCart(overlay.product.name, flavorLabel, overlay.qty, priceLabel(overlay));
+    addToCart(overlay.product.name, flavorLabel, overlay.qty, priceLabel(overlay), unitPrice(overlay));
     setOverlay(o => ({ ...o, added: true }));
     setTimeout(() => closeOverlay(), 1100);
   };
@@ -804,11 +831,23 @@ export default function KindCrumb() {
   };
 
   const totalItems = cart.reduce((s, c) => s + c.qty, 0);
+  const cartTotal = cart.reduce((s, c) => s + (c.unitPrice != null ? c.unitPrice * c.qty : 0), 0);
+  const cartHasUnpriced = cart.some(c => c.unitPrice == null);
+  const canSubmit = formData.name.trim().length > 0 && formData.phone.trim().length > 0;
 
   const handleSubmit = () => {
-    const items = cart.length ? cart.map(c => `- ${c.name} (${c.flavor}) x${c.qty}`).join("%0A") : "No items";
-    const msg = `Hello Kind Crumb!%0A%0AOrder:%0A${items}%0A%0AName: ${formData.name}%0APhone: ${formData.phone}%0ADate needed: ${formData.date}%0ANotes: ${formData.notes}`;
+    if (!canSubmit || orderSent) return;
+    const items = cart.map(c => `- ${c.name} (${c.flavor}) x${c.qty}${c.unitPrice != null ? ` — R${c.unitPrice * c.qty}` : " — priced on collection"}`).join("%0A");
+    const totalLine = cartHasUnpriced ? `Estimated total: R${cartTotal} + items priced on collection` : `Total: R${cartTotal}`;
+    const msg = `Hello Kind Crumb!%0A%0AOrder:%0A${items}%0A${totalLine}%0A%0AName: ${formData.name}%0APhone: ${formData.phone}%0ADate needed: ${formData.date}%0ANotes: ${formData.notes}`;
     window.open(`https://wa.me/27689536500?text=${msg}`, "_blank");
+    setOrderSent(true);
+    setTimeout(() => {
+      setCart([]);
+      setFormData({ name: "", phone: "", date: "", notes: "" });
+      setOrderSent(false);
+      setDrawerOpen(false);
+    }, 1800);
   };
 
   const tickerItems = ["Baked to order", "Pickup available", "Ladysmith", "Always eggless", "Small batch", "No artificial additives"];
@@ -818,6 +857,15 @@ export default function KindCrumb() {
       <style>{fonts}{css}</style>
 
       <div ref={thumbRef} className="scroll-thumb" />
+
+      {/* ADD-TO-CART TOAST */}
+      {toast && (
+        <div className="cart-toast" role="status" aria-live="polite">
+          <span className="cart-toast-text">Added <strong>{toast.name}</strong> — {toast.flavor}</span>
+          <button className="cart-toast-btn" onClick={() => { setToast(null); setDrawerOpen(true); }}>View cart</button>
+        </div>
+      )}
+
       {/* CART DRAWER OVERLAY */}
       <div className={`drawer-overlay${drawerOpen ? " open" : ""}`} onClick={() => setDrawerOpen(false)} />
 
@@ -889,7 +937,12 @@ export default function KindCrumb() {
           <button className="drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close cart"><X size={20} strokeWidth={1.5} /></button>
         </div>
         <div className="drawer-body">
-          {cart.length === 0 ? (
+          {orderSent ? (
+            <div className="drawer-empty">
+              <span className="drawer-sent-check"><Check size={28} strokeWidth={2} /></span>
+              <p className="drawer-empty-text">Order sent!<br />Finish sending the message in WhatsApp — we'll reach out within 24 hours.</p>
+            </div>
+          ) : cart.length === 0 ? (
             <div className="drawer-empty">
               <ShoppingCart size={36} strokeWidth={1} className="drawer-empty-icon" />
               <p className="drawer-empty-text">Nothing here yet.<br />Pick something from the menu.</p>
@@ -902,7 +955,7 @@ export default function KindCrumb() {
                   <div className="drawer-line-info">
                     <p className="drawer-line-name">{c.name}</p>
                     <p className="drawer-line-flavor">{c.flavor}</p>
-                    <p className="drawer-line-price">{c.price}</p>
+                    <p className="drawer-line-price">{c.unitPrice != null ? `R${c.unitPrice * c.qty}` : c.price}</p>
                   </div>
                   <div className="drawer-line-actions">
                     <button className="dqty-btn" onClick={() => updateCartQty(i, -1)} aria-label={`Decrease quantity of ${c.name}`}><Minus size={11} strokeWidth={2} /></button>
@@ -911,11 +964,16 @@ export default function KindCrumb() {
                   </div>
                 </div>
               ))}
+              <div className="drawer-total-row">
+                <span>{cartHasUnpriced ? "Estimated total" : "Total"}</span>
+                <span>R{cartTotal}{cartHasUnpriced ? "+" : ""}</span>
+              </div>
+              {cartHasUnpriced && <p className="drawer-total-note">Some items are priced on collection and aren't included above.</p>}
               <div className="drawer-form-wrap">
                 <h3 className="drawer-form-title">Your <em>details</em></h3>
                 <div className="d-form">
-                  <div className="d-form-group"><label className="d-label">Name</label><input className="d-input" type="text" placeholder="Full name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} /></div>
-                  <div className="d-form-group"><label className="d-label">Phone / WhatsApp</label><input className="d-input" type="tel" placeholder="+27 000 000 0000" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
+                  <div className="d-form-group"><label className="d-label">Name *</label><input className="d-input" type="text" required aria-required="true" placeholder="Full name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} /></div>
+                  <div className="d-form-group"><label className="d-label">Phone / WhatsApp *</label><input className="d-input" type="tel" required aria-required="true" placeholder="+27 000 000 0000" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
                   <div className="d-form-group"><label className="d-label">Date needed</label><input className="d-input" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} /></div>
                   <div className="d-form-group"><label className="d-label">Notes</label><textarea className="d-textarea" placeholder="Vegan requirements, allergies, quantities…" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
                 </div>
@@ -923,10 +981,10 @@ export default function KindCrumb() {
             </>
           )}
         </div>
-        {cart.length > 0 && (
+        {cart.length > 0 && !orderSent && (
           <div className="drawer-foot">
-            <p className="drawer-note">Pricing confirmed on collection. We'll reach out within 24 hours.</p>
-            <button className="drawer-wa-btn" onClick={handleSubmit}><MessageCircle size={15} strokeWidth={1.5} />Send Order via WhatsApp</button>
+            <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Add your name and phone number so we can reach you."}</p>
+            <button className="drawer-wa-btn" onClick={handleSubmit} disabled={!canSubmit} aria-disabled={!canSubmit}><MessageCircle size={15} strokeWidth={1.5} />Send Order via WhatsApp</button>
             <a href="https://wa.me/27689536500" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
           </div>
         )}
