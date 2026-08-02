@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
   BookOpen, Home, Plus, Minus, ArrowRight, ShoppingCart,
-  Clock, Flame, Wheat, Star, Quote, Check
+  Clock, Flame, Wheat, Star, Quote, Check, Menu as MenuIcon
 } from "lucide-react";
 
 const t = {
@@ -46,7 +46,7 @@ body::-webkit-scrollbar { width: 0; display: none; }
 /* ── NAV GHOST ── */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  display: flex; justify-content: space-between; align-items: center;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   padding: 0.9rem 1.25rem;
   transition: background 0.45s ease, border-color 0.45s ease, backdrop-filter 0.45s ease;
   border-bottom: 1px solid transparent;
@@ -59,11 +59,12 @@ body::-webkit-scrollbar { width: 0; display: none; }
 }
 .nav.scrolled .nav-brand-name { color: ${t.dark}; }
 .nav.scrolled .nav-brand-sub { color: ${t.warm}; }
-.nav.scrolled .nav-links a { color: ${t.brown}; }
+.nav.scrolled .nav-menu-btn { color: ${t.brown}; }
 .nav.scrolled .nav-cart-btn { color: ${t.dark}; }
-.nav.scrolled .nav-wa { color: ${t.brown}; border-color: ${t.tan}; }
+.nav.scrolled .nav-wa { opacity: 1; pointer-events: all; transform: translateY(0); color: ${t.brown}; border-color: ${t.tan}; }
 
-.nav-brand { text-decoration: none; display: flex; flex-direction: column; gap: 0.14rem; }
+.nav-left { justify-self: start; position: relative; }
+.nav-brand { justify-self: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 0.14rem; }
 .nav-brand-name {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.1rem; font-weight: 600; letter-spacing: 0.14em;
@@ -76,20 +77,34 @@ body::-webkit-scrollbar { width: 0; display: none; }
   color: ${t.tan}; text-transform: uppercase;
   line-height: 1; font-style: italic; transition: color 0.4s;
 }
-.nav-links { display: none; gap: 2rem; list-style: none; align-items: center; }
-.nav-links a {
-  font-size: 0.68rem; letter-spacing: 0.14em;
-  color: ${t.cream}; text-decoration: none; text-transform: uppercase;
-  transition: opacity 0.2s; font-weight: 400; opacity: 0.85;
+.nav-menu-btn {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: ${t.cream}; background: none; border: none; cursor: pointer;
+  padding: 0.4rem; opacity: 0.9; transition: color 0.4s, opacity 0.2s;
 }
-.nav-links a:hover { opacity: 0.5; }
-.nav-right { display: flex; align-items: center; gap: 1.25rem; }
+.nav-menu-btn:hover { opacity: 0.6; }
+.nav-menu-btn span { display: none; }
+.nav-menu-panel {
+  position: absolute; top: calc(100% + 0.75rem); left: 0; z-index: 10;
+  min-width: 170px; background: ${t.cream}; border: 1px solid ${t.sand};
+  border-radius: 3px; box-shadow: 0 12px 32px ${t.esp}28;
+  padding: 0.6rem; display: flex; flex-direction: column; gap: 0.15rem;
+}
+.nav-menu-panel a {
+  font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: ${t.brown}; text-decoration: none; padding: 0.6rem 0.7rem;
+  border-radius: 2px; transition: background 0.15s;
+}
+.nav-menu-panel a:hover, .nav-menu-panel a:focus-visible { background: ${t.sand}; outline: none; }
+.nav-right { justify-self: end; display: flex; align-items: center; gap: 1.25rem; }
 .nav-wa {
   display: none; align-items: center; gap: 0.5rem;
   font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
   color: ${t.cream}; text-decoration: none;
   padding: 0.45rem 1rem; border: 1px solid ${t.cream}44;
-  border-radius: 2px; transition: all 0.2s; opacity: 0.85;
+  border-radius: 2px; transition: background 0.2s, color 0.4s, border-color 0.4s, opacity 0.3s, transform 0.3s;
+  opacity: 0.85;
 }
 .nav-wa:hover { background: ${t.cream}18; opacity: 1; }
 .nav-cart-btn { display: flex; align-items: center; color: ${t.cream}; background: none; border: none; cursor: pointer; position: relative; padding: 0.25rem; transition: color 0.4s, opacity 0.2s; opacity: 0.85; }
@@ -458,8 +473,8 @@ body::-webkit-scrollbar { width: 0; display: none; }
   .nav { padding: 1rem 3rem; }
   .nav-brand-name { font-size: 1.2rem; }
   .nav-brand-sub { font-size: 0.62rem; }
-  .nav-links { display: flex; }
-  .nav-wa { display: flex; }
+  .nav-menu-btn span { display: inline; }
+  .nav-wa { display: flex; opacity: 0; pointer-events: none; transform: translateY(-4px); }
   .nav-right { gap: 1.5rem; }
   .bottom-tab-bar { display: none; }
   .page-end-pad { display: none; }
@@ -739,6 +754,20 @@ export default function KindCrumb() {
   const [activeTab, setActiveTab] = useState("home");
 
   const [navScrolled, setNavScrolled] = useState(false);
+  const [navMenuOpen, setNavMenuOpen] = useState(false);
+  const navMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!navMenuOpen) return;
+    const onKeyDown = (e) => { if (e.key === "Escape") setNavMenuOpen(false); };
+    const onClickOutside = (e) => { if (navMenuRef.current && !navMenuRef.current.contains(e.target)) setNavMenuOpen(false); };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onClickOutside);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onClickOutside);
+    };
+  }, [navMenuOpen]);
 
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
@@ -992,19 +1021,26 @@ export default function KindCrumb() {
 
       {/* NAV */}
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
+        <div className="nav-left" ref={navMenuRef}>
+          <button className="nav-menu-btn" onClick={() => setNavMenuOpen(o => !o)} aria-expanded={navMenuOpen} aria-controls="nav-menu-panel">
+            <MenuIcon size={18} strokeWidth={1.5} /> <span>Menu</span>
+          </button>
+          {navMenuOpen && (
+            <div id="nav-menu-panel" className="nav-menu-panel" role="menu">
+              <a href="#products" role="menuitem" onClick={() => setNavMenuOpen(false)}>Menu</a>
+              <a href="#about" role="menuitem" onClick={() => setNavMenuOpen(false)}>Our Story</a>
+              <a href="#testimonials" role="menuitem" onClick={() => setNavMenuOpen(false)}>Reviews</a>
+              <a href="#blog" role="menuitem" onClick={() => setNavMenuOpen(false)}>Journal</a>
+            </div>
+          )}
+        </div>
         <a href="#home" className="nav-brand">
           <span className="nav-brand-name">Kind Crumb</span>
           <span className="nav-brand-sub">The Treat Table</span>
         </a>
-        <ul className="nav-links">
-          <li><a href="#products">Menu</a></li>
-          <li><a href="#about">Our Story</a></li>
-          <li><a href="#testimonials">Reviews</a></li>
-          <li><a href="#blog">Journal</a></li>
-        </ul>
         <div className="nav-right">
           <a href="https://wa.me/27689536500" className="nav-wa" target="_blank" rel="noreferrer">
-            <MessageCircle size={13} strokeWidth={1.5} /> Order via WhatsApp
+            <MessageCircle size={13} strokeWidth={1.5} /> Order Now
           </a>
           <button className="nav-cart-btn" onClick={() => setDrawerOpen(true)} aria-label={`Open cart${totalItems > 0 ? `, ${totalItems} items` : ""}`}>
             <ShoppingCart size={19} strokeWidth={1.5} />
