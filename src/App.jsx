@@ -1,17 +1,29 @@
 import { useState, useEffect, useRef } from "react";
-import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
   Plus, Minus, ArrowRight, ShoppingCart,
   Clock, Flame, Wheat, Star, Quote, Check, Menu as MenuIcon
 } from "lucide-react";
 
+// lucide-react@1.8.0 (pinned) predates its Instagram icon, so it's inlined
+// here matching the same outlined stroke style as the rest of the icon set.
+function Instagram({ size = 16, strokeWidth = 1.5, ...rest }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" {...rest}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
 const t = {
   cream: "#F5F0E8", sand: "#E8DCC8", tan: "#C9B99A",
-  brown: "#6B4F35", dark: "#3D2B1A", esp: "#1C1008", warm: "#A07850",
-  // Darker than `warm`, used for body copy on cream/sand backgrounds so
-  // paragraph text clears the WCAG AA 4.5:1 contrast ratio (warm itself
-  // only reaches ~3.5:1, fine for icons/labels but not for reading text).
+  brown: "#6B4F35", dark: "#3D2B1A", esp: "#1C1008",
+  // Darkened from the original #A07850 (~3.5:1 on cream, failed WCAG AA)
+  // to ~5:1 so section labels/eyebrows/tags clear 4.5:1 for small text.
+  warm: "#816141",
   warmText: "#7A5A3D",
 };
 
@@ -174,6 +186,8 @@ body {
 .d-input, .d-textarea { font-family: 'Raleway', sans-serif; font-size: 0.88rem; font-weight: 300; color: ${t.dark}; background: transparent; border: none; border-bottom: 1px solid ${t.tan}; padding: 0.55rem 0; outline: none; transition: border-color 0.2s; width: 100%; }
 .d-input:focus, .d-textarea:focus { border-bottom-color: ${t.brown}; }
 .d-textarea { resize: vertical; min-height: 60px; }
+.d-hint { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; }
+.d-privacy { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; margin-top: 1rem; opacity: 0.85; }
 .drawer-foot { padding: 1.25rem 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .drawer-note { font-size: 0.68rem; color: ${t.warmText}; font-style: italic; }
 .drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'Raleway', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 999px; width: 100%; transition: background 0.2s; }
@@ -633,10 +647,34 @@ const aboutStory = {
   signoff: "— Renata, founder of Kind Crumb",
 };
 
+// Orders are taken 7:30am-5pm daily and need 24hrs notice. Since a same-day
+// "tomorrow" order placed after closing wouldn't get a full working day of
+// notice, the cutoff rolls forward an extra day once we're past close.
+const ORDER_HOURS = { openHour: 7.5, closeHour: 17 };
+
+function getMinOrderDate(now = new Date()) {
+  const hours = now.getHours() + now.getMinutes() / 60;
+  const daysAhead = hours < ORDER_HOURS.closeHour ? 1 : 2;
+  const min = new Date(now);
+  min.setDate(min.getDate() + daysAhead);
+  return min.toISOString().slice(0, 10);
+}
+
+function upcomingSunday(from = new Date()) {
+  const d = new Date(from);
+  const diff = d.getDay() === 0 ? 0 : 7 - d.getDay();
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
 const weeklyBake = {
   name: "Fresh\nDonut Bites",
   desc: "This week's featured bake — golden fried donut bites rolled in cinnamon sugar. A limited batch, available until Sunday.",
-  meta: [{ icon: Clock, label: "Until Sunday" }, { icon: Flame, label: "Fried fresh" }, { icon: Wheat, label: "Eggless" }],
+  meta: [
+    { icon: Clock, label: `Until ${upcomingSunday().toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })}` },
+    { icon: Flame, label: "Fried fresh" },
+    { icon: Wheat, label: "Eggless" },
+  ],
   productIdx: 0,
 };
 
@@ -925,7 +963,8 @@ function AppShell() {
   const totalItems = cart.reduce((s, c) => s + c.qty, 0);
   const cartTotal = cart.reduce((s, c) => s + (c.unitPrice != null ? c.unitPrice * c.qty : 0), 0);
   const cartHasUnpriced = cart.some(c => c.unitPrice == null);
-  const canSubmit = formData.name.trim().length > 0 && formData.phone.trim().length > 0;
+  const phoneDigits = formData.phone.replace(/\D/g, "");
+  const canSubmit = formData.name.trim().length > 0 && phoneDigits.length >= 9;
 
   const handleSubmit = () => {
     if (!canSubmit || orderSent) return;
@@ -1067,16 +1106,21 @@ function AppShell() {
                 <div className="d-form">
                   <div className="d-form-group"><label className="d-label">Name *</label><input className="d-input" type="text" required aria-required="true" placeholder="Full name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} /></div>
                   <div className="d-form-group"><label className="d-label">Phone / WhatsApp *</label><input className="d-input" type="tel" required aria-required="true" placeholder="+27 000 000 0000" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
-                  <div className="d-form-group"><label className="d-label">Date needed</label><input className="d-input" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} /></div>
+                  <div className="d-form-group">
+                    <label className="d-label">Date needed</label>
+                    <input className="d-input" type="date" min={getMinOrderDate()} value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                    <span className="d-hint">Orders need 24hrs notice · we bake 7:30am–5pm daily</span>
+                  </div>
                   <div className="d-form-group"><label className="d-label">Notes</label><textarea className="d-textarea" placeholder="Vegan requirements, allergies, quantities…" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
                 </div>
+                <p className="d-privacy">Your details are only used to prepare and confirm this order — never shared or sold.</p>
               </div>
             </>
           )}
         </div>
         {cart.length > 0 && !orderSent && (
           <div className="drawer-foot">
-            <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Add your name and phone number so we can reach you."}</p>
+            <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Add your name and a valid phone number so we can reach you."}</p>
             <button className="drawer-wa-btn" onClick={handleSubmit} disabled={!canSubmit} aria-disabled={!canSubmit}><MessageCircle size={15} strokeWidth={1.5} />Send Order via WhatsApp</button>
             <a href="https://wa.me/27689536500" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
           </div>
@@ -1143,6 +1187,8 @@ function AppShell() {
           <ul className="footer-contact">
             <li><MapPin size={13} strokeWidth={1.5} /> Ladysmith, KwaZulu-Natal</li>
             <li><MessageCircle size={13} strokeWidth={1.5} /> <a href="https://wa.me/27689536500" target="_blank" rel="noreferrer">Order via WhatsApp — we reply within 24 hours</a></li>
+            <li><Instagram size={13} strokeWidth={1.5} /> <a href="https://www.instagram.com/kind_crumb/" target="_blank" rel="noreferrer">@kind_crumb</a></li>
+            <li><Clock size={13} strokeWidth={1.5} /> Orders taken 7:30am–5pm daily · 24hrs notice needed</li>
           </ul>
         </div>
         <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
@@ -1215,7 +1261,7 @@ function StoryPage({ openOverlay }) {
         <div className="how-steps">
           {[
             { n: "01", icon: ShoppingBag, title: "Choose & add", desc: "Browse the menu, tap a flavour, set your quantity. Add directly from the card — no extra pages." },
-            { n: "02", icon: MessageCircle, title: "Send your order", desc: "Your cart holds everything. Fill in your details and send directly to us on WhatsApp." },
+            { n: "02", icon: MessageCircle, title: "Send your order", desc: "Your cart holds everything. Fill in your details and send directly to us on WhatsApp. We take orders 7:30am–5pm daily and need at least 24 hours notice." },
             { n: "03", icon: MapPin, title: "Collect in Ladysmith", desc: "Everything baked fresh to your order on collection day. No pre-made stock, ever." },
           ].map((s, i) => (
             <R key={i} d={i + 1} className="how-step">
@@ -1310,8 +1356,8 @@ function StoryPage({ openOverlay }) {
           </div>
         </R>
         <R d={2} style={{ marginTop: "1.5rem" }}>
-          <a href="https://wa.me/27689536500" className="gallery-ig-link" target="_blank" rel="noreferrer">
-            <MessageCircle size={14} strokeWidth={1.5} /> See more of our bakes on WhatsApp
+          <a href="https://www.instagram.com/kind_crumb/" className="gallery-ig-link" target="_blank" rel="noreferrer">
+            <Instagram size={14} strokeWidth={1.5} /> See more of our bakes on Instagram
           </a>
         </R>
       </section>
@@ -1335,8 +1381,8 @@ function StoryPage({ openOverlay }) {
 
 export default function KindCrumb() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <AppShell />
-    </HashRouter>
+    </BrowserRouter>
   );
 }
