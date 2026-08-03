@@ -334,17 +334,19 @@ body {
 .showcase-card {
   position: relative; max-width: 1000px; margin: 0 auto;
   border-radius: 28px; overflow: hidden;
-  padding: 0 0 2.75rem;
+  padding: 1.75rem 1.75rem 2.5rem;
   background-color: transparent;
   transition: background-color 0.7s ease;
 }
 .showcase-row.visible .showcase-card { background-color: var(--pcolor); }
-.showcase-grid { display: flex; flex-direction: column; gap: 1.75rem; }
+.showcase-grid { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
 .showcase-photo-block {
-  width: 100%; aspect-ratio: 4/5;
+  width: 100%; max-width: 320px; aspect-ratio: 1/1;
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 12px 28px ${t.esp}22;
 }
 .showcase-photo-block img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; padding: 1.75rem 1.75rem 0; }
+.showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
 .showcase-badge { display: inline-block; background: ${t.sand}; color: ${t.brown}; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
 .showcase-row-name { font-family: 'Playfair Display', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; transition: color 0.7s ease; }
 .showcase-row.visible .showcase-row-name { color: ${t.cream}; }
@@ -475,7 +477,7 @@ body {
   .showcase-row-section { padding: 3rem; }
   .showcase-card { padding: 4rem; overflow: visible; }
   .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
-  .showcase-photo-block { aspect-ratio: 1/1; border-radius: 20px; margin: 0 0 0 -6rem; box-shadow: 0 20px 44px ${t.esp}22; }
+  .showcase-photo-block { width: 100%; max-width: none; aspect-ratio: 1/1; border-radius: 20px; margin: 0 0 0 -6rem; box-shadow: 0 20px 44px ${t.esp}22; }
   .showcase-reverse .showcase-photo-block { order: 2; margin: 0 -6rem 0 0; }
   .showcase-row-body { padding: 0; }
   .showcase-reverse .showcase-row-body { order: 1; }
@@ -535,9 +537,9 @@ body {
 //    pack size) where price depends on the combination of both — flavour
 //    determines a price "tier", quantity picks a price within that tier.
 const products = [
-  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", showcaseColor: "#955431", flavors: [{ name: "Cinnamon Sugar" }, { name: "Vanilla Glaze" }, { name: "Lemon Glaze" }, { name: "Chocolate Dip" }], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
+  { tag: "This Week", name: "Donut Bites", image: "donuts.webp", squareImage: "donuts-square.webp", showcaseColor: "#955431", flavors: [{ name: "Cinnamon Sugar" }, { name: "Vanilla Glaze" }, { name: "Lemon Glaze" }, { name: "Chocolate Dip" }], desc: "Freshly fried donut bites in your choice of glaze — golden, warm and impossible to stop at one. Limited batches.", price: "Coming soon" },
   {
-    tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", showcaseColor: "#7F5C41",
+    tag: "Bite Sized", name: "Mini Cakes", image: "mini-cakes.webp", squareImage: "mini-cakes-square.webp", showcaseColor: "#7F5C41",
     flavors: [
       { name: "Chocolate", price: 45, image: "choc.webp" },
       { name: "Red Velvet", price: 48, image: "redvelvet.webp" },
@@ -550,7 +552,7 @@ const products = [
     desc: "Perfectly portioned mini cakes for any occasion, baked fresh to order.", price: "From R42",
   },
   {
-    tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", showcaseColor: "#8A4C24",
+    tag: "Signature", name: "Cinnamon Rolls", image: "cinnamon-rolls.webp", squareImage: "cinnamon-rolls-square.webp", showcaseColor: "#8A4C24",
     flavorGroups: [
       { tier: "Classic", label: "Classic Rolls", flavors: [
         { name: "Classic", price: 25 },
@@ -573,8 +575,8 @@ const products = [
     ],
     desc: "Our signature soft & fluffy cinnamon rolls. Choose from our classic glazes, decadent speciality flavours, or grab a value pack.", price: "From R25",
   },
-  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", showcaseColor: "#815937", basePrice: 35, flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
-  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", showcaseColor: "#7D5128", basePrice: 350, flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
+  { tag: "Classic", name: "Chunky Cookies", image: "cookies.webp", squareImage: "cookies-square.webp", showcaseColor: "#815937", basePrice: 35, flavors: [{ name: "Brown Butter Choc Chip" }, { name: "Double Chocolate" }, { name: "Macadamia Nut" }, { name: "Oatmeal Raisin" }], desc: "Thick, chewy, and loaded with goodness. Our cookies are baked to have a crispy edge and a gooey center.", price: "From R35" },
+  { tag: "Decadent", name: "Tres Leches Milk Cake", image: "milk-cake.webp", squareImage: "milk-cake-square.webp", showcaseColor: "#7D5128", basePrice: 350, flavors: [{ name: "Pistachio" }, { name: "Almond" }, { name: "Coconut" }, { name: "Strawberry" }, { name: "Blueberry (coming soon)" }, { name: "Chocolate (coming soon)" }], desc: "A rich and moist sponge cake soaked in three kinds of milk, topped with a light whipped cream layer.", price: "From R350" },
 ]
 
 function flavorTier(product, flavorName) {
@@ -746,7 +748,7 @@ function ShowcaseRow({ product: p, reverse, onOpen }) {
         <div className="showcase-card">
           <div className="showcase-grid">
             <div className="showcase-photo-block">
-              <img src={`/images/${p.image}`} alt={p.name} loading="lazy" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={`/images/${p.squareImage || p.image}`} alt={p.name} loading="lazy" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div className="showcase-row-body">
               <p className="showcase-badge">{p.tag}</p>
