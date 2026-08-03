@@ -333,19 +333,18 @@ body {
 .showcase-row-section { background: ${t.cream}; padding: 2.5rem 1.25rem; }
 .showcase-card {
   position: relative; max-width: 1000px; margin: 0 auto;
-  border-radius: 28px; overflow: visible;
-  padding: 4.5rem 1.75rem 2.5rem;
+  border-radius: 28px; overflow: hidden;
+  padding: 0 0 2.75rem;
   background-color: transparent;
   transition: background-color 0.7s ease;
 }
 .showcase-row.visible .showcase-card { background-color: var(--pcolor); }
-.showcase-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.showcase-grid { display: flex; flex-direction: column; gap: 1.75rem; }
 .showcase-photo-block {
-  width: 100%; aspect-ratio: 4/5; border-radius: 20px; overflow: hidden;
-  margin: -4.5rem 0 0; box-shadow: 0 20px 44px ${t.esp}22;
+  width: 100%; aspect-ratio: 4/5;
 }
 .showcase-photo-block img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; }
+.showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; padding: 1.75rem 1.75rem 0; }
 .showcase-badge { display: inline-block; background: ${t.sand}; color: ${t.brown}; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
 .showcase-row-name { font-family: 'Playfair Display', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; transition: color 0.7s ease; }
 .showcase-row.visible .showcase-row-name { color: ${t.cream}; }
@@ -474,10 +473,11 @@ body {
   /* MENU INTRO + SHOWCASE — desktop */
   .menu-intro { padding: 8rem 3rem 3rem; }
   .showcase-row-section { padding: 3rem; }
-  .showcase-card { padding: 4rem; }
+  .showcase-card { padding: 4rem; overflow: visible; }
   .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; }
-  .showcase-photo-block { aspect-ratio: 1/1; margin: 0 0 0 -6rem; }
+  .showcase-photo-block { aspect-ratio: 1/1; border-radius: 20px; margin: 0 0 0 -6rem; box-shadow: 0 20px 44px ${t.esp}22; }
   .showcase-reverse .showcase-photo-block { order: 2; margin: 0 -6rem 0 0; }
+  .showcase-row-body { padding: 0; }
   .showcase-reverse .showcase-row-body { order: 1; }
 
   /* PRODUCT OVERLAY — side-by-side on desktop */
