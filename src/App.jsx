@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
-  BookOpen, Home, Plus, Minus, ArrowRight, ShoppingCart,
+  Plus, Minus, ArrowRight, ShoppingCart,
   Clock, Flame, Wheat, Star, Quote, Check, Menu as MenuIcon
 } from "lucide-react";
 
@@ -124,21 +124,10 @@ body {
 .nav-cart-btn:hover { opacity: 0.55; }
 .cart-count { position: absolute; top: -5px; right: -7px; width: 16px; height: 16px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; font-size: 0.55rem; font-weight: 500; display: flex; align-items: center; justify-content: center; opacity: 1; }
 
-/* ── BOTTOM TAB ── */
-.bottom-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; display: flex; background: ${t.cream}f5; backdrop-filter: blur(16px); border-top: 1px solid ${t.sand}; padding-bottom: env(safe-area-inset-bottom); }
-.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem 0.5rem 0.55rem; gap: 0.22rem; text-decoration: none; color: ${t.tan}; transition: color 0.2s; border: none; background: none; cursor: pointer; }
-.tab-item:hover, .tab-item.active { color: ${t.dark}; }
-.tab-item span { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.tab-cart-btn { flex: 1.5; background: ${t.dark}; color: ${t.cream}; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem 0.5rem 0.55rem; gap: 0.22rem; border: none; cursor: pointer; transition: background 0.2s; position: relative; }
-.tab-cart-btn:hover { background: ${t.esp}; }
-.tab-cart-btn span { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; }
-.tab-cart-count { position: absolute; top: 6px; right: calc(50% - 18px); width: 15px; height: 15px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
-.page-end-pad { height: 5rem; }
-
 /* ── ADD-TO-CART TOAST ── */
 .cart-toast {
   position: fixed; left: 1rem; right: 1rem;
-  bottom: calc(4.75rem + env(safe-area-inset-bottom)); z-index: 250;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom)); z-index: 250;
   background: ${t.esp}; color: ${t.cream}; border-radius: 20px;
   padding: 0.85rem 1rem; box-shadow: 0 8px 28px ${t.esp}44;
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
@@ -466,8 +455,6 @@ body {
   .sidebar { width: 50vw; max-width: 640px; }
   .nav-wa { display: flex; opacity: 0; pointer-events: none; transform: translateY(-4px); }
   .nav-right { gap: 1.5rem; }
-  .bottom-tab-bar { display: none; }
-  .page-end-pad { display: none; }
   .cart-toast { left: auto; right: 2rem; bottom: 1.5rem; max-width: 360px; }
 
   /* HERO */
@@ -826,7 +813,6 @@ function AppShell() {
   const [orderSent, setOrderSent] = useState(false);
 
   const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
-  const [activeTab, setActiveTab] = useState("home");
 
   const [navScrolled, setNavScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -853,18 +839,10 @@ function AppShell() {
 
   useEffect(() => {
     if (location.pathname !== "/") {
-      setActiveTab("blog");
       setNavScrolled(true);
       return;
     }
-    const onScroll = () => {
-      const y = window.scrollY;
-      setNavScrolled(y > 60);
-      const secs = [{ id: "home", el: document.querySelector(".hero") }, { id: "products", el: document.getElementById("products") }];
-      let cur = "home";
-      secs.forEach(({ id, el }) => { if (el && el.offsetTop <= y + window.innerHeight / 2) cur = id; });
-      setActiveTab(cur);
-    };
+    const onScroll = () => setNavScrolled(window.scrollY > 60);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -1168,18 +1146,8 @@ function AppShell() {
         <p className="footer-bottom">© {new Date().getFullYear()} Kind Crumb. All rights reserved.</p>
       </footer>
 
-      <div className="page-end-pad" />
 
       {/* BOTTOM TAB BAR */}
-      <nav className="bottom-tab-bar">
-        <button className={`tab-item${activeTab === "home" ? " active" : ""}`} onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}><Home size={18} strokeWidth={1.5} /><span>Home</span></button>
-        <Link to="/#products" className={`tab-item${activeTab === "products" ? " active" : ""}`}><ShoppingBag size={18} strokeWidth={1.5} /><span>Menu</span></Link>
-        <button className="tab-cart-btn" onClick={() => setDrawerOpen(true)}>
-          {totalItems > 0 && <span className="tab-cart-count">{totalItems}</span>}
-          <ShoppingCart size={18} strokeWidth={1.5} /><span>Order</span>
-        </button>
-        <Link to="/story#blog" className={`tab-item${activeTab === "blog" ? " active" : ""}`}><BookOpen size={18} strokeWidth={1.5} /><span>Journal</span></Link>
-      </nav>
     </>
   );
 }
