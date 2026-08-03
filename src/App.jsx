@@ -778,6 +778,39 @@ function useFocusTrap(active, containerRef, onClose) {
   }, [active]);
 }
 
+// Makes the mobile/browser back button close an open overlay (product card,
+// cart drawer, nav sidebar) instead of leaving the page. Opening pushes a
+// throwaway history entry; the back button pops it (caught via popstate,
+// which just closes the overlay). Closing via any other control (X, Escape,
+// backdrop click) consumes that same entry with history.back() so it never
+// lingers and a real subsequent back press doesn't require two taps.
+function useBackButtonClose(active, onClose) {
+  const pushedRef = useRef(false);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (active && !pushedRef.current) {
+      window.history.pushState({ overlay: true }, "");
+      pushedRef.current = true;
+    } else if (!active && pushedRef.current) {
+      pushedRef.current = false;
+      window.history.back();
+    }
+  }, [active]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (pushedRef.current) {
+        pushedRef.current = false;
+        onCloseRef.current();
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+}
+
 function ShowcaseRow({ product: p, reverse, onOpen }) {
   const open = () => onOpen(p);
   return (
@@ -863,6 +896,10 @@ function AppShell() {
   useFocusTrap(drawerOpen, drawerRef, () => setDrawerOpen(false));
   useFocusTrap(!!overlay && !overlayClosing, overlayRef, () => closeOverlay());
   useFocusTrap(sidebarOpen, sidebarRef, () => setSidebarOpen(false));
+
+  useBackButtonClose(drawerOpen, () => setDrawerOpen(false));
+  useBackButtonClose(!!overlay && !overlayClosing, () => closeOverlay());
+  useBackButtonClose(sidebarOpen, () => setSidebarOpen(false));
 
   // Local custom scrollbars for the product overlay and cart drawer — which
   // element actually scrolls varies by breakpoint (po-card on mobile,
