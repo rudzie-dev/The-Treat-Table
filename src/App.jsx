@@ -437,6 +437,9 @@ body {
 
 /* ── JOURNAL ── */
 .blog-section { padding: 3.5rem 1.25rem; background: ${t.sand}55; }
+.blog-section-standalone { padding-top: 7rem; min-height: 70vh; }
+.blog-standalone-note { font-size: 0.85rem; font-weight: 300; color: ${t.warmText}; line-height: 1.75; max-width: 480px; margin-bottom: 2rem; }
+.blog-standalone-note a { color: ${t.brown}; }
 .blog-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid ${t.sand}; }
 .blog-grid { display: flex; flex-direction: column; gap: 1rem; }
 .blog-card { background: ${t.cream}; border: 1px solid ${t.sand}; border-radius: 16px; overflow: hidden; position: relative; }
@@ -700,7 +703,7 @@ const weeklyBake = {
 
 // Scrolls to a #hash target on navigation — needed because plain <a href="#id">
 // anchors only work within the current page; moving content across routes
-// (e.g. a footer link from "/" to "/story#about") needs this to run the
+// (e.g. a footer link from "/" to "/about#testimonials") needs this to run the
 // scroll after the target route has actually mounted.
 function ScrollToHash() {
   const location = useLocation();
@@ -806,16 +809,25 @@ function useFocusTrap(active, containerRef, onClose) {
 // lingers and a real subsequent back press doesn't require two taps.
 function useBackButtonClose(active, onClose) {
   const pushedRef = useRef(false);
+  const hrefAtPushRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
   useEffect(() => {
     if (active && !pushedRef.current) {
+      hrefAtPushRef.current = window.location.href;
       window.history.pushState({ overlay: true }, "");
       pushedRef.current = true;
     } else if (!active && pushedRef.current) {
       pushedRef.current = false;
-      window.history.back();
+      // A real navigation (e.g. clicking a nav link while the sidebar was
+      // open) may have pushed its own entry on top of ours in between -
+      // only consume our entry with history.back() if the URL is still
+      // exactly what it was when we pushed it, otherwise back() here would
+      // undo that navigation instead of just closing the modal.
+      if (window.location.href === hrefAtPushRef.current) {
+        window.history.back();
+      }
     }
   }, [active]);
 
@@ -1215,16 +1227,17 @@ function AppShell() {
         </div>
         <ul className="sidebar-links">
           <li><Link to="/" onClick={() => setSidebarOpen(false)}>Menu</Link></li>
-          <li><Link to="/story#about" onClick={() => setSidebarOpen(false)}>Our <em>Story</em></Link></li>
-          <li><Link to="/story#testimonials" onClick={() => setSidebarOpen(false)}>Reviews</Link></li>
-          <li><Link to="/story#blog" onClick={() => setSidebarOpen(false)}>Journal</Link></li>
+          <li><Link to="/about" onClick={() => setSidebarOpen(false)}>Our <em>Story</em></Link></li>
+          <li><Link to="/about#testimonials" onClick={() => setSidebarOpen(false)}>Reviews</Link></li>
+          <li><Link to="/journal" onClick={() => setSidebarOpen(false)}>Journal</Link></li>
         </ul>
       </div>
 
       <ScrollToHash />
       <Routes>
         <Route path="/" element={<HomePage openOverlay={openOverlay} />} />
-        <Route path="/story" element={<StoryPage openOverlay={openOverlay} />} />
+        <Route path="/about" element={<AboutPage openOverlay={openOverlay} />} />
+        <Route path="/journal" element={<JournalPage />} />
       </Routes>
 
       {/* FOOTER */}
@@ -1235,9 +1248,9 @@ function AppShell() {
         </div>
         <ul className="footer-links">
           <li><Link to="/">Menu</Link></li>
-          <li><Link to="/story#about">Our Story</Link></li>
-          <li><Link to="/story#testimonials">Reviews</Link></li>
-          <li><Link to="/story#blog">Journal</Link></li>
+          <li><Link to="/about">Our Story</Link></li>
+          <li><Link to="/about#testimonials">Reviews</Link></li>
+          <li><Link to="/journal">Journal</Link></li>
         </ul>
         <div>
           <p className="footer-col-title">Get in touch</p>
@@ -1275,7 +1288,7 @@ function HomePage({ openOverlay }) {
           <p className="hero-sub">Small-batch baking made to order. Experience our soft, fluffy dough swirled with rich cinnamon sugar and topped with cream cheese frosting.</p>
           <div className="hero-actions">
             <a href="#products" className="btn-primary">View the Menu</a>
-            <Link to="/story#how" className="btn-ghost">How it works <ArrowDown size={13} strokeWidth={1.5} /></Link>
+            <Link to="/about#how" className="btn-ghost">How it works <ArrowDown size={13} strokeWidth={1.5} /></Link>
           </div>
         </div>
       </section>
@@ -1306,9 +1319,24 @@ function HomePage({ openOverlay }) {
   );
 }
 
-function StoryPage({ openOverlay }) {
+function AboutPage({ openOverlay }) {
   return (
     <>
+      {/* ABOUT */}
+      <section id="about" className="about-section">
+        <div className="about-grid">
+          <R className="about-img">
+            <img src="/images/burfeecloseup.webp" alt="Close-up of a freshly baked Kind Crumb burfee mini cake, showing the frosting and texture" loading="lazy" width="600" height="600" />
+          </R>
+          <R d={1} className="about-body">
+            <p className="section-label">{aboutStory.eyebrow}</p>
+            <h1 className="section-title" style={{ marginBottom: "1.25rem" }}>Baked with <em>kindness</em>,<br />by hand, in Ladysmith.</h1>
+            {aboutStory.paragraphs.map((p, i) => <p key={i} className="about-text">{p}</p>)}
+            <p className="about-signoff">{aboutStory.signoff}</p>
+          </R>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section id="how" className="how-section">
         <R>
@@ -1357,22 +1385,7 @@ function StoryPage({ openOverlay }) {
         </R>
       </section>
 
-      {/* ABOUT */}
-      <section id="about" className="about-section">
-        <div className="about-grid">
-          <R className="about-img">
-            <img src="/images/burfeecloseup.webp" alt="Close-up of a freshly baked Kind Crumb burfee mini cake, showing the frosting and texture" loading="lazy" width="600" height="600" />
-          </R>
-          <R d={1} className="about-body">
-            <p className="section-label">{aboutStory.eyebrow}</p>
-            <h2 className="section-title" style={{ marginBottom: "1.25rem" }}>Baked with <em>kindness</em>,<br />by hand, in Ladysmith.</h2>
-            {aboutStory.paragraphs.map((p, i) => <p key={i} className="about-text">{p}</p>)}
-            <p className="about-signoff">{aboutStory.signoff}</p>
-          </R>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
+      {/* TESTIMONIALS / REVIEWS */}
       <section id="testimonials" className="testi-section">
         <R>
           <p className="section-label">What people say</p>
@@ -1418,21 +1431,27 @@ function StoryPage({ openOverlay }) {
           </a>
         </R>
       </section>
-
-      {/* JOURNAL */}
-      <section id="blog" className="blog-section">
-        <div className="blog-header">
-          <R>
-            <p className="section-label">From the kitchen</p>
-            <h2 className="section-title">Our <em>Journal</em></h2>
-          </R>
-          <span style={{ fontSize: "0.7rem", color: t.warm, letterSpacing: "0.1em", textTransform: "uppercase" }}>Launching soon</span>
-        </div>
-        <div className="blog-grid">
-          <SkeletonCard /><SkeletonCard /><SkeletonCard />
-        </div>
-      </section>
     </>
+  );
+}
+
+function JournalPage() {
+  return (
+    <section id="blog" className="blog-section blog-section-standalone">
+      <div className="blog-header">
+        <R>
+          <p className="section-label">From the kitchen</p>
+          <h1 className="section-title">Our <em>Journal</em></h1>
+        </R>
+        <span style={{ fontSize: "0.7rem", color: t.warm, letterSpacing: "0.1em", textTransform: "uppercase" }}>Launching soon</span>
+      </div>
+      <R d={1}>
+        <p className="blog-standalone-note">Recipes, behind-the-scenes bakes, and stories from the kitchen — coming soon. In the meantime, follow along on <a href="https://www.instagram.com/kind_crumb/" target="_blank" rel="noreferrer">Instagram</a> or <a href="https://wa.me/27689536500" target="_blank" rel="noreferrer">WhatsApp</a>.</p>
+      </R>
+      <div className="blog-grid">
+        <SkeletonCard /><SkeletonCard /><SkeletonCard />
+      </div>
+    </section>
   );
 }
 

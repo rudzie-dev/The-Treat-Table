@@ -7,9 +7,15 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://kindcrumbtreats.co.za/story</loc>
-    <lastmod>2026-08-03</lastmod>
+    <loc>https://kindcrumbtreats.co.za/about</loc>
+    <lastmod>2026-08-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://kindcrumbtreats.co.za/journal</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
