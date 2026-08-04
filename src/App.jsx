@@ -375,8 +375,8 @@ body {
   text-decoration: underline; text-underline-offset: 3px;
   transition: color 0.5s ease, border-color 0.5s ease, background-color 0.5s ease, padding 0.5s ease;
 }
-.showcase-row.visible .showcase-link { color: ${t.esp}; border-color: ${t.esp}; padding: 0.75rem 1.5rem; text-decoration: none; }
-.showcase-row.visible .showcase-link-primary { background-color: ${t.esp}; color: var(--pcolor); }
+.showcase-row.visible .showcase-link { color: ${t.cream}; border-color: ${t.cream}; padding: 0.75rem 1.5rem; text-decoration: none; }
+.showcase-row.visible .showcase-link-primary { background-color: ${t.cream}; color: var(--pcolor); }
 
 /* ── HOW IT WORKS ── */
 .how-section { padding: 3.5rem 1.25rem; background: ${t.dark}; }
@@ -512,9 +512,9 @@ body {
   .showcase-row.visible .showcase-row-price { color: ${t.brown}; }
   .showcase-row .showcase-card:hover .showcase-row-price { color: ${t.cream}; }
   .showcase-row.visible .showcase-link { color: ${t.dark}; border-color: transparent; padding: 0; text-decoration: underline; }
-  .showcase-row .showcase-card:hover .showcase-link { color: ${t.esp}; border-color: ${t.esp}; padding: 0.75rem 1.5rem; text-decoration: none; }
+  .showcase-row .showcase-card:hover .showcase-link { color: ${t.cream}; border-color: ${t.cream}; padding: 0.75rem 1.5rem; text-decoration: none; }
   .showcase-row.visible .showcase-link-primary { background-color: transparent; }
-  .showcase-row .showcase-card:hover .showcase-link-primary { background-color: ${t.esp}; color: var(--pcolor); }
+  .showcase-row .showcase-card:hover .showcase-link-primary { background-color: ${t.cream}; color: var(--pcolor); }
 
   /* PRODUCT OVERLAY — side-by-side on desktop */
   .po-card { grid-template-columns: 1fr 1fr; max-height: 80vh; }
