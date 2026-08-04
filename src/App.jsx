@@ -496,6 +496,26 @@ body {
   .showcase-row-body { padding: 0; }
   .showcase-reverse .showcase-row-body { order: 1; }
 
+  /* Desktop swaps the mobile's one-time scroll reveal for a live hover
+     state (mouse in -> fills with the product color, mouse out -> reverts)
+     — matching Crumbl's hero-banner hover treatment. The mobile rules key
+     off .showcase-row.visible (set once by the scroll observer and never
+     removed, so it's present on desktop too once a card has scrolled by)
+     — each one is neutralized here at equal-or-higher specificity before
+     re-keying the effect to :hover, which the reset can't outrank. */
+  .showcase-row.visible .showcase-card { background-color: transparent; }
+  .showcase-row .showcase-card:hover { background-color: var(--pcolor); }
+  .showcase-row.visible .showcase-row-name { color: ${t.dark}; }
+  .showcase-row .showcase-card:hover .showcase-row-name { color: ${t.cream}; }
+  .showcase-row.visible .showcase-row-desc { color: ${t.warmText}; }
+  .showcase-row .showcase-card:hover .showcase-row-desc { color: ${t.cream}; }
+  .showcase-row.visible .showcase-row-price { color: ${t.brown}; }
+  .showcase-row .showcase-card:hover .showcase-row-price { color: ${t.cream}; }
+  .showcase-row.visible .showcase-link { color: ${t.dark}; border-color: transparent; padding: 0; text-decoration: underline; }
+  .showcase-row .showcase-card:hover .showcase-link { color: ${t.esp}; border-color: ${t.esp}; padding: 0.75rem 1.5rem; text-decoration: none; }
+  .showcase-row.visible .showcase-link-primary { background-color: transparent; }
+  .showcase-row .showcase-card:hover .showcase-link-primary { background-color: ${t.esp}; color: var(--pcolor); }
+
   /* PRODUCT OVERLAY — side-by-side on desktop */
   .po-card { grid-template-columns: 1fr 1fr; max-height: 80vh; }
   .po-img { aspect-ratio: unset; height: 100%; min-height: 400px; }
