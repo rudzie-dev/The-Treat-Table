@@ -302,7 +302,7 @@ body {
 
 /* ── HERO ── */
 .hero { min-height: 100svh; padding: 0; display: flex; flex-direction: column; border-bottom: 1px solid ${t.sand}; position: relative; overflow: hidden; }
-.hero-bg { position: absolute; inset: 0; z-index: 0; background: url('/images/cinnamon-rolls.webp') center / cover; display: flex; align-items: center; justify-content: center; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; background: url('/images/cinnamon-rolls-hero.webp') center / cover; display: flex; align-items: center; justify-content: center; }
 .hero-circle { width: 200px; height: 200px; border-radius: 50%; background: ${t.tan}44; display: none; align-items: center; justify-content: center; position: relative; opacity: 0.6; }
 .hero-circle::before { content: ''; position: absolute; width: 155px; height: 155px; border-radius: 50%; background: ${t.tan}66; border: 1px solid ${t.tan}99; }
 .hero-circle-text { font-family: 'Playfair Display', serif; font-size: 0.72rem; font-style: italic; color: ${t.brown}; z-index: 1; letter-spacing: 0.1em; }
@@ -381,7 +381,8 @@ body {
 /* ── HOW IT WORKS ── */
 .how-section { padding: 3.5rem 1.25rem; background: ${t.dark}; }
 .how-section .section-label { color: ${t.tan}; }
-.how-section .section-title { color: ${t.cream}; margin-bottom: 3rem; }
+.how-section .section-title { color: ${t.cream}; margin-bottom: 1.25rem; }
+.how-intro { font-size: 0.9rem; font-weight: 300; color: ${t.tan}; line-height: 1.75; max-width: 560px; margin-bottom: 2.5rem; }
 .how-steps { display: flex; flex-direction: column; gap: 0; }
 .how-step { padding: 2rem 0; border-bottom: 1px solid ${t.brown}33; display: flex; gap: 1.5rem; align-items: flex-start; }
 .how-step:last-child { border-bottom: none; }
@@ -526,8 +527,9 @@ body {
 
   /* HOW */
   .how-section { padding: 6rem 3rem; }
-  .how-section .section-title { margin-bottom: 0; }
-  .how-steps { flex-direction: row; gap: 0; margin-top: 4rem; border-top: 1px solid ${t.brown}33; }
+  .how-section .section-title { margin-bottom: 1rem; }
+  .how-intro { font-size: 0.95rem; margin-bottom: 1rem; }
+  .how-steps { flex-direction: row; gap: 0; margin-top: 2.5rem; border-top: 1px solid ${t.brown}33; }
   .how-step { flex: 1; flex-direction: column; padding: 2.5rem 2rem; border-bottom: none; border-right: 1px solid ${t.brown}33; gap: 0; }
   .how-step:last-child { border-right: none; }
   .how-step:nth-child(2) { padding-top: 4rem; }
@@ -716,6 +718,30 @@ function ScrollToHash() {
     }
   }, [location]);
   return null;
+}
+
+// Per-route <title>/meta description/canonical/OG tags. index.html ships
+// static defaults (correct for "/"), but now that /about and /journal are
+// real indexable pages too they need their own values instead of silently
+// inheriting the homepage's — otherwise Google sees three pages that all
+// claim to be about the same thing.
+const SITE_ORIGIN = "https://kindcrumbtreats.co.za";
+function useDocumentMeta({ title, description, path }) {
+  useEffect(() => {
+    document.title = title;
+    const setAttr = (selector, attr, value) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute(attr, value);
+    };
+    setAttr('meta[name="description"]', "content", description);
+    setAttr('meta[property="og:title"]', "content", title);
+    setAttr('meta[property="og:description"]', "content", description);
+    setAttr('meta[name="twitter:title"]', "content", title);
+    setAttr('meta[name="twitter:description"]', "content", description);
+    const canonicalUrl = `${SITE_ORIGIN}${path}`;
+    setAttr('link[rel="canonical"]', "href", canonicalUrl);
+    setAttr('meta[property="og:url"]', "content", canonicalUrl);
+  }, [title, description, path]);
 }
 
 function useReveal() {
@@ -1271,6 +1297,11 @@ function AppShell() {
 }
 function HomePage({ openOverlay }) {
   const tickerItems = ["Baked to order", "Pickup available", "Ladysmith", "Always eggless", "Small batch", "No artificial additives"];
+  useDocumentMeta({
+    title: "Kind Crumb: The Treat Table — Home Baker, Ladysmith KZN",
+    description: "Kind Crumb is a home bakery based in Ladysmith, KZN. Freshly baked cinnamon rolls, mini cakes, cookies and Tres Leches — always eggless, always made to order.",
+    path: "/",
+  });
   return (
     <>
       {/* HERO */}
@@ -1320,6 +1351,11 @@ function HomePage({ openOverlay }) {
 }
 
 function AboutPage({ openOverlay }) {
+  useDocumentMeta({
+    title: "Our Story, How It Works & Reviews — Kind Crumb, Ladysmith KZN",
+    description: "Meet the baker behind Kind Crumb, see how ordering and 24hr-notice baking works, read reviews from Ladysmith customers, and browse the gallery.",
+    path: "/about",
+  });
   return (
     <>
       {/* ABOUT */}
@@ -1342,6 +1378,7 @@ function AboutPage({ openOverlay }) {
         <R>
           <p className="section-label">How it works</p>
           <h2 className="section-title">Three steps.<br /><em>That's it.</em></h2>
+          <p className="how-intro">Ordering from Kind Crumb takes three steps: pick your treats and flavours on the menu, send the order straight to WhatsApp with your details, then collect in Ladysmith on the day it's baked. Every order needs at least 24 hours notice and is made fresh — nothing sits pre-made.</p>
         </R>
         <div className="how-steps">
           {[
@@ -1436,6 +1473,11 @@ function AboutPage({ openOverlay }) {
 }
 
 function JournalPage() {
+  useDocumentMeta({
+    title: "Journal — Kind Crumb, Ladysmith KZN (Launching Soon)",
+    description: "Recipes, behind-the-scenes bakes and stories from the Kind Crumb kitchen in Ladysmith, KZN — launching soon.",
+    path: "/journal",
+  });
   return (
     <section id="blog" className="blog-section blog-section-standalone">
       <div className="blog-header">

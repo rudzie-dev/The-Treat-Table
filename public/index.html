@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Hero background is the Largest Contentful Paint element on first
+         load; it's a CSS background-image so the browser's preload scanner
+         won't find it until the stylesheet is parsed — this hint fetches it
+         in parallel with everything else instead of waiting in line. -->
+    <link rel="preload" as="image" href="/images/cinnamon-rolls-hero.webp" fetchpriority="high" />
+
     <!-- ─── PRIMARY SEO ─────────────────────────────────────── -->
     <title>Kind Crumb: The Treat Table — Home Baker, Ladysmith KZN</title>
     <meta name="description" content="Kind Crumb is a home bakery based in Ladysmith, KZN. Freshly baked cinnamon rolls, mini cakes, cookies and Tres Leches — always eggless, always made to order." />
@@ -171,6 +177,22 @@
               "acceptedAnswer": {
                 "@type": "Answer",
                 "text": "Kind Crumb takes orders 7:30am to 5pm daily and needs at least 24 hours notice to bake everything fresh to order."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Where can I get eggless cakes in Ladysmith?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Kind Crumb bakes always-eggless cakes and treats in Ladysmith, KwaZulu-Natal, made fresh to order and collected locally — a full eggless menu of cinnamon rolls, mini cakes, Tres Leches, cookies and donut bites."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Kind Crumb make birthday cakes in Ladysmith, KZN?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes — Kind Crumb's mini cakes and Tres Leches milk cake are popular for birthdays and celebrations in Ladysmith, KZN. All are eggless and baked fresh to order with at least 24 hours notice."
               }
             }
           ]
