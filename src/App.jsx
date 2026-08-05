@@ -415,6 +415,24 @@ body {
 .about-text:last-child { margin-bottom: 0; }
 .about-signoff { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1rem; color: ${t.dark}; margin-top: 0.75rem; }
 
+/* ── HOME TRUST STRIP — quiet, headerless, unlike every other section ── */
+.trust-strip { background: ${t.sand}33; padding: 1.75rem 1.25rem; }
+.trust-strip-inner { display: flex; flex-direction: column; gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
+.trust-stars { display: flex; gap: 0.15rem; margin-bottom: 0.4rem; color: ${t.warm}; }
+.trust-quote {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem; font-weight: 400;
+  color: ${t.dark}; line-height: 1.5; margin-bottom: 0.4rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.trust-name { font-size: 0.72rem; color: ${t.warmText}; }
+.trust-source { color: ${t.warm}; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.65rem; }
+.trust-more {
+  display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0;
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: ${t.brown};
+  text-decoration: none; transition: color 0.2s, gap 0.2s;
+}
+.trust-more:hover { color: ${t.dark}; gap: 0.6rem; }
+
 /* ── TESTIMONIALS ── */
 .testi-section { padding: 3.5rem 1.25rem; background: ${t.sand}55; }
 .testi-grid { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
@@ -550,6 +568,12 @@ body {
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
   .about-img { aspect-ratio: 1/1; }
   .about-body { justify-content: center; }
+
+  /* HOME TRUST STRIP */
+  .trust-strip { padding: 2rem 3rem; }
+  .trust-strip-inner { flex-direction: row; align-items: flex-start; justify-content: center; gap: 3.5rem; }
+  .trust-item { flex: 1; max-width: 380px; }
+  .trust-more { align-self: center; }
 
   /* TESTIMONIALS */
   .testi-section { padding: 6rem 3rem; }
@@ -1332,6 +1356,26 @@ function HomePage({ openOverlay }) {
           ))}
         </div>
       </div>
+
+      {/* TRUST STRIP — a quiet social-proof beat before the menu starts.
+          Deliberately headerless (no section-label/section-title) so it
+          reads as a beat, not a whole new section — full reviews stay on
+          /about#testimonials, this is just enough to reassure a first-time
+          visitor before they start browsing. */}
+      <R className="trust-strip">
+        <div className="trust-strip-inner">
+          {testimonials.map((tm, i) => (
+            <div key={i} className="trust-item">
+              <div className="trust-stars" aria-label={`${tm.stars} out of 5 stars`}>
+                {Array.from({ length: tm.stars }).map((_, s) => <Star key={s} size={12} strokeWidth={1.5} fill="currentColor" />)}
+              </div>
+              <p className="trust-quote">"{tm.text}"</p>
+              <p className="trust-name">{tm.name} <span className="trust-source">· {tm.source}</span></p>
+            </div>
+          ))}
+          <Link to="/about#testimonials" className="trust-more">★ 5.0 · Loved by Ladysmith <ArrowRight size={12} strokeWidth={1.5} /></Link>
+        </div>
+      </R>
 
       {/* MENU INTRO — breathing room after the hero before the showcase starts */}
       <section id="products" className="menu-intro">
