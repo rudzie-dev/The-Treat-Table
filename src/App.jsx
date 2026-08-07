@@ -467,6 +467,9 @@ body {
 .blog-skel { border-radius: 8px; margin-bottom: 0.5rem; background: linear-gradient(90deg, ${t.sand} 25%, ${t.cream} 50%, ${t.sand} 75%); background-size: 200% 100%; animation: shimmer 1.8s infinite; }
 .coming-soon-badge { position: absolute; top: 0.75rem; right: 0.75rem; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: ${t.brown}; background: ${t.cream}; border: 1px solid ${t.tan}; padding: 0.25rem 0.6rem; border-radius: 20px; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.showcase-photo-loading { background: linear-gradient(90deg, ${t.sand} 25%, ${t.cream} 50%, ${t.sand} 75%); background-size: 200% 100%; animation: shimmer 1.8s infinite; }
+.showcase-photo { opacity: 0; transition: opacity 0.3s ease; }
+.showcase-photo.loaded { opacity: 1; }
 
 /* ── FOOTER ── */
 .footer { background: ${t.esp}; padding: 2.5rem 1.25rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; border-top: 1px solid ${t.dark}; }
@@ -895,13 +898,23 @@ function useBackButtonClose(active, onClose) {
 
 function ShowcaseRow({ product: p, reverse, onOpen }) {
   const open = () => onOpen(p);
+  const [loaded, setLoaded] = useState(false);
   return (
     <section className="showcase-row-section">
       <R className={`showcase-row${reverse ? " showcase-reverse" : ""}`} style={{ "--pcolor": p.showcaseColor }}>
         <div className="showcase-card">
           <div className="showcase-grid">
-            <div className="showcase-photo-block">
-              <img src={`/images/${p.squareImage || p.image}`} alt={p.name} loading="lazy" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <div className={`showcase-photo-block${loaded ? "" : " showcase-photo-loading"}`}>
+              <img
+                src={`/images/${p.squareImage || p.image}`}
+                alt={p.name}
+                loading="lazy"
+                width="500"
+                height="500"
+                className={`showcase-photo${loaded ? " loaded" : ""}`}
+                onLoad={() => setLoaded(true)}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
             <div className="showcase-row-body">
               <p className="showcase-badge">{p.tag}</p>

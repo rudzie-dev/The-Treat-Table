@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Cream from byte one, not just once the JS bundle mounts and injects
+         its <style> tag - otherwise slow connections see a plain white
+         flash before React ever paints. -->
+    <style>html,body{background:#F5F0E8;}</style>
 
     <!-- Hero background is the Largest Contentful Paint element on first
          load; it's a CSS background-image so the browser's preload scanner
