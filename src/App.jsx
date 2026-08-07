@@ -41,7 +41,7 @@ const css = `
 *::-webkit-scrollbar { width: 0; height: 0; display: none; }
 html { scroll-behavior: smooth; overflow-y: scroll; }
 body {
-  background: ${t.cream}; font-family: 'Raleway', sans-serif;
+  background: ${t.cream}; font-family: 'Quicksand', sans-serif;
   color: ${t.esp}; overflow-x: hidden;
 }
 
@@ -80,13 +80,13 @@ body {
 .nav-left { justify-self: start; position: relative; }
 .nav-brand { justify-self: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 0.14rem; }
 .nav-brand-name {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Lora', serif;
   font-size: 1.1rem; font-weight: 600; letter-spacing: 0.14em;
   color: ${t.cream}; text-transform: uppercase;
   line-height: 1; transition: color 0.4s;
 }
 .nav-brand-sub {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Lora', serif;
   font-size: 0.58rem; font-weight: 300; letter-spacing: 0.24em;
   color: ${t.tan}; text-transform: uppercase;
   line-height: 1; font-style: italic; transition: color 0.4s;
@@ -112,11 +112,11 @@ body {
 }
 .sidebar.open { transform: translateX(0); }
 .sidebar-head { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1.25rem; border-bottom: 1px solid ${t.sand}; flex-shrink: 0; }
-.sidebar-brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.dark}; text-transform: uppercase; }
+.sidebar-brand { font-family: 'Lora', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.dark}; text-transform: uppercase; }
 .sidebar-close { background: none; border: none; cursor: pointer; color: ${t.tan}; padding: 0.25rem; display: flex; align-items: center; transition: color 0.2s; }
 .sidebar-close:hover { color: ${t.dark}; }
 .sidebar-links { flex: 1; overflow-y: auto; list-style: none; display: flex; flex-direction: column; padding: 1rem 0; }
-.sidebar-links a { display: flex; align-items: center; font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 400; color: ${t.dark}; text-decoration: none; padding: 1rem 1.75rem; transition: background 0.15s, color 0.15s; }
+.sidebar-links a { display: flex; align-items: center; font-family: 'Lora', serif; font-size: 1.75rem; font-weight: 400; color: ${t.dark}; text-decoration: none; padding: 1rem 1.75rem; transition: background 0.15s, color 0.15s; }
 .sidebar-links a:hover, .sidebar-links a:focus-visible { background: ${t.sand}55; color: ${t.brown}; outline: none; }
 .sidebar-links a em { font-style: italic; color: ${t.warm}; }
 .sidebar-foot { padding: 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; }
@@ -155,7 +155,7 @@ body {
 .drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 400; width: min(420px, 100vw); background: ${t.cream}; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow: -8px 0 40px ${t.esp}22; }
 .drawer.open { transform: translateX(0); }
 .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1.25rem; border-bottom: 1px solid ${t.sand}; flex-shrink: 0; }
-.drawer-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 300; color: ${t.dark}; }
+.drawer-title { font-family: 'Lora', serif; font-size: 1.5rem; font-weight: 300; color: ${t.dark}; }
 .drawer-title em { font-style: italic; }
 .drawer-close { background: none; border: none; cursor: pointer; color: ${t.tan}; padding: 0.25rem; display: flex; align-items: center; transition: color 0.2s; }
 .drawer-close:hover { color: ${t.dark}; }
@@ -167,7 +167,7 @@ body {
 .drawer-empty-cta:hover { background: ${t.brown}; color: ${t.cream}; border-color: ${t.brown}; }
 .drawer-line { display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem 0; border-bottom: 1px solid ${t.sand}; }
 .drawer-line-info { flex: 1; }
-.drawer-line-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; color: ${t.dark}; margin-bottom: 0.15rem; }
+.drawer-line-name { font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 400; color: ${t.dark}; margin-bottom: 0.15rem; }
 .drawer-line-flavor { font-size: 0.72rem; color: ${t.warmText}; }
 .drawer-line-price { font-size: 0.72rem; color: ${t.brown}; margin-top: 0.25rem; }
 .drawer-line-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; padding-top: 0.2rem; }
@@ -178,19 +178,19 @@ body {
 .drawer-total-note { font-size: 0.66rem; color: ${t.warmText}; margin-top: 0.35rem; line-height: 1.5; }
 .drawer-sent-check { width: 56px; height: 56px; border-radius: 50%; background: ${t.brown}; color: ${t.cream}; display: flex; align-items: center; justify-content: center; }
 .drawer-form-wrap { padding: 1.5rem 0 1rem; }
-.drawer-form-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 300; color: ${t.dark}; margin-bottom: 1.25rem; }
+.drawer-form-title { font-family: 'Lora', serif; font-size: 1.2rem; font-weight: 300; color: ${t.dark}; margin-bottom: 1.25rem; }
 .drawer-form-title em { font-style: italic; }
 .d-form { display: flex; flex-direction: column; gap: 0.85rem; }
 .d-form-group { display: flex; flex-direction: column; gap: 0.3rem; }
 .d-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: ${t.brown}; }
-.d-input, .d-textarea { font-family: 'Raleway', sans-serif; font-size: 0.88rem; font-weight: 300; color: ${t.dark}; background: transparent; border: none; border-bottom: 1px solid ${t.tan}; padding: 0.55rem 0; outline: none; transition: border-color 0.2s; width: 100%; }
+.d-input, .d-textarea { font-family: 'Quicksand', sans-serif; font-size: 0.88rem; font-weight: 300; color: ${t.dark}; background: transparent; border: none; border-bottom: 1px solid ${t.tan}; padding: 0.55rem 0; outline: none; transition: border-color 0.2s; width: 100%; }
 .d-input:focus, .d-textarea:focus { border-bottom-color: ${t.brown}; }
 .d-textarea { resize: vertical; min-height: 60px; }
 .d-hint { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; }
 .d-privacy { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; margin-top: 1rem; opacity: 0.85; }
 .drawer-foot { padding: 1.25rem 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .drawer-note { font-size: 0.68rem; color: ${t.warmText}; font-style: italic; }
-.drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'Raleway', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 999px; width: 100%; transition: background 0.2s; }
+.drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 999px; width: 100%; transition: background 0.2s; }
 .drawer-wa-btn:hover { background: ${t.esp}; }
 .drawer-wa-btn:disabled { background: ${t.tan}; cursor: not-allowed; }
 .drawer-wa-btn:disabled:hover { background: ${t.tan}; }
@@ -252,12 +252,12 @@ body {
   width: 100%; aspect-ratio: 4/5;
   background: linear-gradient(135deg, ${t.sand} 0%, ${t.tan} 100%);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Playfair Display', serif; font-size: 0.9rem;
+  font-family: 'Lora', serif; font-size: 0.9rem;
   color: ${t.warm}88; letter-spacing: 0.15em; flex-shrink: 0;
 }
 .po-body { position: relative; padding: 2rem 1.75rem 2.5rem; }
 .po-tag { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.4rem; }
-.po-name { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; margin-bottom: 1rem; }
+.po-name { font-family: 'Lora', serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; margin-bottom: 1rem; }
 .po-name em { font-style: italic; }
 .po-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.85; margin-bottom: 1.75rem; }
 .po-flavor-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; }
@@ -305,7 +305,7 @@ body {
 .hero-bg { position: absolute; inset: 0; z-index: 0; background: url('/images/cinnamon-rolls-hero.webp') center / cover; display: flex; align-items: center; justify-content: center; }
 .hero-circle { width: 200px; height: 200px; border-radius: 50%; background: ${t.tan}44; display: none; align-items: center; justify-content: center; position: relative; opacity: 0.6; }
 .hero-circle::before { content: ''; position: absolute; width: 155px; height: 155px; border-radius: 50%; background: ${t.tan}66; border: 1px solid ${t.tan}99; }
-.hero-circle-text { font-family: 'Playfair Display', serif; font-size: 0.72rem; font-style: italic; color: ${t.brown}; z-index: 1; letter-spacing: 0.1em; }
+.hero-circle-text { font-family: 'Lora', serif; font-size: 0.72rem; font-style: italic; color: ${t.brown}; z-index: 1; letter-spacing: 0.1em; }
 .hero-badge { display: none; }
 .hero-content {
   position: relative; z-index: 1;
@@ -315,7 +315,7 @@ body {
 }
 .hero-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem; opacity: 1; animation: fadeUp 0.8s 0.2s forwards; }
 .hero-eyebrow::before { content: ''; display: block; width: 1.5rem; height: 1px; background: ${t.tan}; flex-shrink: 0; }
-.hero-title { font-family: 'Playfair Display', serif; font-size: clamp(2.6rem, 9vw, 3.5rem); font-weight: 300; line-height: 1.05; color: ${t.dark}; margin-bottom: 0.75rem; opacity: 1; animation: fadeUp 0.9s 0.35s forwards; }
+.hero-title { font-family: 'Lora', serif; font-size: clamp(2.6rem, 9vw, 3.5rem); font-weight: 300; line-height: 1.05; color: ${t.dark}; margin-bottom: 0.75rem; opacity: 1; animation: fadeUp 0.9s 0.35s forwards; }
 .hero-title em { font-style: italic; color: ${t.brown}; }
 .hero-sub { font-size: 0.85rem; font-weight: 300; line-height: 1.7; color: ${t.warmText}; margin-bottom: 1.75rem; opacity: 1; animation: fadeUp 0.9s 0.5s forwards; max-width: 340px; }
 .hero-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s 0.65s forwards; }
@@ -335,7 +335,7 @@ body {
 /* ── SECTION COMMONS ── */
 .section { padding: 3.5rem 1.25rem; }
 .section-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.5rem; }
-.section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; }
+.section-title { font-family: 'Lora', serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 300; color: ${t.dark}; line-height: 1.1; }
 .section-title em { font-style: italic; }
 
 /* ── MENU INTRO — breathing room between hero and showcase ── */
@@ -362,7 +362,7 @@ body {
 .showcase-photo-block img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .showcase-row-body { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
 .showcase-badge { display: inline-block; background: ${t.sand}; color: ${t.brown}; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 999px; margin-bottom: 1rem; }
-.showcase-row-name { font-family: 'Playfair Display', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; transition: color 0.7s ease; }
+.showcase-row-name { font-family: 'Lora', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); color: ${t.dark}; line-height: 1.15; margin-bottom: 0.85rem; transition: color 0.7s ease; }
 .showcase-row.visible .showcase-row-name { color: ${t.cream}; }
 .showcase-row-desc { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.75; margin-bottom: 0.75rem; max-width: 420px; transition: color 0.7s ease; }
 .showcase-row.visible .showcase-row-desc { color: ${t.cream}; }
@@ -386,20 +386,20 @@ body {
 .how-steps { display: flex; flex-direction: column; gap: 0; }
 .how-step { padding: 2rem 0; border-bottom: 1px solid ${t.brown}33; display: flex; gap: 1.5rem; align-items: flex-start; }
 .how-step:last-child { border-bottom: none; }
-.how-step-num { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 300; color: ${t.brown}44; line-height: 1; flex-shrink: 0; width: 3rem; }
+.how-step-num { font-family: 'Lora', serif; font-size: 2.8rem; font-weight: 300; color: ${t.brown}44; line-height: 1; flex-shrink: 0; width: 3rem; }
 .how-step-body {}
 .how-step-icon { margin-bottom: 0.75rem; color: ${t.tan}; }
-.how-step-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 400; color: ${t.cream}; margin-bottom: 0.4rem; }
+.how-step-title { font-family: 'Lora', serif; font-size: 1.3rem; font-weight: 400; color: ${t.cream}; margin-bottom: 0.4rem; }
 .how-step-desc { font-size: 0.8rem; font-weight: 300; color: ${t.tan}; line-height: 1.8; }
 
 /* ── THIS WEEK'S BAKE ── */
 .weekly-section { padding: 3.5rem 1.25rem; border-top: 1px solid ${t.sand}; }
 .weekly-inner { background: ${t.sand}; position: relative; overflow: hidden; border-radius: 16px; }
 .weekly-inner::after { content: ''; position: absolute; bottom: -50px; right: -50px; width: 180px; height: 180px; border-radius: 50%; background: ${t.tan}55; pointer-events: none; }
-.weekly-img { width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, ${t.tan} 0%, ${t.brown}44 100%); display: flex; align-items: center; justify-content: center; position: relative; font-family: 'Playfair Display', serif; font-size: 0.9rem; color: ${t.cream}88; letter-spacing: 0.15em; flex-shrink: 0; }
+.weekly-img { width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, ${t.tan} 0%, ${t.brown}44 100%); display: flex; align-items: center; justify-content: center; position: relative; font-family: 'Lora', serif; font-size: 0.9rem; color: ${t.cream}88; letter-spacing: 0.15em; flex-shrink: 0; }
 .weekly-body { padding: 1.75rem 1.5rem 2rem; position: relative; z-index: 1; }
 .weekly-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: ${t.warm}; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
-.weekly-name { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.15; margin-bottom: 0.75rem; }
+.weekly-name { font-family: 'Lora', serif; font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 300; color: ${t.dark}; line-height: 1.15; margin-bottom: 0.75rem; }
 .weekly-name em { font-style: italic; }
 .weekly-desc { font-size: 0.84rem; font-weight: 300; color: ${t.warmText}; line-height: 1.8; margin-bottom: 1.25rem; }
 .weekly-meta { display: flex; gap: 1.25rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
@@ -413,14 +413,14 @@ body {
 .about-body { display: flex; flex-direction: column; }
 .about-text { font-size: 0.88rem; font-weight: 300; color: ${t.warmText}; line-height: 1.85; margin-bottom: 1rem; }
 .about-text:last-child { margin-bottom: 0; }
-.about-signoff { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1rem; color: ${t.dark}; margin-top: 0.75rem; }
+.about-signoff { font-family: 'Lora', serif; font-style: italic; font-size: 1.1rem; color: ${t.dark}; margin-top: 0.75rem; }
 
 /* ── HOME TRUST STRIP — quiet, headerless, unlike every other section ── */
 .trust-strip { background: ${t.sand}33; padding: 1.75rem 1.25rem; }
 .trust-strip-inner { display: flex; flex-direction: column; gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
 .trust-stars { display: flex; gap: 0.15rem; margin-bottom: 0.4rem; color: ${t.warm}; }
 .trust-quote {
-  font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem; font-weight: 400;
+  font-family: 'Lora', serif; font-style: italic; font-size: 0.95rem; font-weight: 400;
   color: ${t.dark}; line-height: 1.5; margin-bottom: 0.4rem;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
@@ -441,7 +441,7 @@ body {
 .testi-stars { display: flex; gap: 0.15rem; margin-bottom: 0.85rem; color: ${t.warm}; }
 .testi-text { font-size: 0.85rem; font-weight: 300; color: ${t.dark}; line-height: 1.75; margin-bottom: 1.1rem; }
 .testi-meta { display: flex; align-items: center; justify-content: space-between; }
-.testi-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 500; color: ${t.dark}; }
+.testi-name { font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 500; color: ${t.dark}; }
 .testi-source { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.warm}; }
 
 /* ── GALLERY ── */
@@ -473,7 +473,7 @@ body {
 
 /* ── FOOTER ── */
 .footer { background: ${t.esp}; padding: 2.5rem 1.25rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; border-top: 1px solid ${t.dark}; }
-.footer-brand { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.cream}; text-transform: uppercase; }
+.footer-brand { font-family: 'Lora', serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.1em; color: ${t.cream}; text-transform: uppercase; }
 .footer-tagline { font-size: 0.73rem; font-weight: 300; color: ${t.tan}; line-height: 1.6; margin-top: 0.3rem; }
 .footer-links { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
 .footer-links a { font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.tan}; text-decoration: none; transition: color 0.2s; }
@@ -509,7 +509,7 @@ body {
   .hero-badge { display: block; position: absolute; bottom: 3rem; left: -1.5rem; background: ${t.cream}; border: 1px solid ${t.sand}; padding: 1.2rem 1.75rem; min-width: 195px; box-shadow: 0 8px 32px ${t.esp}18; transition: transform 0.3s ease, box-shadow 0.3s ease; }
   .hero-badge:hover { transform: translateY(-3px); box-shadow: 0 16px 40px ${t.esp}28; }
   .hero-badge-label { font-size: 0.62rem; letter-spacing: 0.18em; color: ${t.warm}; text-transform: uppercase; margin-bottom: 0.3rem; }
-  .hero-badge-value { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 400; color: ${t.dark}; }
+  .hero-badge-value { font-family: 'Lora', serif; font-size: 1.4rem; font-weight: 400; color: ${t.dark}; }
 
   /* MENU INTRO + SHOWCASE — desktop */
   .menu-intro { padding: 8rem 3rem 3rem; }
