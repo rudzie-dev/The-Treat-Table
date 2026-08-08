@@ -188,6 +188,8 @@ body {
 .d-input:focus, .d-textarea:focus { border-bottom-color: ${t.brown}; }
 .d-textarea { resize: vertical; min-height: 60px; }
 .d-hint { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; }
+.d-input-error { border-bottom-color: ${t.brown}; }
+.d-error { font-size: 0.66rem; color: ${t.brown}; font-weight: 500; line-height: 1.5; }
 .d-privacy { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; margin-top: 1rem; opacity: 0.85; }
 .drawer-foot { padding: 1.25rem 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .drawer-note { font-size: 0.68rem; color: ${t.warmText}; font-style: italic; }
@@ -1008,6 +1010,10 @@ function AppShell() {
   const [orderFailed, setOrderFailed] = useState(false);
 
   const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
+  // Only surface a field's error once the visitor has actually left it —
+  // otherwise the drawer would open with every field already flagged red.
+  const [touched, setTouched] = useState({ name: false, phone: false, date: false });
+  const touchField = (field) => setTouched(prev => ({ ...prev, [field]: true }));
 
   const [navScrolled, setNavScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -1128,8 +1134,17 @@ function AppShell() {
   const totalItems = cart.reduce((s, c) => s + c.qty, 0);
   const cartTotal = cart.reduce((s, c) => s + (c.unitPrice != null ? c.unitPrice * c.qty : 0), 0);
   const cartHasUnpriced = cart.some(c => c.unitPrice == null);
-  const phoneDigits = formData.phone.replace(/\D/g, "");
-  const canSubmit = formData.name.trim().length > 0 && phoneDigits.length >= 9;
+
+  const nameValid = formData.name.trim().length > 0;
+  // Strip spacing/punctuation a person might type (083 555 1234, 083-555-1234)
+  // then require an optional leading + and 9-12 digits — long enough for a
+  // local SA number (0xxxxxxxxx), short enough to reject pasted-in prose
+  // that happens to contain a run of digits.
+  const phoneCleaned = formData.phone.trim().replace(/[\s\-()]/g, "");
+  const phoneValid = /^\+?\d{9,12}$/.test(phoneCleaned);
+  const minOrderDate = getMinOrderDate();
+  const dateValid = !formData.date || formData.date >= minOrderDate;
+  const canSubmit = nameValid && phoneValid && dateValid;
 
   const handleSubmit = () => {
     if (!canSubmit || orderSent) return;
@@ -1275,12 +1290,43 @@ function AppShell() {
               <div className="drawer-form-wrap">
                 <h3 className="drawer-form-title">Your <em>details</em></h3>
                 <div className="d-form">
-                  <div className="d-form-group"><label className="d-label">Name *</label><input className="d-input" type="text" required aria-required="true" placeholder="Full name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} /></div>
-                  <div className="d-form-group"><label className="d-label">Phone / WhatsApp *</label><input className="d-input" type="tel" required aria-required="true" placeholder="+27 000 000 0000" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
+                  <div className="d-form-group">
+                    <label className="d-label">Name *</label>
+                    <input
+                      className={`d-input${touched.name && !nameValid ? " d-input-error" : ""}`}
+                      type="text" required aria-required="true"
+                      aria-invalid={touched.name && !nameValid}
+                      placeholder="Full name" value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      onBlur={() => touchField("name")}
+                    />
+                    {touched.name && !nameValid && <span className="d-error">Please enter your name.</span>}
+                  </div>
+                  <div className="d-form-group">
+                    <label className="d-label">Phone / WhatsApp *</label>
+                    <input
+                      className={`d-input${touched.phone && !phoneValid ? " d-input-error" : ""}`}
+                      type="tel" required aria-required="true"
+                      aria-invalid={touched.phone && !phoneValid}
+                      placeholder="+27 000 000 0000" value={formData.phone}
+                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                      onBlur={() => touchField("phone")}
+                    />
+                    {touched.phone && !phoneValid && <span className="d-error">Enter a valid phone number (9-12 digits).</span>}
+                  </div>
                   <div className="d-form-group">
                     <label className="d-label">Date needed</label>
-                    <input className="d-input" type="date" min={getMinOrderDate()} value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
-                    <span className="d-hint">Orders need 24hrs notice · we bake 7:30am–5pm daily</span>
+                    <input
+                      className={`d-input${touched.date && !dateValid ? " d-input-error" : ""}`}
+                      type="date" min={minOrderDate}
+                      aria-invalid={touched.date && !dateValid}
+                      value={formData.date}
+                      onChange={e => setFormData({ ...formData, date: e.target.value })}
+                      onBlur={() => touchField("date")}
+                    />
+                    {touched.date && !dateValid
+                      ? <span className="d-error">Orders need at least 24hrs notice — please pick a later date.</span>
+                      : <span className="d-hint">Orders need 24hrs notice · we bake 7:30am–5pm daily</span>}
                   </div>
                   <div className="d-form-group"><label className="d-label">Notes</label><textarea className="d-textarea" placeholder="Vegan requirements, allergies, quantities…" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
                 </div>
@@ -1298,7 +1344,7 @@ function AppShell() {
               </p>
             )}
             {!orderFailed && (
-              <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Add your name and a valid phone number so we can reach you."}</p>
+              <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Fill in your details above so we can reach you."}</p>
             )}
             <button className="drawer-wa-btn" onClick={handleSubmit} disabled={!canSubmit} aria-disabled={!canSubmit}><MessageCircle size={15} strokeWidth={1.5} />{orderFailed ? "Try Again" : "Send Order via WhatsApp"}</button>
             <a href="https://wa.me/27689536500" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
