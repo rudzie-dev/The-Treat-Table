@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Component } from "react";
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowDown, MapPin, MessageCircle, Leaf, X, ShoppingBag,
   Plus, Minus, ArrowRight, ShoppingCart,
-  Clock, Flame, Wheat, Star, Quote, Check, Menu as MenuIcon
+  Clock, Flame, Wheat, Star, Quote, Check, Menu as MenuIcon,
+  AlertCircle, Compass
 } from "lucide-react";
 
 // lucide-react@1.8.0 (pinned) predates its Instagram icon, so it's inlined
@@ -190,6 +191,8 @@ body {
 .d-privacy { font-size: 0.66rem; color: ${t.warmText}; line-height: 1.5; margin-top: 1rem; opacity: 0.85; }
 .drawer-foot { padding: 1.25rem 1.5rem; border-top: 1px solid ${t.sand}; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .drawer-note { font-size: 0.68rem; color: ${t.warmText}; font-style: italic; }
+.drawer-note-error { display: flex; align-items: flex-start; gap: 0.4rem; color: ${t.brown}; font-style: normal; font-weight: 500; }
+.drawer-note-error svg { flex-shrink: 0; margin-top: 0.1rem; }
 .drawer-wa-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: ${t.cream}; background: ${t.dark}; border: none; cursor: pointer; padding: 1rem; border-radius: 999px; width: 100%; transition: background 0.2s; }
 .drawer-wa-btn:hover { background: ${t.esp}; }
 .drawer-wa-btn:disabled { background: ${t.tan}; cursor: not-allowed; }
@@ -467,6 +470,15 @@ body {
 .blog-standalone-note a { color: ${t.brown}; }
 .blog-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid ${t.sand}; }
 .blog-grid { display: flex; flex-direction: column; gap: 1rem; }
+
+/* ── 404 / NOT FOUND ── */
+.notfound-section {
+  min-height: 70vh; padding: 7rem 1.25rem 4rem; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+}
+.notfound-section .section-label, .notfound-section .section-title { text-align: center; }
+.notfound-section .blog-standalone-note { text-align: center; margin-left: auto; margin-right: auto; }
+.notfound-icon { color: ${t.tan}; margin-bottom: 1rem; }
 .blog-card { background: ${t.cream}; border: 1px solid ${t.sand}; border-radius: 16px; overflow: hidden; position: relative; }
 .blog-skeleton-img { width: 100%; height: 160px; background: linear-gradient(90deg, ${t.sand} 25%, ${t.cream} 50%, ${t.sand} 75%); background-size: 200% 100%; animation: shimmer 1.8s infinite; }
 .blog-skeleton-body { padding: 1.25rem; }
@@ -678,6 +690,15 @@ function overlayImage(overlay) {
   const { product, flavor } = overlay;
   const flavors = product.flavorGroups ? product.flavorGroups.flatMap(g => g.flavors) : product.flavors;
   return flavors.find(f => f.name === flavor)?.image ?? product.image;
+}
+
+// Every image container on the site already has a soft gradient/sand
+// placeholder background sitting behind its <img> (see .po-img, .about-img,
+// .weekly-img, .flavor-card, .gallery-item). If the photo itself fails to
+// load, hiding the broken <img> just lets that existing placeholder show
+// through instead of the browser's broken-image icon.
+function hideBrokenImg(e) {
+  e.currentTarget.style.display = "none";
 }
 
 const testimonials = [
@@ -947,7 +968,7 @@ function FlavorCard({ flavor, selected, onSelect }) {
       aria-label={flavor.price ? `${flavor.name}, R${flavor.price}` : flavor.name}
       onClick={onSelect}
     >
-      {flavor.image && <img src={`/images/${flavor.image}`} alt="" loading="lazy" width="96" height="96" />}
+      {flavor.image && <img src={`/images/${flavor.image}`} alt="" loading="lazy" width="96" height="96" onError={hideBrokenImg} />}
       {selected && <span className="flavor-card-check"><Check size={11} strokeWidth={2.5} /></span>}
       <span className="flavor-card-label">
         {flavor.name}
@@ -984,6 +1005,7 @@ function AppShell() {
   const [overlayClosing, setOverlayClosing] = useState(false); // { product, flavor, qty, added }
   const [toast, setToast] = useState(null); // { name, flavor } — transient "added to cart" confirmation
   const [orderSent, setOrderSent] = useState(false);
+  const [orderFailed, setOrderFailed] = useState(false);
 
   const [formData, setFormData] = useState({ name: "", phone: "", date: "", notes: "" });
 
@@ -1024,6 +1046,12 @@ function AppShell() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [location.pathname]);
+
+  // Clear a stale "couldn't open WhatsApp" message each time the drawer is
+  // reopened, rather than have it linger from a previous attempt.
+  useEffect(() => {
+    if (drawerOpen) setOrderFailed(false);
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (drawerOpen || overlay) {
@@ -1108,7 +1136,15 @@ function AppShell() {
     const items = cart.map(c => `- ${c.name} (${c.flavor}) x${c.qty}${c.unitPrice != null ? ` — R${c.unitPrice * c.qty}` : " — priced on collection"}`).join("%0A");
     const totalLine = cartHasUnpriced ? `Estimated total: R${cartTotal} + items priced on collection` : `Total: R${cartTotal}`;
     const msg = `Hello Kind Crumb!%0A%0AOrder:%0A${items}%0A${totalLine}%0A%0AName: ${formData.name}%0APhone: ${formData.phone}%0ADate needed: ${formData.date}%0ANotes: ${formData.notes}`;
-    window.open(`https://wa.me/27689536500?text=${msg}`, "_blank");
+    // Some browsers/in-app browsers (Instagram, popup blockers, etc.) silently
+    // refuse to open the new tab and hand back null instead of throwing — if
+    // that happens we must not tell the user the order went through.
+    const win = window.open(`https://wa.me/27689536500?text=${msg}`, "_blank");
+    if (!win) {
+      setOrderFailed(true);
+      return;
+    }
+    setOrderFailed(false);
     setOrderSent(true);
     setTimeout(() => {
       setCart([]);
@@ -1120,8 +1156,6 @@ function AppShell() {
 
   return (
     <>
-      <style>{fonts}{css}</style>
-
       <div ref={thumbRef} className="scroll-thumb" />
 
       {/* ADD-TO-CART TOAST */}
@@ -1140,7 +1174,7 @@ function AppShell() {
         {overlay && (
           <div className="po-card" ref={overlayRef} role="dialog" aria-modal="true" aria-label={`${overlay.product.name} details`}>
             <div ref={poCardThumbRef} className="local-scroll-thumb" />
-            <div className="po-img"><img src={`/images/${overlayImage(overlay)}`} alt={`${overlay.product.name} — ${overlay.flavor}`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="po-img"><img src={`/images/${overlayImage(overlay)}`} alt={`${overlay.product.name} — ${overlay.flavor}`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} onError={hideBrokenImg} /></div>
             <div className="po-body" ref={poBodyRef}>
               <div ref={poBodyThumbRef} className="local-scroll-thumb" />
               <button className="po-close" onClick={closeOverlay} aria-label="Close"><X size={16} strokeWidth={1.5} /></button>
@@ -1257,8 +1291,16 @@ function AppShell() {
         </div>
         {cart.length > 0 && !orderSent && (
           <div className="drawer-foot">
-            <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Add your name and a valid phone number so we can reach you."}</p>
-            <button className="drawer-wa-btn" onClick={handleSubmit} disabled={!canSubmit} aria-disabled={!canSubmit}><MessageCircle size={15} strokeWidth={1.5} />Send Order via WhatsApp</button>
+            {orderFailed && (
+              <p className="drawer-note drawer-note-error">
+                <AlertCircle size={13} strokeWidth={1.75} />
+                Couldn't open WhatsApp — your browser may have blocked it. Tap Send to try again, or use the link below.
+              </p>
+            )}
+            {!orderFailed && (
+              <p className="drawer-note">{canSubmit ? "Pricing confirmed on collection. We'll reach out within 24 hours." : "Add your name and a valid phone number so we can reach you."}</p>
+            )}
+            <button className="drawer-wa-btn" onClick={handleSubmit} disabled={!canSubmit} aria-disabled={!canSubmit}><MessageCircle size={15} strokeWidth={1.5} />{orderFailed ? "Try Again" : "Send Order via WhatsApp"}</button>
             <a href="https://wa.me/27689536500" className="drawer-wa-alt" target="_blank" rel="noreferrer">Or message us directly <ArrowRight size={12} strokeWidth={1.5} /></a>
           </div>
         )}
@@ -1306,6 +1348,7 @@ function AppShell() {
         <Route path="/" element={<HomePage openOverlay={openOverlay} />} />
         <Route path="/about" element={<AboutPage openOverlay={openOverlay} />} />
         <Route path="/journal" element={<JournalPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       {/* FOOTER */}
@@ -1426,7 +1469,7 @@ function AboutPage({ openOverlay }) {
       <section id="about" className="about-section">
         <div className="about-grid">
           <R className="about-img">
-            <img src="/images/burfeecloseup.webp" alt="Close-up of a freshly baked Kind Crumb burfee mini cake, showing the frosting and texture" loading="lazy" width="600" height="600" />
+            <img src="/images/burfeecloseup.webp" alt="Close-up of a freshly baked Kind Crumb burfee mini cake, showing the frosting and texture" loading="lazy" width="600" height="600" onError={hideBrokenImg} />
           </R>
           <R d={1} className="about-body">
             <p className="section-label">{aboutStory.eyebrow}</p>
@@ -1470,7 +1513,7 @@ function AboutPage({ openOverlay }) {
         </R>
         <R d={1}>
           <div className="weekly-inner">
-            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name.replace("\n", " ")} loading="lazy" width="600" height="600" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} /></div>
+            <div className="weekly-img"><img src={`/images/${products[weeklyBake.productIdx].image}`} alt={weeklyBake.name.replace("\n", " ")} loading="lazy" width="600" height="600" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} onError={hideBrokenImg} /></div>
             <div className="weekly-body">
               <div className="weekly-eyebrow"><Flame size={12} color={t.warm} strokeWidth={1.5} />Limited this week</div>
               <h3 className="weekly-name">
@@ -1521,7 +1564,7 @@ function AboutPage({ openOverlay }) {
           <div className="gallery-grid">
             {["cinnamon-rolls", "redvelvet", "cookies", "milk-cake", "donuts", "carrotclosup"].map((img, i) => (
               <div key={i} className="gallery-item">
-                <img src={`/images/${img}.webp`} alt={`Kind Crumb bake — ${img.replace(/[-.]/g, " ")}`} loading="lazy" width="300" height="300" />
+                <img src={`/images/${img}.webp`} alt={`Kind Crumb bake — ${img.replace(/[-.]/g, " ")}`} loading="lazy" width="300" height="300" onError={hideBrokenImg} />
               </div>
             ))}
           </div>
@@ -1561,10 +1604,68 @@ function JournalPage() {
   );
 }
 
+function NotFoundPage() {
+  useEffect(() => { document.title = "Page Not Found — Kind Crumb"; }, []);
+  return (
+    <section className="notfound-section">
+      <R>
+        <Compass size={40} strokeWidth={1} className="notfound-icon" />
+        <p className="section-label">404</p>
+        <h1 className="section-title">Nothing to see <em>here</em>.</h1>
+        <p className="blog-standalone-note" style={{ margin: "0.75rem auto 1.75rem" }}>
+          That page doesn't exist — it may have moved, or the link was mistyped. Let's get you back to the menu.
+        </p>
+        <Link to="/" className="btn-primary">Back to Home</Link>
+      </R>
+    </section>
+  );
+}
+
+// Last-resort safety net — without this, any unexpected render error
+// anywhere in the tree unmounts the whole site to a blank white screen
+// with no explanation. Class component because React only supports
+// componentDidCatch/getDerivedStateFromError this way, no hook equivalent.
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error("Kind Crumb crashed:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <section className="notfound-section">
+          <AlertCircle size={40} strokeWidth={1} className="notfound-icon" />
+          <p className="section-label">Oops</p>
+          <h1 className="section-title">Something went <em>wrong</em>.</h1>
+          <p className="blog-standalone-note" style={{ margin: "0.75rem auto 1.75rem" }}>
+            Sorry about that — an unexpected error occurred. Refreshing the page usually fixes it.
+          </p>
+          <button className="btn-primary" onClick={() => window.location.reload()}>Refresh Page</button>
+        </section>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function KindCrumb() {
   return (
-    <BrowserRouter>
-      <AppShell />
-    </BrowserRouter>
+    <>
+      {/* Hoisted above the error boundary so the site's styling still loads
+          even if AppShell itself crashes — otherwise the "something went
+          wrong" fallback would render completely unstyled. */}
+      <style>{fonts}{css}</style>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </ErrorBoundary>
+    </>
   );
 }
